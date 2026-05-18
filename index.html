@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_2.html -->
+<!-- saved from url=(0054)file:///C:/Users/rladu/Downloads/todayzcar_crm_34.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>TS AUTO PLAN CRM</title>
 <link href="file:///C:/Users/rladu/Downloads/index_files/css2" rel="stylesheet">
 <style>
@@ -349,7 +352,10 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
   <div class="topbar">
     <div class="topbar-logo" onclick="(function(){var n=document.querySelector(&#39;.nav-item[onclick*=\&#39;dashboard\&#39;]&#39;);goPage(&#39;dashboard&#39;,n);})()" style="cursor:pointer;" title="대시보드로 이동">TS AUTO PLAN <span style="font-weight:400;font-size:12px;color:var(--text2);letter-spacing:1px;">/ 타소</span></div>
     <div class="topbar-right">
-      <button id="topAlarmBtn" onclick="openAlarmDropdown()" title="오늘 알람" style="position:relative;background:transparent;border:1px solid var(--border2);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;" onmouseover="this.style.background=&#39;var(--bg3)&#39;;this.style.borderColor=&#39;var(--accent)&#39;;" onmouseout="this.style.background=&#39;transparent&#39;;this.style.borderColor=&#39;var(--border2)&#39;;">
+      <button id="topAlarmBtn" onclick="openAlarmDropdown()" title="오늘 알람"
+        style="position:relative;background:transparent;border:1px solid var(--border2);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;"
+        onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)';"
+        onmouseout="this.style.background='transparent';this.style.borderColor='var(--border2)';">
         💡
         <span id="topAlarmBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;font-family:JetBrains Mono,monospace;align-items:center;justify-content:center;line-height:1;">0</span>
       </button>
@@ -1204,7 +1210,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <!-- 상태 -->
           <select class="select-filter" id="dbStatusFilter" onchange="filterDB()"><option value="">전체 상태</option><option value="신규문의" style="background:#1a1a1a;color:#f0f0f0;">신규문의</option><option value="상담중" style="background:#1a1a1a;color:#f0f0f0;">상담중</option><option value="계약완료" style="background:#1a1a1a;color:#f0f0f0;">계약완료</option><option value="종결" style="background:#1a1a1a;color:#f0f0f0;">종결</option><option value="취소" style="background:#1a1a1a;color:#f0f0f0;">취소</option><option value="펀딩완료" style="background:#1a1a1a;color:#f0f0f0;">펀딩완료</option></select>
           <!-- 담당자 필터 (관리자: 전체, 영업자: 본인 고정) -->
-          <select class="select-filter" id="dbAssignFilter" onchange="filterDB()"><option value="">전체 담당자</option><option value="강민지">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
+          <select class="select-filter" id="dbAssignFilter" onchange="filterDB()"><option value="">전체 담당자</option><option value="김영준">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
           <!-- 유입경로 -->
           <select class="select-filter" id="dbSourceFilter" onchange="filterDB()"><option value="">전체 유입경로</option><option value="네이버">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
           <!-- 중요고객 토글 -->
@@ -1266,7 +1272,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
                 <select id="colF_source" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option><option value="네이버">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
               </th>
               <th style="padding:4px 8px;">
-                <select id="colF_assign" onchange="colFilterDB()" style="width: 100%; padding: 3px 4px; background: var(--bg4); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-size: 11px; font-family: inherit; outline: none; opacity: 1;"><option value="">전체</option><option value="강민지">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
+                <select id="colF_assign" onchange="colFilterDB()" style="width: 100%; padding: 3px 4px; background: var(--bg4); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-size: 11px; font-family: inherit; outline: none; opacity: 1;"><option value="">전체</option><option value="김영준">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
               </th>
               <th style="padding:4px 8px;">
                 <select id="colF_status" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option><option value="신규문의">신규문의</option><option value="상담중">상담중</option><option value="계약완료">계약완료</option><option value="종결">종결</option><option value="취소">취소</option><option value="펀딩완료">펀딩완료</option></select>
@@ -1299,7 +1305,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             <div class="info-row" style="align-items:center;">
               <span class="info-key">담당자</span>
               <span class="info-val admin-only" id="detailAssignWrap">
-                <select id="detailAssignSel" onchange="changeAssign(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="강민지" selected="">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
+                <select id="detailAssignSel" onchange="changeAssign(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="김영준" selected="">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
               </span>
               <span class="info-val" id="detailAssign" style="display:none;">-</span>
             </div>
@@ -2027,7 +2033,9 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <div class="section-card" style="padding:30px;">
         <div style="font-size:14px;color:var(--text2);margin-bottom:20px;">하위 메뉴에서 세부 설정을 진행하세요</div>
         <div style="display:flex;gap:14px;">
-          <div onclick="goPage(&#39;alarmperiodic&#39;, document.querySelector(&#39;.nav-item[onclick*=alarmperiodic]&#39;))" style="flex:1;padding:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor=&#39;var(--accent)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+          <div onclick="goPage('alarmperiodic', document.querySelector('.nav-item[onclick*=alarmperiodic]'))"
+            style="flex:1;padding:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
             <div style="font-size:24px;margin-bottom:8px;">⏰</div>
             <div style="font-size:14px;font-weight:700;margin-bottom:4px;">주기별 알람</div>
             <div style="font-size:12px;color:var(--text3);">만기/인도 기반 알람 멘트 설정</div>
@@ -2110,7 +2118,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="form-field" style="margin-bottom:12px;">
             <label style="font-size:11px;">업체명</label>
             <div style="display:flex;gap:6px;">
-              <input type="text" id="scr_company" value="TS AUTO PLAN" readonly="" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;flex:1;outline:none;cursor:not-allowed;">
+              <input type="text" id="scr_company" value="TS AUTO PLAN" readonly style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;flex:1;outline:none;cursor:not-allowed;">
               <button type="button" id="scr_directBtn" class="btn btn-ghost btn-sm" onclick="toggleDirectMode()" style="padding:7px 10px;font-size:11px;white-space:nowrap;">직영업</button>
             </div>
           </div>
@@ -2118,7 +2126,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <!-- 담당자 연락처 (자동 + 잠금) -->
           <div class="form-field" style="margin-bottom:14px;">
             <label style="font-size:11px;">담당자 연락처 <span style="font-size:10px;color:var(--text3);">(로그인 정보 자동)</span></label>
-            <input type="text" id="scr_phone" readonly="" placeholder="-" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;width:100%;outline:none;cursor:not-allowed;font-family:JetBrains Mono,monospace;">
+            <input type="text" id="scr_phone" readonly placeholder="-" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;width:100%;outline:none;cursor:not-allowed;font-family:JetBrains Mono,monospace;">
           </div>
 
           <button class="btn btn-primary" id="scr_generateBtn" style="width:100%;" onclick="generateScript()">✨ AI 스크립트 생성</button>
@@ -2130,7 +2138,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             <div style="font-size:13px;font-weight:700;">생성된 스크립트</div>
             <button class="btn btn-ghost btn-sm" onclick="copyScript()">📋 전체 복사</button>
           </div>
-          <textarea id="scr_result" rows="20" placeholder="좌측에서 입력값을 작성하고 &#39;스크립트 생성&#39; 버튼을 클릭하세요." style="width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"></textarea>
+          <textarea id="scr_result" rows="20" placeholder="좌측에서 입력값을 작성하고 '스크립트 생성' 버튼을 클릭하세요." style="width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"></textarea>
         </div>
       </div>
     </div>
@@ -2182,7 +2190,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       </div>
       <div class="form-field" id="fm_manualAssignWrap">
         <label>담당자</label>
-        <input type="text" id="fm_manualAssign" placeholder="담당자명" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;"><option value="강민지">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></input>
+        <input type="text" id="fm_manualAssign" placeholder="담당자명" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;">
       </div>
       <!-- DB에서 연결된 경우 표시 -->
       <div class="form-field full" id="fm_dbLinkedWrap" style="display:none;">
@@ -2404,7 +2412,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div id="reassignTargetInfo" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;margin-bottom:14px;font-size:13px;"></div>
     <div class="form-field" style="margin-bottom:16px;">
       <label>재배분 담당자</label>
-      <select id="reassignStaffSel" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;"><option value="강민지">강민지 (현재 3건)</option><option value="박광석">박광석 (현재 3건)</option><option value="정서준">정서준 (현재 0건)</option><option value="강해옥">강해옥 (현재 0건)</option><option value="이성훈">이성훈 (현재 0건)</option></select>
+      <select id="reassignStaffSel" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;"><option value="김영준">김영준 (현재 1건)</option><option value="1241">1241 (현재 0건)</option><option value="D">D (현재 0건)</option><option value="강민지">강민지 (현재 2건)</option></select>
     </div>
     <div class="form-field" style="margin-bottom:16px;">
       <label>메모 (선택)</label>
@@ -2481,7 +2489,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <select id="f_source"><option value="네이버" selected="">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
       </div>
       <div class="form-field"><label>담당자</label>
-        <select id="f_assign"><option value="강민지" selected="">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
+        <select id="f_assign"><option value="김영준" selected="">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
       </div>
       <div class="form-field"><label>상태</label>
         <select id="f_status"><option value="신규문의" selected="" style="background:#1a1a1a;color:#f0f0f0;">신규문의</option><option value="상담중" style="background:#1a1a1a;color:#f0f0f0;">상담중</option><option value="계약완료" style="background:#1a1a1a;color:#f0f0f0;">계약완료</option><option value="종결" style="background:#1a1a1a;color:#f0f0f0;">종결</option><option value="취소" style="background:#1a1a1a;color:#f0f0f0;">취소</option><option value="펀딩완료" style="background:#1a1a1a;color:#f0f0f0;">펀딩완료</option></select>
@@ -7153,7 +7161,24 @@ window.addEventListener('keydown', e => {
 
 // ── 페이지 로드 시 자동 복원 ──
 window.addEventListener('DOMContentLoaded', async ()=>{
-  // 마지막 로그인 아이디 자동 복원
+  // ★ 강제 로그아웃: 페이지 로드 시 무조건 로그인 화면부터 (보안 강화) ★
+  try {
+    sessionStorage.removeItem('ts_auto_plan_login_user');
+    sessionStorage.removeItem('ts_auto_plan_login_date');
+    sessionStorage.removeItem('crm_session');
+    localStorage.removeItem('ts_auto_plan_login_user');
+    localStorage.removeItem('ts_auto_plan_login_date');
+    localStorage.removeItem('crm_session');
+  } catch(e){}
+  // 강제로 로그인 화면 표시, 앱 화면 숨김
+  try {
+    const loginEl = document.getElementById('loginScreen');
+    const appEl = document.getElementById('app');
+    if(loginEl) loginEl.style.display = 'flex';
+    if(appEl) appEl.classList.remove('active');
+  } catch(e){}
+
+  // 마지막 로그인 아이디 자동 복원 (편의 기능: 아이디만 채워줌)
   try {
     const lastId = localStorage.getItem('lastLoginId');
     if(lastId) {
@@ -7162,16 +7187,13 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     }
   } catch(e){}
 
-  // 자동 로그인 시도 (async 결과 await 필수)
-  const loggedIn = await tryAutoLogin();
-  if(!loggedIn) {
-    setTimeout(()=>{
-      const idEl = document.getElementById('loginId');
-      const pwEl = document.getElementById('loginPw');
-      if(idEl && idEl.value) pwEl?.focus();
-      else idEl?.focus();
-    }, 100);
-  }
+  // 로그인 입력 포커스
+  setTimeout(()=>{
+    const idEl = document.getElementById('loginId');
+    const pwEl = document.getElementById('loginPw');
+    if(idEl && idEl.value) pwEl?.focus();
+    else idEl?.focus();
+  }, 100);
 });
 
 // ============================================================
