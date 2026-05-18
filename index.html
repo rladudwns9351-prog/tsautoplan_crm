@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///C:/Users/rladu/Downloads/todayzcar_crm_34.html -->
+<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_2.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -349,10 +349,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
   <div class="topbar">
     <div class="topbar-logo" onclick="(function(){var n=document.querySelector(&#39;.nav-item[onclick*=\&#39;dashboard\&#39;]&#39;);goPage(&#39;dashboard&#39;,n);})()" style="cursor:pointer;" title="대시보드로 이동">TS AUTO PLAN <span style="font-weight:400;font-size:12px;color:var(--text2);letter-spacing:1px;">/ 타소</span></div>
     <div class="topbar-right">
-      <button id="topAlarmBtn" onclick="openAlarmDropdown()" title="오늘 알람"
-        style="position:relative;background:transparent;border:1px solid var(--border2);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;"
-        onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)';"
-        onmouseout="this.style.background='transparent';this.style.borderColor='var(--border2)';">
+      <button id="topAlarmBtn" onclick="openAlarmDropdown()" title="오늘 알람" style="position:relative;background:transparent;border:1px solid var(--border2);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;" onmouseover="this.style.background=&#39;var(--bg3)&#39;;this.style.borderColor=&#39;var(--accent)&#39;;" onmouseout="this.style.background=&#39;transparent&#39;;this.style.borderColor=&#39;var(--border2)&#39;;">
         💡
         <span id="topAlarmBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;font-family:JetBrains Mono,monospace;align-items:center;justify-content:center;line-height:1;">0</span>
       </button>
@@ -1207,7 +1204,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <!-- 상태 -->
           <select class="select-filter" id="dbStatusFilter" onchange="filterDB()"><option value="">전체 상태</option><option value="신규문의" style="background:#1a1a1a;color:#f0f0f0;">신규문의</option><option value="상담중" style="background:#1a1a1a;color:#f0f0f0;">상담중</option><option value="계약완료" style="background:#1a1a1a;color:#f0f0f0;">계약완료</option><option value="종결" style="background:#1a1a1a;color:#f0f0f0;">종결</option><option value="취소" style="background:#1a1a1a;color:#f0f0f0;">취소</option><option value="펀딩완료" style="background:#1a1a1a;color:#f0f0f0;">펀딩완료</option></select>
           <!-- 담당자 필터 (관리자: 전체, 영업자: 본인 고정) -->
-          <select class="select-filter" id="dbAssignFilter" onchange="filterDB()"><option value="">전체 담당자</option><option value="김영준">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
+          <select class="select-filter" id="dbAssignFilter" onchange="filterDB()"><option value="">전체 담당자</option><option value="강민지">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
           <!-- 유입경로 -->
           <select class="select-filter" id="dbSourceFilter" onchange="filterDB()"><option value="">전체 유입경로</option><option value="네이버">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
           <!-- 중요고객 토글 -->
@@ -1269,7 +1266,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
                 <select id="colF_source" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option><option value="네이버">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
               </th>
               <th style="padding:4px 8px;">
-                <select id="colF_assign" onchange="colFilterDB()" style="width: 100%; padding: 3px 4px; background: var(--bg4); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-size: 11px; font-family: inherit; outline: none; opacity: 1;"><option value="">전체</option><option value="김영준">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
+                <select id="colF_assign" onchange="colFilterDB()" style="width: 100%; padding: 3px 4px; background: var(--bg4); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-size: 11px; font-family: inherit; outline: none; opacity: 1;"><option value="">전체</option><option value="강민지">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
               </th>
               <th style="padding:4px 8px;">
                 <select id="colF_status" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option><option value="신규문의">신규문의</option><option value="상담중">상담중</option><option value="계약완료">계약완료</option><option value="종결">종결</option><option value="취소">취소</option><option value="펀딩완료">펀딩완료</option></select>
@@ -1302,7 +1299,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             <div class="info-row" style="align-items:center;">
               <span class="info-key">담당자</span>
               <span class="info-val admin-only" id="detailAssignWrap">
-                <select id="detailAssignSel" onchange="changeAssign(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="김영준" selected="">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
+                <select id="detailAssignSel" onchange="changeAssign(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="강민지" selected="">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
               </span>
               <span class="info-val" id="detailAssign" style="display:none;">-</span>
             </div>
@@ -2030,9 +2027,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <div class="section-card" style="padding:30px;">
         <div style="font-size:14px;color:var(--text2);margin-bottom:20px;">하위 메뉴에서 세부 설정을 진행하세요</div>
         <div style="display:flex;gap:14px;">
-          <div onclick="goPage('alarmperiodic', document.querySelector('.nav-item[onclick*=alarmperiodic]'))"
-            style="flex:1;padding:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;"
-            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div onclick="goPage(&#39;alarmperiodic&#39;, document.querySelector(&#39;.nav-item[onclick*=alarmperiodic]&#39;))" style="flex:1;padding:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor=&#39;var(--accent)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
             <div style="font-size:24px;margin-bottom:8px;">⏰</div>
             <div style="font-size:14px;font-weight:700;margin-bottom:4px;">주기별 알람</div>
             <div style="font-size:12px;color:var(--text3);">만기/인도 기반 알람 멘트 설정</div>
@@ -2115,7 +2110,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="form-field" style="margin-bottom:12px;">
             <label style="font-size:11px;">업체명</label>
             <div style="display:flex;gap:6px;">
-              <input type="text" id="scr_company" value="TS AUTO PLAN" readonly style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;flex:1;outline:none;cursor:not-allowed;">
+              <input type="text" id="scr_company" value="TS AUTO PLAN" readonly="" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;flex:1;outline:none;cursor:not-allowed;">
               <button type="button" id="scr_directBtn" class="btn btn-ghost btn-sm" onclick="toggleDirectMode()" style="padding:7px 10px;font-size:11px;white-space:nowrap;">직영업</button>
             </div>
           </div>
@@ -2123,7 +2118,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <!-- 담당자 연락처 (자동 + 잠금) -->
           <div class="form-field" style="margin-bottom:14px;">
             <label style="font-size:11px;">담당자 연락처 <span style="font-size:10px;color:var(--text3);">(로그인 정보 자동)</span></label>
-            <input type="text" id="scr_phone" readonly placeholder="-" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;width:100%;outline:none;cursor:not-allowed;font-family:JetBrains Mono,monospace;">
+            <input type="text" id="scr_phone" readonly="" placeholder="-" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;width:100%;outline:none;cursor:not-allowed;font-family:JetBrains Mono,monospace;">
           </div>
 
           <button class="btn btn-primary" id="scr_generateBtn" style="width:100%;" onclick="generateScript()">✨ AI 스크립트 생성</button>
@@ -2135,7 +2130,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             <div style="font-size:13px;font-weight:700;">생성된 스크립트</div>
             <button class="btn btn-ghost btn-sm" onclick="copyScript()">📋 전체 복사</button>
           </div>
-          <textarea id="scr_result" rows="20" placeholder="좌측에서 입력값을 작성하고 '스크립트 생성' 버튼을 클릭하세요." style="width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"></textarea>
+          <textarea id="scr_result" rows="20" placeholder="좌측에서 입력값을 작성하고 &#39;스크립트 생성&#39; 버튼을 클릭하세요." style="width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"></textarea>
         </div>
       </div>
     </div>
@@ -2187,7 +2182,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       </div>
       <div class="form-field" id="fm_manualAssignWrap">
         <label>담당자</label>
-        <input type="text" id="fm_manualAssign" placeholder="담당자명" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;">
+        <input type="text" id="fm_manualAssign" placeholder="담당자명" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;"><option value="강민지">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></input>
       </div>
       <!-- DB에서 연결된 경우 표시 -->
       <div class="form-field full" id="fm_dbLinkedWrap" style="display:none;">
@@ -2409,7 +2404,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div id="reassignTargetInfo" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;margin-bottom:14px;font-size:13px;"></div>
     <div class="form-field" style="margin-bottom:16px;">
       <label>재배분 담당자</label>
-      <select id="reassignStaffSel" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;"><option value="김영준">김영준 (현재 1건)</option><option value="1241">1241 (현재 0건)</option><option value="D">D (현재 0건)</option><option value="강민지">강민지 (현재 2건)</option></select>
+      <select id="reassignStaffSel" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;"><option value="강민지">강민지 (현재 3건)</option><option value="박광석">박광석 (현재 3건)</option><option value="정서준">정서준 (현재 0건)</option><option value="강해옥">강해옥 (현재 0건)</option><option value="이성훈">이성훈 (현재 0건)</option></select>
     </div>
     <div class="form-field" style="margin-bottom:16px;">
       <label>메모 (선택)</label>
@@ -2486,7 +2481,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <select id="f_source"><option value="네이버" selected="">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
       </div>
       <div class="form-field"><label>담당자</label>
-        <select id="f_assign"><option value="김영준" selected="">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
+        <select id="f_assign"><option value="강민지" selected="">강민지</option><option value="박광석">박광석</option><option value="정서준">정서준</option><option value="강해옥">강해옥</option><option value="이성훈">이성훈</option></select>
       </div>
       <div class="form-field"><label>상태</label>
         <select id="f_status"><option value="신규문의" selected="" style="background:#1a1a1a;color:#f0f0f0;">신규문의</option><option value="상담중" style="background:#1a1a1a;color:#f0f0f0;">상담중</option><option value="계약완료" style="background:#1a1a1a;color:#f0f0f0;">계약완료</option><option value="종결" style="background:#1a1a1a;color:#f0f0f0;">종결</option><option value="취소" style="background:#1a1a1a;color:#f0f0f0;">취소</option><option value="펀딩완료" style="background:#1a1a1a;color:#f0f0f0;">펀딩완료</option></select>
@@ -2929,44 +2924,18 @@ function doLogout() {
   document.getElementById('app').classList.remove('active');
 }
 
-// ── 자동 로그인: 같은 날짜 안에서만 유지 (창별 독립, sessionStorage 기반) ──
+// ── 자동 로그인 비활성화: 매번 로그인 화면부터 시작 (보안 강화) ──
 async function tryAutoLogin() {
   try {
-    // 로그인 정보는 sessionStorage에서만 복원 (창별 독립)
-    const savedUser = sessionStorage.getItem('ts_auto_plan_login_user');
-    const savedDate = sessionStorage.getItem('ts_auto_plan_login_date');
-    if(!savedUser || !savedDate) {
-      // 잔존 localStorage 로그인 키 정리 (구버전 호환)
-      localStorage.removeItem('ts_auto_plan_login_user');
-      localStorage.removeItem('ts_auto_plan_login_date');
-      localStorage.removeItem('crm_session');
-      sessionStorage.removeItem('crm_session');
-      return false;
-    }
-    // 오늘 날짜와 비교
-    const now = new Date();
-    const todayKey = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-    if(savedDate !== todayKey) {
-      // 날짜가 다르면 해당 창의 세션만 무효 처리
-      sessionStorage.removeItem('ts_auto_plan_login_user');
-      sessionStorage.removeItem('ts_auto_plan_login_date');
-      sessionStorage.removeItem('crm_session');
-      return false;
-    }
-    // 같은 날 → 자동 로그인 유지 (해당 창의 sessionStorage 기준)
-    const sess = JSON.parse(savedUser);
-    currentRole = sess.role;
-    currentUser = sess.name;
-    currentUserId = sess.id || 'admin';
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('app').classList.add('active');
-    await loadData();
-    const savedPage = localStorage.getItem('crm_currentPage') || 'dashboard';
-    initApp(savedPage);
-    return true;
-  } catch(e){
-    return false;
-  }
+    // 기존 세션 정보 모두 삭제 (자동 로그인 차단)
+    sessionStorage.removeItem('ts_auto_plan_login_user');
+    sessionStorage.removeItem('ts_auto_plan_login_date');
+    sessionStorage.removeItem('crm_session');
+    localStorage.removeItem('ts_auto_plan_login_user');
+    localStorage.removeItem('ts_auto_plan_login_date');
+    localStorage.removeItem('crm_session');
+  } catch(e){}
+  return false; // 항상 로그인 화면 표시
 }
 function setRole(role, name) {
   currentRole = role; currentUser = name;
@@ -5414,6 +5383,8 @@ let _pendingRerender = false;     // 모달 닫힐 때까지 재렌더 보류 �
 
 // 동기화 이벤트 발신 (저장/수정/삭제 성공 후 호출)
 function notifyDataChanged(type) {
+  // Realtime echo 방지용 타임스탬프
+  window._lastLocalChange = Date.now();
   const payload = {
     type: type || 'all',
     ts: Date.now(),
@@ -5534,13 +5505,15 @@ function initSyncChannel() {
     try { _handleSyncEvent(JSON.parse(e.newValue)); } catch(_){}
   });
 
-  // 3) 다른 PC/네트워크 변경 반영용 polling (15초)
+  // 3) 다른 PC/네트워크 변경 반영용 polling (5초) - 백업용
   if(!window._syncPollTimer) {
     window._syncPollTimer = setInterval(async () => {
       if(_isSyncReloading) return;
       if(!isSbConfigured()) return;
       // 로그인 안된 상태면 폴링 스킵
       if(!document.getElementById('app')?.classList.contains('active')) return;
+      // Realtime 연결 정상이면 폴링 스킵 (불필요한 트래픽 절감)
+      if(window._realtimeConnected) return;
       _isSyncReloading = true;
       try {
         await loadData();
@@ -5548,7 +5521,103 @@ function initSyncChannel() {
       } catch(_){} finally {
         _isSyncReloading = false;
       }
-    }, 15000);
+    }, 5000);
+  }
+
+  // 4) Supabase Realtime WebSocket 구독 (진짜 실시간 동기화)
+  initSupabaseRealtime();
+}
+
+// ===== Supabase Realtime 구독 (WebSocket 기반 즉시 동기화) =====
+function initSupabaseRealtime() {
+  if(!isSbConfigured()) return;
+  if(window._realtimeWs) {
+    try { window._realtimeWs.close(); } catch(_){}
+  }
+
+  try {
+    // Supabase Realtime WebSocket 엔드포인트
+    const wsUrl = SB_URL.replace('https://', 'wss://') + '/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=1.0.0';
+    const ws = new WebSocket(wsUrl);
+    window._realtimeWs = ws;
+    window._realtimeConnected = false;
+
+    let heartbeatTimer = null;
+    let ref = 1;
+
+    ws.onopen = () => {
+      window._realtimeConnected = true;
+      console.log('[Realtime] WebSocket connected');
+
+      // 1) customers 테이블 구독
+      ws.send(JSON.stringify({
+        topic: 'realtime:public:customers',
+        event: 'phx_join',
+        payload: { config: { postgres_changes: [{ event: '*', schema: 'public', table: 'customers' }] } },
+        ref: String(ref++)
+      }));
+      // 2) fundings 테이블 구독
+      ws.send(JSON.stringify({
+        topic: 'realtime:public:fundings',
+        event: 'phx_join',
+        payload: { config: { postgres_changes: [{ event: '*', schema: 'public', table: 'fundings' }] } },
+        ref: String(ref++)
+      }));
+      // 3) staff 테이블 구독
+      ws.send(JSON.stringify({
+        topic: 'realtime:public:staff',
+        event: 'phx_join',
+        payload: { config: { postgres_changes: [{ event: '*', schema: 'public', table: 'staff' }] } },
+        ref: String(ref++)
+      }));
+
+      // 30초마다 heartbeat (연결 유지)
+      heartbeatTimer = setInterval(() => {
+        if(ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: String(ref++) }));
+        }
+      }, 30000);
+    };
+
+    ws.onmessage = async (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        // postgres_changes 이벤트만 처리
+        if(msg.event === 'postgres_changes' || (msg.payload && msg.payload.data)) {
+          const table = msg.payload?.data?.table || msg.topic?.split(':').pop();
+          // 자신이 발생시킨 변경 무시 (loop 방지) - 0.5초 디바운스
+          if(window._lastLocalChange && Date.now() - window._lastLocalChange < 500) return;
+
+          if(_isSyncReloading) return;
+          _isSyncReloading = true;
+          try {
+            await loadData();
+            safeRerender(table || 'realtime');
+          } catch(_){} finally {
+            _isSyncReloading = false;
+          }
+        }
+      } catch(_){}
+    };
+
+    ws.onclose = () => {
+      window._realtimeConnected = false;
+      if(heartbeatTimer) clearInterval(heartbeatTimer);
+      console.log('[Realtime] disconnected, reconnect in 3s...');
+      // 3초 후 재연결
+      setTimeout(() => {
+        if(document.getElementById('app')?.classList.contains('active')) {
+          initSupabaseRealtime();
+        }
+      }, 3000);
+    };
+
+    ws.onerror = (err) => {
+      console.warn('[Realtime] error', err);
+      window._realtimeConnected = false;
+    };
+  } catch(e) {
+    console.warn('[Realtime] init failed', e);
   }
 }
 
