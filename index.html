@@ -8680,62 +8680,47 @@ function renderLocalCard(r, idx) {
   const addr = r.roadAddress || r.address || '-';
   const phone = r.telephone || '';
   const phoneLink = phone ? `tel:${phone.replace(/[^\d]/g,'')}` : '';
-  const naverMap = r.naverMapUrl;
-  // 네이버지도 임베드용 URL (정적 지도 이미지)
-  const hasCoord = r.lat && r.lng;
+  // 네이버 지도 검색: 주소만 사용 (상호명 제외해서 검색 결과 누락 방지)
+  const mapKeyword = r.roadAddress || r.address || r.title;
+  const naverMap = `https://map.naver.com/v5/search/${encodeURIComponent(mapKeyword)}`;
 
   return `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;">
-      <div style="display:flex;gap:14px;align-items:flex-start;">
-        <!-- 좌측: 정보 -->
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-            <span style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">#${idx+1}</span>
-            <div style="font-size:15px;font-weight:700;color:var(--text);">${escapeHtml(r.title)}</div>
-            ${r.category ? `<span style="font-size:10px;background:rgba(170,136,255,.12);color:#aa88ff;padding:2px 8px;border-radius:10px;border:1px solid rgba(170,136,255,.3);">${escapeHtml(r.category)}</span>` : ''}
-          </div>
-          <div style="font-size:12px;color:var(--text2);margin-bottom:4px;display:flex;align-items:flex-start;gap:6px;">
-            <span style="flex-shrink:0;">📍</span>
-            <span>${escapeHtml(addr)}</span>
-          </div>
-          ${phone ? `
-            <div style="font-size:12px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
-              <span>📞</span>
-              <a href="${phoneLink}" style="color:var(--blue);text-decoration:none;font-family:JetBrains Mono,monospace;">${escapeHtml(phone)}</a>
-            </div>
-          ` : ''}
-          ${r.description ? `
-            <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5;">${escapeHtml(r.description)}</div>
-          ` : ''}
-          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
-            <a href="${escapeHtml(naverMap)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;background:rgba(68,255,136,.1);color:var(--green);border:1px solid rgba(68,255,136,.35);padding:4px 10px;border-radius:5px;text-decoration:none;">
-              🗺️ 네이버 지도
-            </a>
-            ${phone ? `
-              <a href="${phoneLink}" style="font-size:11px;background:rgba(68,136,255,.1);color:var(--blue);border:1px solid rgba(68,136,255,.35);padding:4px 10px;border-radius:5px;text-decoration:none;">
-                📞 전화걸기
-              </a>
-            ` : ''}
-            ${r.link ? `
-              <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);padding:4px 10px;border-radius:5px;text-decoration:none;">
-                🔗 홈페이지
-              </a>
-            ` : ''}
-            <button onclick="copyAddress('${escapeHtml(addr).replace(/'/g,"\\'")}')" style="font-size:11px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);padding:4px 10px;border-radius:5px;cursor:pointer;">
-              📋 주소복사
-            </button>
-          </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">#${idx+1}</span>
+        <div style="font-size:15px;font-weight:700;color:var(--text);">${escapeHtml(r.title)}</div>
+        ${r.category ? `<span style="font-size:10px;background:rgba(170,136,255,.12);color:#aa88ff;padding:2px 8px;border-radius:10px;border:1px solid rgba(170,136,255,.3);">${escapeHtml(r.category)}</span>` : ''}
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:4px;display:flex;align-items:flex-start;gap:6px;">
+        <span style="flex-shrink:0;">📍</span>
+        <span>${escapeHtml(addr)}</span>
+      </div>
+      ${phone ? `
+        <div style="font-size:12px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+          <span>📞</span>
+          <a href="${phoneLink}" style="color:var(--blue);text-decoration:none;font-family:JetBrains Mono,monospace;">${escapeHtml(phone)}</a>
         </div>
-        <!-- 우측: 지도 미리보기 -->
-        ${hasCoord ? `
-          <a href="${escapeHtml(naverMap)}" target="_blank" rel="noopener noreferrer" style="flex-shrink:0;text-decoration:none;">
-            <div style="width:160px;height:120px;background:linear-gradient(135deg,#1a2845 0%,#0d1929 100%);border:1px solid var(--border2);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='var(--accent)';" onmouseout="this.style.borderColor='var(--border2)';">
-              <div style="font-size:38px;">🗺️</div>
-              <div style="font-size:11px;color:var(--text2);margin-top:4px;">지도 보기</div>
-              <div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:JetBrains Mono,monospace;">${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}</div>
-            </div>
+      ` : ''}
+      ${r.description ? `
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5;">${escapeHtml(r.description)}</div>
+      ` : ''}
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+        <a href="${escapeHtml(naverMap)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;background:rgba(68,255,136,.1);color:var(--green);border:1px solid rgba(68,255,136,.35);padding:4px 10px;border-radius:5px;text-decoration:none;">
+          🗺️ 네이버 지도
+        </a>
+        ${phone ? `
+          <a href="${phoneLink}" style="font-size:11px;background:rgba(68,136,255,.1);color:var(--blue);border:1px solid rgba(68,136,255,.35);padding:4px 10px;border-radius:5px;text-decoration:none;">
+            📞 전화걸기
           </a>
         ` : ''}
+        ${r.link ? `
+          <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);padding:4px 10px;border-radius:5px;text-decoration:none;">
+            🔗 홈페이지
+          </a>
+        ` : ''}
+        <button onclick="copyAddress('${escapeHtml(addr).replace(/'/g,"\\'")}')" style="font-size:11px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);padding:4px 10px;border-radius:5px;cursor:pointer;">
+          📋 주소복사
+        </button>
       </div>
     </div>
   `;
