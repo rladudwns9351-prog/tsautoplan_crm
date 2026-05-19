@@ -4536,12 +4536,12 @@ function latestConsultDate(c) {
 }
 
 function renderDB(list) {
-  // 정렬: 먼저 등록한 게 1번 (오래된 것이 위)
+  // 정렬: 나중에 등록한 게 1번 (최신이 위, 오래된 게 아래)
   const sorted = [...list].sort((a,b) => {
-    // date 동일하면 id 작은 게 먼저 (먼저 등록순)
-    const dc = (a.date||'').localeCompare(b.date||'');
+    // date 동일하면 id 큰 게 먼저 (나중 등록순)
+    const dc = (b.date||'').localeCompare(a.date||'');
     if(dc !== 0) return dc;
-    return (a.id||0) - (b.id||0);
+    return (b.id||0) - (a.id||0);
   });
   document.getElementById('dbCount').textContent = '전체 '+sorted.length+'명';
 
@@ -4549,7 +4549,7 @@ function renderDB(list) {
   const pg = paginate(sorted, 'db');
   const body = document.getElementById('dbBody');
   body.innerHTML = pg.items.map((c,i) => {
-    const no = pg.startIndex + i + 1;  // 1번부터 (먼저 등록 = 1번)
+    const no = pg.startIndex + i + 1;  // 1번부터 (최신 등록 = 1번)
     return '<tr id="dbrow-'+c.id+'" onclick="openDetail('+c.id+')" style="'+(c.important?'background:rgba(255,204,68,.04);':'')+'">'+
       '<td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="db-check" data-id="'+c.id+'" onchange="onCheckChange()" style="cursor:pointer;accent-color:var(--accent);"></td>'+
       '<td style="text-align:center;font-family:JetBrains Mono,monospace;font-size:12px;color:var(--text3);">'+no+'</td>'+
@@ -5705,11 +5705,11 @@ function renderFundingPage() {
   const now = new Date();
   const thisMonth = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
-  // 먼저 등록=1번 (오래된 게 위)
+  // 나중 등록=1번 (최신이 위)
   const sortedList = [...myList].sort((a,b) => {
-    const dc = (a.fundingDate||'').localeCompare(b.fundingDate||'');
+    const dc = (b.fundingDate||'').localeCompare(a.fundingDate||'');
     if(dc !== 0) return dc;
-    return (a.id||0) - (b.id||0);
+    return (b.id||0) - (a.id||0);
   });
   // 페이징
   const pg = paginate(sortedList, 'funding');
@@ -5923,11 +5923,11 @@ function renderReclaimPage() {
   // 전체 DB 테이블
   const body = document.getElementById('reclaimBody');
   if(!body) return;
-  // 먼저 등록 = 1번 (오래된 게 위)
+  // 나중 등록 = 1번 (최신이 위)
   const sortedAll = [...all].sort((a,b) => {
-    const dc = (a.date||'').localeCompare(b.date||'');
+    const dc = (b.date||'').localeCompare(a.date||'');
     if(dc !== 0) return dc;
-    return (a.id||0) - (b.id||0);
+    return (b.id||0) - (a.id||0);
   });
   const pg = paginate(sortedAll, 'recovered');
   body.innerHTML = pg.items.map((c,i)=>{
@@ -7087,11 +7087,11 @@ function filterConsult() {
   const body = document.getElementById('consultBody');
   if(!body) return;
 
-  // 먼저 등록=1번 순서 (오래된 게 위)
+  // 나중 등록=1번 순서 (최신이 위)
   const sortFn = (a,b) => {
-    const dc = (a.date||'').localeCompare(b.date||'');
+    const dc = (b.date||'').localeCompare(a.date||'');
     if(dc !== 0) return dc;
-    return (a.id||0) - (b.id||0);
+    return (b.id||0) - (a.id||0);
   };
 
   if(currentRole==='admin') {
@@ -9606,13 +9606,13 @@ async function renderFeedbackAdmin() {
   _feedbackCache = all;
   const filter = document.getElementById('feedbackFilterStatus')?.value || '';
   let list = filter ? all.filter(f => f.status === filter) : all;
-  // 먼저 등록 = 1번 (오래된 게 위)
+  // 나중 등록 = 1번 (최신이 위)
   list = [...list].sort((a,b) => {
     const ac = a.created_at || '';
     const bc = b.created_at || '';
-    const dc = ac.localeCompare(bc);
+    const dc = bc.localeCompare(ac);
     if(dc !== 0) return dc;
-    return (a.id||0) - (b.id||0);
+    return (b.id||0) - (a.id||0);
   });
   document.getElementById('feedbackTotalCount').textContent = `${list.length}건`;
   if(!list.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">제출된 요청이 없습니다.</div>'; return; }
