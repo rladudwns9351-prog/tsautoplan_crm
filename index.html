@@ -417,9 +417,6 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <div class="nav-item" onclick="goPage(&#39;news&#39;,this)">
         <span class="nav-icon">📰</span> 뉴스 검색
       </div>
-      <div class="nav-item" onclick="goPage(&#39;videosum&#39;,this)">
-        <span class="nav-icon">🎬</span> 영상 요약
-      </div>
       <div class="nav-item" onclick="goPage(&#39;feedback&#39;,this)">
         <span class="nav-icon">💡</span> 수정사항 요청
       </div>
@@ -2183,32 +2180,6 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       </div>
     </div>
 
-    <!-- ===== VIDEO SUMMARY PAGE ===== -->
-    <div class="page" id="page-videosum">
-      <div class="page-header">
-        <div>
-          <div class="page-title">🎬 영상 요약</div>
-          <div class="page-sub">YouTube 영상 URL을 입력하면 AI가 자막을 분석해 핵심 내용을 요약합니다</div>
-        </div>
-      </div>
-
-      <div class="section-card" style="padding:24px;max-width:1000px;">
-        <div class="form-field" style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">YouTube URL <span style="color:var(--red);">*</span></label>
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="vid_url" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;outline:none;">
-            <button class="btn btn-primary" onclick="summarizeVideo()" style="white-space:nowrap;">✨ 요약하기</button>
-          </div>
-        </div>
-
-        <div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:var(--text2);line-height:1.6;">
-          💡 <strong style="color:var(--text);">자막이 있으면 빠르게 (5~10초)</strong>, 없으면 영상을 직접 분석합니다 (20~60초). 공개 영상만 지원.
-        </div>
-
-        <div id="vidResultArea" style="margin-top:16px;"></div>
-      </div>
-    </div>
-
     <!-- ===== FEEDBACK PAGE (수정사항 요청) ===== -->
     <div class="page" id="page-feedback">
       <div class="page-header">
@@ -3173,7 +3144,6 @@ function goPage(id, navEl) {
   if(id==='alarmperiodic') { renderAlarmPeriodicPage(); }
   if(id==='script')        { renderScriptPage(); }
   if(id==='news')          { /* 별도 init 불필요 */ }
-  if(id==='videosum')      { /* 별도 init 불필요 */ }
   if(id==='feedback')      { renderFeedbackPage(); }
 
   if(id==='dbstats') {
@@ -8298,86 +8268,6 @@ function renderNewsResults(data) {
       <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--blue);text-decoration:none;font-family:JetBrains Mono,monospace;">🔗 ${escapeHtml(r.link.length>80?r.link.slice(0,80)+'...':r.link)}</a>
     </div>
   `).join('');
-}
-
-// ============================================================
-// 🎬 영상 요약 (Supabase Edge Function: summarize-video)
-// ============================================================
-async function summarizeVideo() {
-  const url = (document.getElementById('vid_url').value || '').trim();
-  if(!url) { alert('YouTube URL을 입력해주세요.'); return; }
-  if(!/youtube\.com|youtu\.be/i.test(url)) {
-    alert('YouTube URL만 지원합니다.'); return;
-  }
-
-  const resultEl = document.getElementById('vidResultArea');
-  resultEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">🎬 영상 분석 중... (자막 추출 + AI 요약, 10~30초 소요)</div>';
-
-  try {
-    const res = await fetch(`${SB_URL}/functions/v1/summarize-video`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + SB_KEY,
-        'apikey': SB_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ url })
-    });
-    const data = await res.json();
-    if(!res.ok) {
-      resultEl.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;">요약 실패: ${escapeHtml(data.error||'알 수 없는 오류')}</div>`;
-      return;
-    }
-    renderVideoSummary(data);
-  } catch(e) {
-    resultEl.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;">네트워크 오류: ${escapeHtml(e.message)}</div>`;
-  }
-}
-
-function renderVideoSummary(data) {
-  const resultEl = document.getElementById('vidResultArea');
-  const info = data.videoInfo || {};
-  const lengthMin = info.lengthSeconds ? Math.ceil(info.lengthSeconds/60) : 0;
-  const methodBadge = data.method === 'video'
-    ? '<span style="background:rgba(170,136,255,.15);color:#aa88ff;border:1px solid rgba(170,136,255,.35);padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;">🎥 영상 직접 분석</span>'
-    : '<span style="background:rgba(68,136,255,.15);color:var(--blue);border:1px solid rgba(68,136,255,.35);padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;">📝 자막 기반</span>';
-  resultEl.innerHTML = `
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:18px;">
-      <div style="display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;">
-        <img src="https://i.ytimg.com/vi/${escapeHtml(data.videoId)}/mqdefault.jpg" style="width:160px;height:90px;border-radius:6px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:700;margin-bottom:6px;line-height:1.4;">${escapeHtml(info.title||'영상')}</div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">📺 ${escapeHtml(info.author||'-')}</div>
-          <div style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">
-            ${lengthMin?`⏱️ 약 ${lengthMin}분`:''}
-            ${data.method==='transcript'?` · 자막: ${escapeHtml(data.captionLang||'-')}`:''}
-            ${data.transcriptLength?` · 본문 ${(data.transcriptLength||0).toLocaleString()}자`:''}
-          </div>
-          <a href="https://www.youtube.com/watch?v=${escapeHtml(data.videoId)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--blue);text-decoration:none;margin-top:6px;display:inline-block;">🔗 영상 보러가기</a>
-        </div>
-      </div>
-      <div style="border-top:1px solid var(--border);padding-top:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div style="font-size:12px;font-weight:700;color:var(--green);">🤖 AI 요약</div>
-            ${methodBadge}
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="copyVideoSummary()" style="font-size:11px;">📋 복사</button>
-        </div>
-        <div id="vidSummaryText" style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;background:var(--bg2);padding:14px 16px;border-radius:6px;border:1px solid var(--border);">${escapeHtml(data.summary||'(요약 없음)')}</div>
-      </div>
-    </div>
-  `;
-}
-
-function copyVideoSummary() {
-  const text = document.getElementById('vidSummaryText')?.textContent || '';
-  if(!text) return;
-  navigator.clipboard.writeText(text).then(()=>{
-    showGlobalToast('요약 내용이 클립보드에 복사되었습니다.');
-  }).catch(()=>{
-    alert('복사 실패. 직접 선택해서 복사해주세요.');
-  });
 }
 
 // ============================================================
