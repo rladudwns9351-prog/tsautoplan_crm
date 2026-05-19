@@ -417,6 +417,18 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <div class="nav-item" onclick="goPage(&#39;news&#39;,this)">
         <span class="nav-icon">📰</span> 뉴스 검색
       </div>
+      <div class="nav-item" onclick="goPage(&#39;calc33&#39;,this)">
+        <span class="nav-icon">🧮</span> 3.3% 계산기
+      </div>
+      <div class="nav-item" onclick="goPage(&#39;calcvat&#39;,this)">
+        <span class="nav-icon">💵</span> 부가세 계산기
+      </div>
+      <div class="nav-item" onclick="goPage(&#39;calcage&#39;,this)">
+        <span class="nav-icon">🎂</span> 만나이 계산기
+      </div>
+      <div class="nav-item" onclick="goPage(&#39;tracking&#39;,this)">
+        <span class="nav-icon">🚛</span> 탁송조회
+      </div>
       <div class="nav-item" onclick="goPage(&#39;feedback&#39;,this)">
         <span class="nav-icon">💡</span> 수정사항 요청
       </div>
@@ -2180,6 +2192,195 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       </div>
     </div>
 
+    <!-- ===== 3.3% 계산기 ===== -->
+    <div class="page" id="page-calc33">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🧮 3.3% 계산기</div>
+          <div class="page-sub">프리랜서 원천징수 3.3%를 제외한 실제 수령액을 확인합니다</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1000px;">
+        <!-- 계약 금액 기준 -->
+        <div class="section-card" style="padding:24px;">
+          <div style="font-size:15px;font-weight:700;margin-bottom:16px;color:var(--blue);">계약 금액 기준</div>
+          <div class="form-field" style="margin-bottom:18px;">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">계약 금액 (원)</label>
+            <input type="text" id="c33_contract" placeholder="1,000,000" oninput="calc33Contract()" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;width:100%;outline:none;font-family:JetBrains Mono,monospace;text-align:right;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;border-top:1px solid var(--border);padding-top:14px;">
+            <div style="display:flex;justify-content:space-between;color:var(--text2);">
+              <span>기본세율 (3%)</span>
+              <span id="c33_tax3" style="font-family:JetBrains Mono,monospace;">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;color:var(--text2);">
+              <span>지방소득세율 (0.3%)</span>
+              <span id="c33_tax03" style="font-family:JetBrains Mono,monospace;">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;color:var(--text2);border-top:1px dashed var(--border);padding-top:10px;">
+              <span>총 3.3% 금액</span>
+              <span id="c33_taxTotal" style="font-family:JetBrains Mono,monospace;font-weight:600;">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(170,136,255,.08);padding:12px 14px;border-radius:6px;margin-top:6px;">
+              <span style="font-weight:700;color:#aa88ff;">실제 수령액</span>
+              <span id="c33_result" style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:17px;color:#aa88ff;">0 원</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 실제 수령액 기준 (역산) -->
+        <div class="section-card" style="padding:24px;">
+          <div style="font-size:15px;font-weight:700;margin-bottom:16px;color:#aa88ff;">실제 수령액 기준</div>
+          <div class="form-field" style="margin-bottom:18px;">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">실제 수령액 (원)</label>
+            <input type="text" id="c33_net" placeholder="1,000,000" oninput="calc33Net()" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;width:100%;outline:none;font-family:JetBrains Mono,monospace;text-align:right;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;border-top:1px solid var(--border);padding-top:14px;">
+            <div style="display:flex;justify-content:space-between;color:var(--text2);">
+              <span>기본세율 (3%)</span>
+              <span id="c33r_tax3" style="font-family:JetBrains Mono,monospace;">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;color:var(--text2);">
+              <span>지방소득세율 (0.3%)</span>
+              <span id="c33r_tax03" style="font-family:JetBrains Mono,monospace;">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;color:var(--text2);border-top:1px dashed var(--border);padding-top:10px;">
+              <span>총 3.3% 금액</span>
+              <span id="c33r_taxTotal" style="font-family:JetBrains Mono,monospace;font-weight:600;">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(68,136,255,.08);padding:12px 14px;border-radius:6px;margin-top:6px;">
+              <span style="font-weight:700;color:var(--blue);">계약 금액</span>
+              <span id="c33r_result" style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:17px;color:var(--blue);">0 원</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 부가세 계산기 ===== -->
+    <div class="page" id="page-calcvat">
+      <div class="page-header">
+        <div>
+          <div class="page-title">💵 부가세 계산기</div>
+          <div class="page-sub">부가가치세 10%를 자동 계산합니다</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1000px;">
+        <!-- 합계금액 기준 -->
+        <div class="section-card" style="padding:24px;">
+          <div style="font-size:15px;font-weight:700;margin-bottom:16px;color:var(--blue);">합계금액을 알고 계신 경우</div>
+          <div class="form-field" style="margin-bottom:18px;">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">합계금액 (TOTAL)</label>
+            <input type="text" id="vat_total" placeholder="1,000,000" oninput="calcVatTotal()" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;width:100%;outline:none;font-family:JetBrains Mono,monospace;text-align:right;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;border-top:1px solid var(--border);padding-top:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(68,136,255,.08);padding:12px 14px;border-radius:6px;">
+              <span style="font-weight:700;color:var(--blue);">공급가액 (VALUE OF SUPPLY)</span>
+              <span id="vat_supply" style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:15px;color:var(--blue);">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(170,136,255,.08);padding:12px 14px;border-radius:6px;">
+              <span style="font-weight:700;color:#aa88ff;">부가세액 (TAX)</span>
+              <span id="vat_tax" style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:15px;color:#aa88ff;">0 원</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 공급가액 기준 -->
+        <div class="section-card" style="padding:24px;">
+          <div style="font-size:15px;font-weight:700;margin-bottom:16px;color:#aa88ff;">공급가액을 알고 계신 경우</div>
+          <div class="form-field" style="margin-bottom:18px;">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">공급가액 (VALUE OF SUPPLY)</label>
+            <input type="text" id="vat_supplyIn" placeholder="1,000,000" oninput="calcVatSupply()" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;width:100%;outline:none;font-family:JetBrains Mono,monospace;text-align:right;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;border-top:1px solid var(--border);padding-top:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(68,136,255,.08);padding:12px 14px;border-radius:6px;">
+              <span style="font-weight:700;color:var(--blue);">합계금액 (TOTAL)</span>
+              <span id="vat_totalOut" style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:15px;color:var(--blue);">0 원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(170,136,255,.08);padding:12px 14px;border-radius:6px;">
+              <span style="font-weight:700;color:#aa88ff;">부가세액 (TAX)</span>
+              <span id="vat_taxOut" style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:15px;color:#aa88ff;">0 원</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 만나이 계산기 ===== -->
+    <div class="page" id="page-calcage">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🎂 만나이 계산기</div>
+          <div class="page-sub">고객의 만나이와 연나이를 계산합니다</div>
+        </div>
+      </div>
+
+      <div class="section-card" style="padding:28px;max-width:780px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+          <div class="form-field">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">출생일</label>
+            <input type="date" id="age_birth" onchange="calcAge()" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;width:100%;outline:none;font-family:JetBrains Mono,monospace;">
+          </div>
+          <div class="form-field">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">기준일</label>
+            <input type="date" id="age_target" onchange="calcAge()" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;width:100%;outline:none;font-family:JetBrains Mono,monospace;">
+          </div>
+        </div>
+
+        <div id="ageResult" style="text-align:center;padding:30px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:18px;">
+          <div style="font-size:14px;color:var(--text3);">출생일과 기준일을 입력하세요</div>
+        </div>
+
+        <div style="background:rgba(68,136,255,.05);border-left:3px solid var(--blue);padding:14px 18px;border-radius:4px;font-size:12px;line-height:1.9;color:var(--text2);">
+          • 만 18세 이상: 투표, 운전면허 취득, 아르바이트 및 취업<br>
+          • 만 18세 ~ 30세: 워킹홀리데이 신청 가능<br>
+          • 연나이 18세 이상: 군대입영, 9급 공무원 지원 가능<br>
+          • 초등 입학: 만 6세가 된 다음해 3월부터 입학, 연나이 7세<br>
+          • 병역법과 청소년보호법은 태어난 연도만 고려하는 연나이가 기준<br>
+          • 만 19세 이상: 청소년 관람불가 영화 관람
+        </div>
+
+        <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:8px;">
+          <button class="btn btn-ghost" onclick="resetAge()">🔄 초기화</button>
+          <button class="btn btn-primary" onclick="setTodayAsTarget()">📅 오늘로 설정</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 탁송조회 ===== -->
+    <div class="page" id="page-tracking">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🚛 탁송조회</div>
+          <div class="page-sub">현대 글로비스 탁송 조회 시스템</div>
+        </div>
+      </div>
+
+      <div class="section-card" style="padding:28px;max-width:780px;">
+        <div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.35);border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.7;color:var(--text);">
+          ⚠️ <strong>정확한 조회를 위해 아래 정보를 정확히 입력해주세요</strong><br>
+          <span style="color:var(--text2);font-size:12px;">
+            • <strong>브랜드</strong>: 차량 브랜드 (예: 현대, 기아, 제네시스 등)<br>
+            • <strong>계약번호</strong>: 정확한 계약번호<br>
+            • <strong>상호명</strong>: 금융사명 정확히 입력 (예: <strong>현대캐피탈</strong>, <strong>메리츠캐피탈</strong>)
+          </span>
+        </div>
+
+        <div style="text-align:center;padding:30px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;">
+          <div style="font-size:48px;margin-bottom:14px;">🚛</div>
+          <div style="font-size:14px;color:var(--text2);margin-bottom:18px;">아래 버튼을 클릭하면 새 창에서 탁송조회 사이트가 열립니다.</div>
+          <button class="btn btn-primary" onclick="openTracking()" style="font-size:14px;padding:12px 28px;">
+            🔗 탁송조회 사이트 열기
+          </button>
+          <div style="margin-top:14px;font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">
+            glink.glovis.net/newcar/c/tracking.do
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== FEEDBACK PAGE (수정사항 요청) ===== -->
     <div class="page" id="page-feedback">
       <div class="page-header">
@@ -3144,6 +3345,10 @@ function goPage(id, navEl) {
   if(id==='alarmperiodic') { renderAlarmPeriodicPage(); }
   if(id==='script')        { renderScriptPage(); }
   if(id==='news')          { /* 별도 init 불필요 */ }
+  if(id==='calc33')        { resetCalc33(); }
+  if(id==='calcvat')       { resetCalcVat(); }
+  if(id==='calcage')       { initCalcAge(); }
+  if(id==='tracking')      { /* 별도 init 불필요 */ }
   if(id==='feedback')      { renderFeedbackPage(); }
 
   if(id==='dbstats') {
@@ -8268,6 +8473,163 @@ function renderNewsResults(data) {
       <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--blue);text-decoration:none;font-family:JetBrains Mono,monospace;">🔗 ${escapeHtml(r.link.length>80?r.link.slice(0,80)+'...':r.link)}</a>
     </div>
   `).join('');
+}
+
+// ============================================================
+// 🧮 3.3% 계산기
+// ============================================================
+function _fmtNum(n) {
+  if(!n || isNaN(n)) return '0';
+  return Math.round(n).toLocaleString('ko-KR');
+}
+function _parseNum(str) {
+  if(!str) return 0;
+  const n = parseFloat(String(str).replace(/[^\d.-]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+function _fmtInputNumber(input) {
+  const v = _parseNum(input.value);
+  input.value = v ? v.toLocaleString('ko-KR') : '';
+}
+
+function calc33Contract() {
+  const input = document.getElementById('c33_contract');
+  _fmtInputNumber(input);
+  const contract = _parseNum(input.value);
+  const tax3 = contract * 0.03;
+  const tax03 = contract * 0.003;
+  const taxTotal = tax3 + tax03;
+  const net = contract - taxTotal;
+  document.getElementById('c33_tax3').textContent = _fmtNum(tax3) + ' 원';
+  document.getElementById('c33_tax03').textContent = _fmtNum(tax03) + ' 원';
+  document.getElementById('c33_taxTotal').textContent = _fmtNum(taxTotal) + ' 원';
+  document.getElementById('c33_result').textContent = _fmtNum(net) + ' 원';
+}
+
+function calc33Net() {
+  const input = document.getElementById('c33_net');
+  _fmtInputNumber(input);
+  const net = _parseNum(input.value);
+  // 역산: 계약금액 = 수령액 / 0.967
+  const contract = net / 0.967;
+  const tax3 = contract * 0.03;
+  const tax03 = contract * 0.003;
+  const taxTotal = tax3 + tax03;
+  document.getElementById('c33r_tax3').textContent = _fmtNum(tax3) + ' 원';
+  document.getElementById('c33r_tax03').textContent = _fmtNum(tax03) + ' 원';
+  document.getElementById('c33r_taxTotal').textContent = _fmtNum(taxTotal) + ' 원';
+  document.getElementById('c33r_result').textContent = _fmtNum(contract) + ' 원';
+}
+
+function resetCalc33() {
+  const ids = ['c33_contract','c33_net'];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['c33_tax3','c33_tax03','c33_taxTotal','c33_result','c33r_tax3','c33r_tax03','c33r_taxTotal','c33r_result'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = '0 원';
+  });
+}
+
+// ============================================================
+// 💵 부가세 계산기
+// ============================================================
+function calcVatTotal() {
+  const input = document.getElementById('vat_total');
+  _fmtInputNumber(input);
+  const total = _parseNum(input.value);
+  // 합계금액 = 공급가액 × 1.1 → 공급가액 = total / 1.1
+  const supply = total / 1.1;
+  const tax = total - supply;
+  document.getElementById('vat_supply').textContent = _fmtNum(supply) + ' 원';
+  document.getElementById('vat_tax').textContent = _fmtNum(tax) + ' 원';
+}
+
+function calcVatSupply() {
+  const input = document.getElementById('vat_supplyIn');
+  _fmtInputNumber(input);
+  const supply = _parseNum(input.value);
+  const tax = supply * 0.1;
+  const total = supply + tax;
+  document.getElementById('vat_totalOut').textContent = _fmtNum(total) + ' 원';
+  document.getElementById('vat_taxOut').textContent = _fmtNum(tax) + ' 원';
+}
+
+function resetCalcVat() {
+  ['vat_total','vat_supplyIn'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['vat_supply','vat_tax','vat_totalOut','vat_taxOut'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = '0 원';
+  });
+}
+
+// ============================================================
+// 🎂 만나이 계산기
+// ============================================================
+function initCalcAge() {
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+  const targetEl = document.getElementById('age_target');
+  if(targetEl && !targetEl.value) targetEl.value = todayStr;
+  calcAge();
+}
+
+function setTodayAsTarget() {
+  const today = new Date();
+  document.getElementById('age_target').value = today.toISOString().slice(0,10);
+  calcAge();
+}
+
+function resetAge() {
+  document.getElementById('age_birth').value = '';
+  document.getElementById('age_target').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ageResult').innerHTML = '<div style="font-size:14px;color:var(--text3);">출생일과 기준일을 입력하세요</div>';
+}
+
+function calcAge() {
+  const birthStr = document.getElementById('age_birth').value;
+  const targetStr = document.getElementById('age_target').value;
+  const resultEl = document.getElementById('ageResult');
+  if(!birthStr || !targetStr) {
+    resultEl.innerHTML = '<div style="font-size:14px;color:var(--text3);">출생일과 기준일을 입력하세요</div>';
+    return;
+  }
+  const birth = new Date(birthStr);
+  const target = new Date(targetStr);
+  if(birth > target) {
+    resultEl.innerHTML = '<div style="font-size:14px;color:var(--red);">⚠️ 출생일이 기준일보다 늦을 수 없습니다</div>';
+    return;
+  }
+
+  // 만나이 계산
+  let manAge = target.getFullYear() - birth.getFullYear();
+  const m = target.getMonth() - birth.getMonth();
+  if(m < 0 || (m === 0 && target.getDate() < birth.getDate())) {
+    manAge--;
+  }
+
+  // 연나이
+  const yearAge = target.getFullYear() - birth.getFullYear();
+
+  // 띠
+  const zodiac = ['원숭이띠','닭띠','개띠','돼지띠','쥐띠','소띠','호랑이띠','토끼띠','용띠','뱀띠','말띠','양띠'];
+  const zodiacName = zodiac[birth.getFullYear() % 12];
+
+  resultEl.innerHTML = `
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px;">계산 결과</div>
+    <div style="font-size:24px;font-weight:700;line-height:1.5;">
+      만 <span style="color:var(--green);">${manAge}</span>세, <span style="color:var(--blue);">${zodiacName}</span>,<br>
+      연나이 <span style="color:var(--green);">${yearAge}</span>세 입니다
+    </div>
+  `;
+}
+
+// ============================================================
+// 🚛 탁송조회
+// ============================================================
+function openTracking() {
+  const url = 'https://glink.glovis.net/newcar/c/tracking.do';
+  const win = window.open(url, '_blank', 'noopener,noreferrer');
+  if(!win) {
+    alert('팝업이 차단되었습니다.\n브라우저 주소창의 팝업 차단을 해제하거나, 아래 주소를 직접 복사해서 이용하세요.\n\n' + url);
+  }
 }
 
 // ============================================================
