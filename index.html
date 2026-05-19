@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_3.html -->
+<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_2.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1266,13 +1266,14 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       </div>
 
       <!-- 테이블 -->
-      <div class="section-card" style="overflow-x:auto;" onwheel="if(event.shiftKey && event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
+      <div class="section-card" style="overflow-x:auto;" onwheel="if(event.shiftKey &amp;&amp; event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
         <table class="tbl" style="min-width:1140px;">
           <thead>
             <tr>
               <th style="width:36px;text-align:center;"><input type="checkbox" id="checkAll" onchange="toggleCheckAll(this)" style="cursor:pointer;accent-color:var(--accent);"></th>
               <th style="width:42px;text-align:center;">NO</th>
               <th style="min-width:90px;">고객명</th>
+              <th style="min-width:60px;text-align:center;">등급</th>
               <th style="min-width:130px;">연락처</th>
               <th style="min-width:120px;">관심차량</th>
               <th style="min-width:80px;">유입경로</th>
@@ -1292,6 +1293,9 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
               <th colspan="2"></th>
               <th style="padding:4px 8px;">
                 <input id="colF_name" type="text" placeholder="이름검색" oninput="colFilterDB()" style="width:100%;padding:3px 6px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
+              </th>
+              <th style="padding:4px 8px;">
+                <select id="colF_grade" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option><option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
               </th>
               <th style="padding:4px 8px;">
                 <input id="colF_phone" type="text" placeholder="연락처" oninput="colFilterDB()" style="width:100%;padding:3px 6px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
@@ -1912,7 +1916,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="section-head-title">펀딩 등록 목록</div>
           <div style="font-size:11px;color:var(--text3);" id="fundingCount">6건</div>
         </div>
-        <div style="overflow-x:auto;" id="fundingTableScroll" onwheel="if(event.shiftKey && event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
+        <div style="overflow-x:auto;" id="fundingTableScroll" onwheel="if(event.shiftKey &amp;&amp; event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
         <table class="tbl" style="min-width:1700px;white-space:nowrap;">
           <thead><tr>
             <th style="width:36px;text-align:center;white-space:nowrap;"></th>
@@ -2002,7 +2006,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
               <div class="section-head-title">전체 배분 DB</div>
               <div style="font-size:11px;color:var(--text3);">행 클릭 → 회수 선택</div>
             </div>
-            <div style="overflow-x:auto;" onwheel="if(event.shiftKey && event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
+            <div style="overflow-x:auto;" onwheel="if(event.shiftKey &amp;&amp; event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
             <table class="tbl">
               <thead><tr>
                 <th style="width:36px;"><input type="checkbox" id="reclaimCheckAll" onchange="toggleReclaimAll(this)" style="cursor:pointer;accent-color:var(--red);"></th>
@@ -2240,11 +2244,11 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
         <div style="display:grid;grid-template-columns:1.2fr 1fr 100px;gap:10px;margin-bottom:14px;">
           <div class="form-field">
             <label style="font-size:11px;">지역 (시/구/동) <span style="color:var(--red);">*</span></label>
-            <input type="text" id="ls_region" placeholder="예: 강남구 역삼동" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;" onkeydown="if(event.key==='Enter') searchLocal()">
+            <input type="text" id="ls_region" placeholder="예: 강남구 역삼동" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;" onkeydown="if(event.key===&#39;Enter&#39;) searchLocal()">
           </div>
           <div class="form-field">
             <label style="font-size:11px;">업체/필름명 <span style="color:var(--red);">*</span></label>
-            <input type="text" id="ls_category" placeholder="예: 유리막코팅, 레이노" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;" onkeydown="if(event.key==='Enter') searchLocal()">
+            <input type="text" id="ls_category" placeholder="예: 유리막코팅, 레이노" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;" onkeydown="if(event.key===&#39;Enter&#39;) searchLocal()">
           </div>
           <div class="form-field" style="display:flex;align-items:flex-end;">
             <button class="btn btn-primary" onclick="searchLocal()" style="width:100%;">🔍 검색</button>
@@ -2254,14 +2258,14 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
         <!-- 카테고리 빠른 버튼 -->
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;">
           <div style="font-size:11px;color:var(--text3);align-self:center;margin-right:4px;">빠른 선택:</div>
-          <button onclick="setLocalCategory('유리막코팅')" class="ls-quick-btn">🪟 유리막</button>
-          <button onclick="setLocalCategory('썬팅')" class="ls-quick-btn">🌑 썬팅</button>
-          <button onclick="setLocalCategory('블랙박스')" class="ls-quick-btn">📹 블랙박스</button>
-          <button onclick="setLocalCategory('PPF')" class="ls-quick-btn">🛡️ PPF</button>
-          <button onclick="setLocalCategory('레이노')" class="ls-quick-btn">🎬 레이노</button>
-          <button onclick="setLocalCategory('썬가드')" class="ls-quick-btn">🎬 썬가드</button>
-          <button onclick="setLocalCategory('V-KOOL')" class="ls-quick-btn">🎬 V-KOOL</button>
-          <button onclick="setLocalCategory('루마')" class="ls-quick-btn">🎬 루마</button>
+          <button onclick="setLocalCategory(&#39;유리막코팅&#39;)" class="ls-quick-btn">🪟 유리막</button>
+          <button onclick="setLocalCategory(&#39;썬팅&#39;)" class="ls-quick-btn">🌑 썬팅</button>
+          <button onclick="setLocalCategory(&#39;블랙박스&#39;)" class="ls-quick-btn">📹 블랙박스</button>
+          <button onclick="setLocalCategory(&#39;PPF&#39;)" class="ls-quick-btn">🛡️ PPF</button>
+          <button onclick="setLocalCategory(&#39;레이노&#39;)" class="ls-quick-btn">🎬 레이노</button>
+          <button onclick="setLocalCategory(&#39;썬가드&#39;)" class="ls-quick-btn">🎬 썬가드</button>
+          <button onclick="setLocalCategory(&#39;V-KOOL&#39;)" class="ls-quick-btn">🎬 V-KOOL</button>
+          <button onclick="setLocalCategory(&#39;루마&#39;)" class="ls-quick-btn">🎬 루마</button>
         </div>
 
         <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">
@@ -2465,7 +2469,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           </a>
 
           <div style="margin-top:16px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;">
-            <input type="text" id="tracking_url" value="https://glink.glovis.net/newcar/c/tracking.do" readonly style="padding:8px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text3);font-size:12px;font-family:JetBrains Mono,monospace;width:360px;max-width:80%;outline:none;">
+            <input type="text" id="tracking_url" value="https://glink.glovis.net/newcar/c/tracking.do" readonly="" style="padding:8px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text3);font-size:12px;font-family:JetBrains Mono,monospace;width:360px;max-width:80%;outline:none;">
             <button class="btn btn-ghost btn-sm" onclick="copyTrackingUrl()" style="font-size:12px;">📋 복사</button>
           </div>
           <div style="margin-top:10px;font-size:11px;color:var(--text3);">버튼이 안 열리면 URL을 복사해 새 탭에 붙여넣으세요.</div>
@@ -3062,6 +3066,7 @@ function customerToRow(c) {
     source:           c.source,
     division:         c.division   || null,
     memo_tag:         c.memoTag    || null,
+    grade:            c.grade      || null,
     assign:           c.assign,
     status:           c.status,
     date:             c.date,
@@ -3093,6 +3098,7 @@ function rowToCustomer(r) {
     source:          r.source,
     division:        r.division  || '',
     memoTag:         r.memo_tag  || '',
+    grade:           r.grade     || '',
     assign:          r.assign,
     status:          r.status,
     date:            r.date,
@@ -4372,6 +4378,48 @@ async function changeCustomerMemoTag(newVal) {
   refreshAllViews();
 }
 
+// ============================================================
+// 🏆 고객 등급 (S/A/B/C)
+// ============================================================
+const GRADE_OPTIONS = ['S','A','B','C'];
+const GRADE_COLORS = {
+  'S': '#ff7eb6',  // 핑크 (VIP)
+  'A': '#ffcc44',  // 금색
+  'B': '#888888',  // 은색/회색
+  'C': '#cd7f32'   // 브론즈
+};
+
+function gradeColor(g) { return GRADE_COLORS[g] || 'var(--text3)'; }
+
+// 행에서 등급 변경 - 이벤트에서 호출
+async function changeCustomerGradeFromRow(custId, newVal) {
+  const c = customers.find(x=>x.id===custId);
+  if(!c) return;
+  c.grade = newVal || '';
+  // UI 즉시 반영: 셀렉트 색상 업데이트
+  const sel = document.querySelector('select.grade-row-sel[data-cid="'+custId+'"]');
+  if(sel) {
+    sel.style.color = gradeColor(newVal);
+    sel.style.borderColor = newVal ? gradeColor(newVal)+'66' : 'var(--border2)';
+  }
+  if(isSbConfigured()) {
+    try { await sbUpdateCustomer(c); showGlobalToast('등급이 '+(newVal||'미지정')+'(으)로 변경되었습니다.'); }
+    catch(e) { showGlobalToast('⚠️ 저장 실패: ' + (e.message||e)); }
+  }
+}
+
+// 행용 드롭다운 HTML 생성
+function gradeSelectHtml(c) {
+  const cur = c.grade || '';
+  const color = cur ? gradeColor(cur) : 'var(--text3)';
+  const border = cur ? gradeColor(cur)+'66' : 'var(--border2)';
+  return '<select class="grade-row-sel" data-cid="'+c.id+'" onchange="changeCustomerGradeFromRow('+c.id+', this.value)" onclick="event.stopPropagation()" '+
+    'style="background:var(--bg3);border:1px solid '+border+';border-radius:5px;color:'+color+';font-size:12px;font-weight:700;padding:3px 6px;font-family:inherit;outline:none;cursor:pointer;text-align:center;min-width:48px;">'+
+    '<option value="" style="color:var(--text3);">-</option>'+
+    GRADE_OPTIONS.map(g=>'<option value="'+g+'" style="color:'+GRADE_COLORS[g]+';font-weight:700;"'+(g===cur?' selected':'')+'>'+g+'</option>').join('')+
+  '</select>';
+}
+
 // 고객 상세 페이지의 info-row 순서를 addModalFieldOrder 기준으로 재정렬
 function refreshDetailFieldOrder() {
   // info-row 중 data-field 있는 것만 대상 (name/phone/memo는 별도 영역이라 제외)
@@ -4554,6 +4602,7 @@ function renderDB(list) {
       '<td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="db-check" data-id="'+c.id+'" onchange="onCheckChange()" style="cursor:pointer;accent-color:var(--accent);"></td>'+
       '<td style="text-align:center;font-family:JetBrains Mono,monospace;font-size:12px;color:var(--text3);">'+no+'</td>'+
       '<td><div class="tbl-name">'+(c.important?'⭐ ':'')+c.name+isNewDB(c)+directBadge(c)+'</div></td>'+
+      '<td style="text-align:center;" onclick="event.stopPropagation()">'+gradeSelectHtml(c)+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:12px;">'+c.phone+'</td>'+
       '<td style="font-size:13px;">'+c.car+'</td>'+
       '<td><span style="font-size:12px;color:var(--text2);">'+c.source+'</span></td>'+
@@ -4634,7 +4683,7 @@ function filterDB() {
   resetPage('db');
   // 컬럼 필터가 활성화된 경우 colFilterDB 우선 호출
   const hasColFilter = ['colF_name','colF_phone','colF_car'].some(id=>(document.getElementById(id)?.value||'')!=='') ||
-    ['colF_source','colF_assign','colF_status','colF_division','colF_memoTag'].some(id=>{
+    ['colF_source','colF_assign','colF_status','colF_division','colF_memoTag','colF_grade'].some(id=>{
       const el=document.getElementById(id); return el && !el.disabled && (el.value||'')!=='';
     });
   if(hasColFilter) { colFilterDB(); return; }
@@ -7184,6 +7233,7 @@ function colFilterDB() {
   // 필터 변경 시 페이지 1로 리셋
   resetPage('db');
   const name   = (document.getElementById('colF_name')?.value||'').toLowerCase();
+  const grade  = document.getElementById('colF_grade')?.value||'';
   const phone  = (document.getElementById('colF_phone')?.value||'').toLowerCase();
   const car    = (document.getElementById('colF_car')?.value||'').toLowerCase();
   const source = document.getElementById('colF_source')?.value||'';
@@ -7203,6 +7253,7 @@ function colFilterDB() {
     if(dbImportantOnly && !c.important) return false;
     // 컬럼 필터
     if(name   && !c.name.toLowerCase().includes(name)) return false;
+    if(grade  && (c.grade||'')!==grade) return false;
     if(phone  && !c.phone.includes(phone)) return false;
     if(car    && !c.car.toLowerCase().includes(car)) return false;
     if(source && c.source!==source) return false;
@@ -7224,7 +7275,7 @@ function clearColFilters() {
   ['colF_name','colF_phone','colF_car'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
-  ['colF_source','colF_status','colF_division','colF_memoTag'].forEach(id=>{
+  ['colF_source','colF_status','colF_division','colF_memoTag','colF_grade'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   if(currentRole==='admin') {
