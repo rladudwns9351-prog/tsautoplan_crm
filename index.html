@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///C:/Users/rladu/Downloads/todayzcar_crm_34.html -->
+<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_3.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -326,7 +326,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 <body>
 
 <!-- ===== LOGIN ===== -->
-<div id="loginScreen" style="display: none;">
+<div id="loginScreen" style="display: flex;">
   <div class="login-box">
     <div class="login-logo">TS AUTO PLAN <span style="font-weight:400;font-size:14px;letter-spacing:1px;">/ 타소</span></div>
     <div class="login-sub">장기렌트 CRM 시스템</div>
@@ -347,15 +347,12 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 </div>
 
 <!-- ===== APP ===== -->
-<div id="app" class="active">
+<div id="app" class="">
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-logo" onclick="(function(){var n=document.querySelector(&#39;.nav-item[onclick*=\&#39;dashboard\&#39;]&#39;);goPage(&#39;dashboard&#39;,n);})()" style="cursor:pointer;" title="대시보드로 이동">TS AUTO PLAN <span style="font-weight:400;font-size:12px;color:var(--text2);letter-spacing:1px;">/ 타소</span></div>
     <div class="topbar-right">
-      <button id="topAlarmBtn" onclick="openAlarmDropdown()" title="오늘 알람"
-        style="position:relative;background:transparent;border:1px solid var(--border2);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;"
-        onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)';"
-        onmouseout="this.style.background='transparent';this.style.borderColor='var(--border2)';">
+      <button id="topAlarmBtn" onclick="openAlarmDropdown()" title="오늘 알람" style="position:relative;background:transparent;border:1px solid var(--border2);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;" onmouseover="this.style.background=&#39;var(--bg3)&#39;;this.style.borderColor=&#39;var(--accent)&#39;;" onmouseout="this.style.background=&#39;transparent&#39;;this.style.borderColor=&#39;var(--border2)&#39;;">
         💡
         <span id="topAlarmBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;font-family:JetBrains Mono,monospace;align-items:center;justify-content:center;line-height:1;">0</span>
       </button>
@@ -416,6 +413,9 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       </div>
       <div class="nav-item" onclick="goPage(&#39;script&#39;,this)">
         <span class="nav-icon">📝</span> 스크립트생성
+      </div>
+      <div class="nav-item" onclick="goPage(&#39;feedback&#39;,this)">
+        <span class="nav-icon">💡</span> 수정사항 요청
       </div>
     </div>
     <div class="sidebar-bottom">
@@ -2033,9 +2033,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <div class="section-card" style="padding:30px;">
         <div style="font-size:14px;color:var(--text2);margin-bottom:20px;">하위 메뉴에서 세부 설정을 진행하세요</div>
         <div style="display:flex;gap:14px;">
-          <div onclick="goPage('alarmperiodic', document.querySelector('.nav-item[onclick*=alarmperiodic]'))"
-            style="flex:1;padding:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;"
-            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div onclick="goPage(&#39;alarmperiodic&#39;, document.querySelector(&#39;.nav-item[onclick*=alarmperiodic]&#39;))" style="flex:1;padding:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor=&#39;var(--accent)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
             <div style="font-size:24px;margin-bottom:8px;">⏰</div>
             <div style="font-size:14px;font-weight:700;margin-bottom:4px;">주기별 알람</div>
             <div style="font-size:12px;color:var(--text3);">만기/인도 기반 알람 멘트 설정</div>
@@ -2118,7 +2116,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="form-field" style="margin-bottom:12px;">
             <label style="font-size:11px;">업체명</label>
             <div style="display:flex;gap:6px;">
-              <input type="text" id="scr_company" value="TS AUTO PLAN" readonly style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;flex:1;outline:none;cursor:not-allowed;">
+              <input type="text" id="scr_company" value="TS AUTO PLAN" readonly="" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;flex:1;outline:none;cursor:not-allowed;">
               <button type="button" id="scr_directBtn" class="btn btn-ghost btn-sm" onclick="toggleDirectMode()" style="padding:7px 10px;font-size:11px;white-space:nowrap;">직영업</button>
             </div>
           </div>
@@ -2126,7 +2124,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <!-- 담당자 연락처 (자동 + 잠금) -->
           <div class="form-field" style="margin-bottom:14px;">
             <label style="font-size:11px;">담당자 연락처 <span style="font-size:10px;color:var(--text3);">(로그인 정보 자동)</span></label>
-            <input type="text" id="scr_phone" readonly placeholder="-" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;width:100%;outline:none;cursor:not-allowed;font-family:JetBrains Mono,monospace;">
+            <input type="text" id="scr_phone" readonly="" placeholder="-" style="padding:8px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;width:100%;outline:none;cursor:not-allowed;font-family:JetBrains Mono,monospace;">
           </div>
 
           <button class="btn btn-primary" id="scr_generateBtn" style="width:100%;" onclick="generateScript()">✨ AI 스크립트 생성</button>
@@ -2138,7 +2136,67 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             <div style="font-size:13px;font-weight:700;">생성된 스크립트</div>
             <button class="btn btn-ghost btn-sm" onclick="copyScript()">📋 전체 복사</button>
           </div>
-          <textarea id="scr_result" rows="20" placeholder="좌측에서 입력값을 작성하고 '스크립트 생성' 버튼을 클릭하세요." style="width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"></textarea>
+          <textarea id="scr_result" rows="20" placeholder="좌측에서 입력값을 작성하고 &#39;스크립트 생성&#39; 버튼을 클릭하세요." style="width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FEEDBACK PAGE (수정사항 요청) ===== -->
+    <div class="page" id="page-feedback">
+      <div class="page-header">
+        <div>
+          <div class="page-title">💡 수정사항 요청</div>
+          <div class="page-sub" id="feedbackPageSub">CRM 사용 중 불편하거나 개선이 필요한 부분을 알려주세요</div>
+        </div>
+      </div>
+
+      <!-- 영업자(직원) 화면: 요청 작성 폼 -->
+      <div id="feedbackStaffView" style="display:none;">
+        <div class="section-card" style="padding:24px;max-width:780px;">
+          <div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:12px 14px;margin-bottom:20px;font-size:12px;color:var(--text2);line-height:1.6;">
+            💬 <strong style="color:var(--text);">최대한 상세하게 기재</strong>해주시면 빠르게 반영하는 데 도움이 됩니다.<br>
+            (어떤 페이지의 어떤 기능인지, 어떤 상황에서 불편한지, 어떻게 개선되면 좋을지 등)
+          </div>
+
+          <div class="form-field" style="margin-bottom:16px;">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">수정할 부분 <span style="color:var(--red);">*</span></label>
+            <input type="text" id="fb_title" placeholder="예: 고객DB 페이지 - 검색 기능" maxlength="100" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+          </div>
+
+          <div class="form-field" style="margin-bottom:20px;">
+            <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">상세 내용 <span style="color:var(--red);">*</span></label>
+            <textarea id="fb_content" rows="10" placeholder="예: 고객 검색 시 연락처 뒷자리만 입력해도 검색이 되면 좋겠습니다. 현재는 전체 번호를 입력해야 하는데..." style="width:100%;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;line-height:1.6;resize:vertical;outline:none;"></textarea>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button class="btn btn-ghost" onclick="resetFeedbackForm()">취소</button>
+            <button class="btn btn-primary" onclick="submitFeedback()">📤 제출</button>
+          </div>
+        </div>
+
+        <!-- 본인이 제출한 요청 목록 -->
+        <div class="section-card" style="padding:24px;margin-top:20px;max-width:780px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:14px;">📋 내가 제출한 요청</div>
+          <div id="feedbackMyList"></div>
+        </div>
+      </div>
+
+      <!-- 관리자 화면: 요청 리스트 -->
+      <div id="feedbackAdminView" style="display:none;">
+        <div class="section-card" style="padding:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;">전체 수정사항 요청 <span id="feedbackTotalCount" style="color:var(--text3);font-weight:400;margin-left:8px;"></span></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="feedbackFilterStatus" onchange="renderFeedbackAdmin()" style="padding:6px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;outline:none;">
+                <option value="">전체 상태</option>
+                <option value="대기">대기</option>
+                <option value="검토중">검토중</option>
+                <option value="반영완료">반영완료</option>
+                <option value="보류">보류</option>
+              </select>
+            </div>
+          </div>
+          <div id="feedbackAdminList"></div>
         </div>
       </div>
     </div>
@@ -2500,6 +2558,64 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       <button class="btn btn-ghost" onclick="closeModal(&#39;addModal&#39;)">취소</button>
       <button class="btn btn-primary" onclick="saveCustomer()">등록</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== 수정사항 요청 상세 모달 ===== -->
+<div class="modal-bg" id="feedbackDetailModal">
+  <div class="modal" style="width:640px;max-height:88vh;overflow-y:auto;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div class="modal-title" style="margin-bottom:0;">💡 수정사항 상세</div>
+      <button onclick="closeModal(&#39;feedbackDetailModal&#39;)" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:12px;">
+      <div><span style="color:var(--text3);">작성자:</span> <span id="fbd_author" style="font-weight:600;"></span></div>
+      <div><span style="color:var(--text3);">작성일:</span> <span id="fbd_date" style="font-family:JetBrains Mono,monospace;"></span></div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:600;">수정할 부분</div>
+      <div id="fbd_title" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;font-size:13px;font-weight:600;"></div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:600;">상세 내용</div>
+      <div id="fbd_content" style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;font-size:13px;line-height:1.7;white-space:pre-wrap;min-height:120px;"></div>
+    </div>
+
+    <!-- 관리자만 보이는 상태 변경 영역 -->
+    <div id="fbd_adminControls" style="display:none;border-top:1px solid var(--border);padding-top:16px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);">상태 변경:</label>
+        <select id="fbd_status" style="padding:6px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;outline:none;">
+          <option value="대기">대기</option>
+          <option value="검토중">검토중</option>
+          <option value="반영완료">반영완료</option>
+          <option value="보류">보류</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="updateFeedbackStatus()">💾 저장</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;color:var(--red);" onclick="deleteFeedback()">🗑️ 삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 파일 미리보기 모달 ===== -->
+<div class="modal-bg" id="filePreviewModal">
+  <div class="modal" style="width:90vw;max-width:1000px;height:88vh;padding:0;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--bg2);">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+        <span id="fpv_icon" style="font-size:20px;">📄</span>
+        <span id="fpv_name" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+        <span id="fpv_size" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;"></span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="downloadCurrentPreview()">⬇️ 다운로드</button>
+        <button onclick="closeModal(&#39;filePreviewModal&#39;)" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px;">✕</button>
+      </div>
+    </div>
+    <div id="fpv_body" style="flex:1;overflow:auto;background:#000;display:flex;align-items:center;justify-content:center;"></div>
   </div>
 </div>
 
@@ -2970,6 +3086,7 @@ function goPage(id, navEl) {
   if(id==='alarmsettings') { /* 정적 카드, 별도 렌더 불필요 */ }
   if(id==='alarmperiodic') { renderAlarmPeriodicPage(); }
   if(id==='script')        { renderScriptPage(); }
+  if(id==='feedback')      { renderFeedbackPage(); }
 
   if(id==='dbstats') {
     setStatsPeriod(30);
@@ -6345,21 +6462,136 @@ function renderMemos() {
 
 function handleFileUpload(input) {
   if(!currentCustomer) return;
-  Array.from(input.files).forEach(f=>{
-    currentCustomer.files.push({name:f.name, size:formatSize(f.size), date:new Date().toLocaleDateString('ko-KR')});
-  });
-  renderFiles(); input.value='';
-  saveData();
+  uploadCustomerFiles(Array.from(input.files));
+  input.value='';
 }
 function handleFileDropDB(e) {
   if(!currentCustomer) return;
   const files = e.dataTransfer?.files;
   if(!files) return;
-  Array.from(files).forEach(f=>{
-    currentCustomer.files.push({name:f.name, size:formatSize(f.size), date:new Date().toLocaleDateString('ko-KR')});
+  uploadCustomerFiles(Array.from(files));
+}
+
+// ===== 이미지 자동 압축 =====
+async function compressImageFile(file) {
+  // 이미지가 아니면 원본 그대로 반환
+  if(!file.type.startsWith('image/')) return file;
+  // PNG/JPEG/WebP만 압축 대상 (GIF는 애니메이션 보존 위해 제외)
+  if(!/jpe?g|png|webp/i.test(file.type)) return file;
+  try {
+    const dataUrl = await new Promise((res,rej)=>{
+      const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file);
+    });
+    const img = await new Promise((res,rej)=>{
+      const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=dataUrl;
+    });
+    const MAX = 1600; // 긴변 최대 1600px
+    let w=img.width, h=img.height;
+    if(w>MAX || h>MAX) {
+      const ratio = Math.min(MAX/w, MAX/h);
+      w = Math.round(w*ratio); h = Math.round(h*ratio);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width=w; canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    const blob = await new Promise(r=>canvas.toBlob(r, 'image/jpeg', 0.82));
+    if(!blob || blob.size >= file.size) return file; // 압축이 효과 없으면 원본
+    // 새 파일명: 원본이름.jpg (확장자 통일)
+    const newName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    return new File([blob], newName, { type:'image/jpeg' });
+  } catch(e) {
+    console.warn('이미지 압축 실패, 원본 사용:', e);
+    return file;
+  }
+}
+
+// ===== Supabase Storage 헬퍼 =====
+const SB_BUCKET = 'customer-files';
+
+async function sbStorageUpload(path, file) {
+  const res = await fetch(`${SB_URL}/storage/v1/object/${SB_BUCKET}/${path}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': file.type || 'application/octet-stream',
+      'x-upsert': 'true'
+    },
+    body: file
   });
+  if(!res.ok) {
+    const err = await res.text();
+    throw new Error(`Storage 업로드 실패: ${res.status} ${err}`);
+  }
+  return await res.json();
+}
+async function sbStorageDownload(path) {
+  const res = await fetch(`${SB_URL}/storage/v1/object/${SB_BUCKET}/${path}`, {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  });
+  if(!res.ok) throw new Error('파일 다운로드 실패: ' + res.status);
+  return await res.blob();
+}
+async function sbStorageDelete(path) {
+  const res = await fetch(`${SB_URL}/storage/v1/object/${SB_BUCKET}/${path}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  });
+  return res.ok;
+}
+async function sbStorageSignedUrl(path, expiresIn=3600) {
+  // 비공개 버킷이면 signed URL, 공개 버킷이면 public URL
+  const res = await fetch(`${SB_URL}/storage/v1/object/sign/${SB_BUCKET}/${path}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ expiresIn })
+  });
+  if(res.ok) {
+    const data = await res.json();
+    return SB_URL + '/storage/v1' + data.signedURL;
+  }
+  // signed URL 실패 시 public URL 시도
+  return `${SB_URL}/storage/v1/object/public/${SB_BUCKET}/${path}`;
+}
+
+// ===== 고객 서류 업로드 (압축 + Storage) =====
+async function uploadCustomerFiles(files) {
+  if(!files || !files.length) return;
+  if(!isSbConfigured()) {
+    alert('Supabase가 설정되지 않아 파일을 영구 저장할 수 없습니다.');
+    return;
+  }
+  showGlobalToast(`서류 ${files.length}건 업로드 중...`);
+  for(const rawFile of files) {
+    try {
+      const file = await compressImageFile(rawFile);
+      const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+      const safeName = file.name.replace(/[^\w.\-가-힣 ]/g,'_');
+      const id = Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      const path = `customer_${currentCustomer.id}/${id}.${ext}`;
+      await sbStorageUpload(path, file);
+      currentCustomer.files.push({
+        id,
+        name: safeName,
+        size: formatSize(file.size),
+        sizeBytes: file.size,
+        type: file.type || '',
+        path,
+        date: new Date().toLocaleDateString('ko-KR'),
+        uploader: currentUser || ''
+      });
+    } catch(e) {
+      console.error('업로드 실패:', e);
+      alert(`"${rawFile.name}" 업로드 실패: ${e.message}`);
+    }
+  }
   renderFiles();
-  saveData();
+  try { await sbUpdateCustomer(currentCustomer); } catch(e){ console.warn(e); }
+  showGlobalToast('업로드 완료');
 }
 
 function formatSize(b) { return b>1024*1024?(b/1024/1024).toFixed(1)+'MB':(b/1024).toFixed(0)+'KB'; }
@@ -6367,20 +6599,103 @@ function formatSize(b) { return b>1024*1024?(b/1024/1024).toFixed(1)+'MB':(b/102
 function renderFiles() {
   const list = document.getElementById('fileList');
   if(!currentCustomer.files.length) { list.innerHTML='<div style="color:var(--text3);font-size:13px;text-align:center;padding:24px;">업로드된 서류가 없습니다.</div>'; return; }
-  list.innerHTML = currentCustomer.files.map((f,i)=>`
+  list.innerHTML = currentCustomer.files.map((f,i)=>{
+    const isLegacy = !f.path; // path 없으면 옛 데이터 (실제 파일 없음)
+    const canPreview = !isLegacy;
+    return `
     <div class="file-item">
       <div class="file-icon">${fileIcon(f.name)}</div>
-      <div class="file-info"><div class="file-name">${f.name}</div><div class="file-size">${f.size} · ${f.date}</div></div>
+      <div class="file-info" style="cursor:${canPreview?'pointer':'default'};" ${canPreview?`onclick="previewFile(${i})"`:''}>
+        <div class="file-name">${escapeHtml(f.name)} ${isLegacy?'<span style="color:var(--text3);font-size:10px;">(구버전, 파일없음)</span>':''}</div>
+        <div class="file-size">${f.size||''} · ${f.date||''}${f.uploader?' · '+escapeHtml(f.uploader):''}</div>
+      </div>
       <div class="file-actions">
+        ${canPreview?`<button class="btn btn-ghost btn-sm" onclick="previewFile(${i})">👁️ 보기</button>`:''}
+        ${canPreview?`<button class="btn btn-ghost btn-sm" onclick="downloadFile(${i})">⬇️</button>`:''}
         <button class="btn btn-ghost btn-sm" onclick="deleteFile(${i})">삭제</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-async function deleteFile(i) { currentCustomer.files.splice(i,1); renderFiles(); if(isSbConfigured()) try{ await sbUpdateCustomer(currentCustomer); }catch(e){} }
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function deleteFile(i) {
+  const f = currentCustomer.files[i];
+  if(!f) return;
+  if(!confirm(`"${f.name}" 파일을 삭제하시겠습니까?`)) return;
+  if(f.path) {
+    try { await sbStorageDelete(f.path); } catch(e){ console.warn('Storage 삭제 실패:', e); }
+  }
+  currentCustomer.files.splice(i,1);
+  renderFiles();
+  if(isSbConfigured()) try{ await sbUpdateCustomer(currentCustomer); }catch(e){}
+}
+
+// ===== 파일 미리보기/다운로드 =====
+let _currentPreview = null;
+
+async function previewFile(i) {
+  const f = currentCustomer.files[i];
+  if(!f || !f.path) { alert('파일 정보를 찾을 수 없습니다.'); return; }
+  _currentPreview = f;
+  document.getElementById('fpv_icon').textContent = fileIcon(f.name);
+  document.getElementById('fpv_name').textContent = f.name;
+  document.getElementById('fpv_size').textContent = f.size || '';
+  const body = document.getElementById('fpv_body');
+  body.innerHTML = '<div style="color:#888;padding:40px;">불러오는 중...</div>';
+  document.getElementById('filePreviewModal').classList.add('open');
+  try {
+    const blob = await sbStorageDownload(f.path);
+    const url = URL.createObjectURL(blob);
+    _currentPreview._blobUrl = url;
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if(['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) {
+      body.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+    } else if(ext==='pdf') {
+      body.innerHTML = `<iframe src="${url}" style="width:100%;height:100%;border:0;background:#fff;"></iframe>`;
+    } else if(['txt','md','json','csv','log'].includes(ext)) {
+      const text = await blob.text();
+      body.innerHTML = `<pre style="margin:0;padding:20px;color:#ddd;background:#1a1a1a;width:100%;height:100%;overflow:auto;white-space:pre-wrap;font-family:JetBrains Mono,monospace;font-size:12px;">${escapeHtml(text)}</pre>`;
+    } else {
+      body.innerHTML = `<div style="text-align:center;color:#ddd;padding:40px;">
+        <div style="font-size:64px;margin-bottom:16px;">${fileIcon(f.name)}</div>
+        <div style="font-size:14px;margin-bottom:8px;">${escapeHtml(f.name)}</div>
+        <div style="font-size:12px;color:#888;margin-bottom:20px;">미리보기를 지원하지 않는 형식입니다</div>
+        <button class="btn btn-primary" onclick="downloadCurrentPreview()">⬇️ 다운로드</button>
+      </div>`;
+    }
+  } catch(e) {
+    body.innerHTML = `<div style="color:#f55;padding:40px;">파일을 불러올 수 없습니다: ${e.message}</div>`;
+  }
+}
+
+async function downloadFile(i) {
+  const f = currentCustomer.files[i];
+  if(!f || !f.path) { alert('파일 정보를 찾을 수 없습니다.'); return; }
+  try {
+    const blob = await sbStorageDownload(f.path);
+    triggerDownload(blob, f.name);
+  } catch(e) {
+    alert('다운로드 실패: ' + e.message);
+  }
+}
+function downloadCurrentPreview() {
+  if(!_currentPreview) return;
+  const i = currentCustomer.files.indexOf(_currentPreview);
+  if(i>=0) downloadFile(i);
+}
+function triggerDownload(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
 function fileIcon(name) {
   const ext = name.split('.').pop().toLowerCase();
-  return {pdf:'📄',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',docx:'📝',xlsx:'📊',zip:'📦'}[ext]||'📎';
+  return {pdf:'📄',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',webp:'🖼️',docx:'📝',doc:'📝',xlsx:'📊',xls:'📊',zip:'📦',txt:'📃'}[ext]||'📎';
 }
 
 function renderHistory() {
@@ -7638,6 +7953,207 @@ function renderScriptPage() {
 
   // 구버전 잔존 API Key 제거 (보안 처리)
   try { localStorage.removeItem('ts_crm_gemini_api_key'); } catch(e){}
+}
+
+// ============================================================
+// 💡 수정사항 요청 (Feedback) - Supabase 저장
+// ============================================================
+const FEEDBACK_TABLE = 'feedback';
+let _feedbackCache = [];
+
+async function sbLoadFeedback() {
+  if(!isSbConfigured()) return [];
+  try {
+    const rows = await sbFetch(`${FEEDBACK_TABLE}?order=created_at.desc&select=*`);
+    return rows || [];
+  } catch(e) {
+    console.warn('feedback 로드 실패:', e);
+    return [];
+  }
+}
+async function sbSaveFeedback(item) {
+  const row = {
+    title: item.title,
+    content: item.content,
+    author: item.author,
+    author_id: item.author_id,
+    status: item.status || '대기',
+    created_at: item.created_at || new Date().toISOString()
+  };
+  const result = await sbFetch(`${FEEDBACK_TABLE}`, 'POST', [row]);
+  return Array.isArray(result) ? result[0] : result;
+}
+async function sbUpdateFeedback(id, patch) {
+  return await sbFetch(`${FEEDBACK_TABLE}?id=eq.${id}`, 'PATCH', patch);
+}
+async function sbDeleteFeedback(id) {
+  return await sbFetch(`${FEEDBACK_TABLE}?id=eq.${id}`, 'DELETE');
+}
+
+async function renderFeedbackPage() {
+  const staffView = document.getElementById('feedbackStaffView');
+  const adminView = document.getElementById('feedbackAdminView');
+  const subEl = document.getElementById('feedbackPageSub');
+
+  if(currentRole === 'admin') {
+    staffView.style.display = 'none';
+    adminView.style.display = '';
+    if(subEl) subEl.textContent = '영업자들이 제출한 수정사항 요청을 관리합니다';
+    await renderFeedbackAdmin();
+  } else {
+    staffView.style.display = '';
+    adminView.style.display = 'none';
+    if(subEl) subEl.textContent = 'CRM 사용 중 불편하거나 개선이 필요한 부분을 알려주세요';
+    resetFeedbackForm();
+    await renderFeedbackMyList();
+  }
+}
+
+function resetFeedbackForm() {
+  const t = document.getElementById('fb_title');
+  const c = document.getElementById('fb_content');
+  if(t) t.value = '';
+  if(c) c.value = '';
+}
+
+async function submitFeedback() {
+  const title = (document.getElementById('fb_title').value || '').trim();
+  const content = (document.getElementById('fb_content').value || '').trim();
+  if(!title) { alert('수정할 부분을 입력해주세요.'); return; }
+  if(!content) { alert('상세 내용을 입력해주세요.'); return; }
+  if(!isSbConfigured()) { alert('Supabase가 설정되지 않아 제출할 수 없습니다.'); return; }
+  try {
+    await sbSaveFeedback({
+      title, content,
+      author: currentUser || '',
+      author_id: currentUserId || '',
+      status: '대기'
+    });
+    showGlobalToast('수정사항이 제출되었습니다. 감사합니다!');
+    resetFeedbackForm();
+    await renderFeedbackMyList();
+  } catch(e) {
+    alert('제출 실패: ' + e.message);
+  }
+}
+
+async function renderFeedbackMyList() {
+  const el = document.getElementById('feedbackMyList');
+  if(!el) return;
+  const all = await sbLoadFeedback();
+  _feedbackCache = all;
+  const mine = all.filter(f => f.author_id === currentUserId || f.author === currentUser);
+  if(!mine.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:24px;">아직 제출한 요청이 없습니다.</div>'; return; }
+  el.innerHTML = mine.map(f => `
+    <div onclick="openFeedbackDetail(${f.id})" style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(f.title)}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">${formatFeedbackDate(f.created_at)}</div>
+      </div>
+      <div>${feedbackStatusBadge(f.status)}</div>
+    </div>
+  `).join('');
+}
+
+async function renderFeedbackAdmin() {
+  const el = document.getElementById('feedbackAdminList');
+  if(!el) return;
+  const all = await sbLoadFeedback();
+  _feedbackCache = all;
+  const filter = document.getElementById('feedbackFilterStatus')?.value || '';
+  const list = filter ? all.filter(f => f.status === filter) : all;
+  document.getElementById('feedbackTotalCount').textContent = `${list.length}건`;
+  if(!list.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">제출된 요청이 없습니다.</div>'; return; }
+  el.innerHTML = `
+    <table class="table" style="width:100%;">
+      <thead><tr>
+        <th style="width:60px;">NO</th>
+        <th>수정할 부분</th>
+        <th style="width:120px;">작성자</th>
+        <th style="width:160px;">작성일</th>
+        <th style="width:100px;">상태</th>
+        <th style="width:80px;"></th>
+      </tr></thead>
+      <tbody>
+        ${list.map((f,idx)=>`
+          <tr style="cursor:pointer;" onclick="openFeedbackDetail(${f.id})">
+            <td style="font-family:JetBrains Mono,monospace;color:var(--text3);">${list.length-idx}</td>
+            <td style="font-weight:600;">${escapeHtml(f.title)}</td>
+            <td>${escapeHtml(f.author||'-')}</td>
+            <td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);">${formatFeedbackDate(f.created_at)}</td>
+            <td>${feedbackStatusBadge(f.status)}</td>
+            <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openFeedbackDetail(${f.id})">상세</button></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function feedbackStatusBadge(status) {
+  const map = {
+    '대기':       { bg:'rgba(255,193,7,.15)', color:'#e0a800', border:'rgba(255,193,7,.4)' },
+    '검토중':     { bg:'rgba(68,136,255,.15)', color:'#4488ff', border:'rgba(68,136,255,.4)' },
+    '반영완료':   { bg:'rgba(40,200,120,.15)', color:'#28c878', border:'rgba(40,200,120,.4)' },
+    '보류':       { bg:'rgba(150,150,150,.15)', color:'#888', border:'rgba(150,150,150,.4)' }
+  };
+  const s = map[status] || map['대기'];
+  return `<span style="display:inline-block;padding:3px 10px;background:${s.bg};color:${s.color};border:1px solid ${s.border};border-radius:10px;font-size:11px;font-weight:600;">${status||'대기'}</span>`;
+}
+
+function formatFeedbackDate(iso) {
+  if(!iso) return '-';
+  try {
+    const d = new Date(iso);
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch(e) { return iso; }
+}
+
+let _currentFeedback = null;
+function openFeedbackDetail(id) {
+  const f = _feedbackCache.find(x => x.id === id);
+  if(!f) return;
+  _currentFeedback = f;
+  document.getElementById('fbd_author').textContent = f.author || '-';
+  document.getElementById('fbd_date').textContent = formatFeedbackDate(f.created_at);
+  document.getElementById('fbd_title').textContent = f.title || '';
+  document.getElementById('fbd_content').textContent = f.content || '';
+  const adminCtrl = document.getElementById('fbd_adminControls');
+  if(currentRole === 'admin') {
+    adminCtrl.style.display = '';
+    document.getElementById('fbd_status').value = f.status || '대기';
+  } else {
+    adminCtrl.style.display = 'none';
+  }
+  document.getElementById('feedbackDetailModal').classList.add('open');
+}
+
+async function updateFeedbackStatus() {
+  if(!_currentFeedback) return;
+  const newStatus = document.getElementById('fbd_status').value;
+  try {
+    await sbUpdateFeedback(_currentFeedback.id, { status: newStatus });
+    _currentFeedback.status = newStatus;
+    showGlobalToast('상태가 변경되었습니다.');
+    closeModal('feedbackDetailModal');
+    await renderFeedbackAdmin();
+  } catch(e) {
+    alert('업데이트 실패: ' + e.message);
+  }
+}
+
+async function deleteFeedback() {
+  if(!_currentFeedback) return;
+  if(!confirm('이 수정사항 요청을 삭제하시겠습니까?')) return;
+  try {
+    await sbDeleteFeedback(_currentFeedback.id);
+    showGlobalToast('삭제되었습니다.');
+    closeModal('feedbackDetailModal');
+    await renderFeedbackAdmin();
+  } catch(e) {
+    alert('삭제 실패: ' + e.message);
+  }
 }
 
 // 이모지 토글
