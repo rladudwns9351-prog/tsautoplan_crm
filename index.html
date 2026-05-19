@@ -2202,8 +2202,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
         </div>
 
         <div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:var(--text2);line-height:1.6;">
-          ⚠️ <strong style="color:var(--text);">자막이 있는 영상만</strong> 요약이 가능합니다. (한국어/영어 자막 지원)<br>
-          요약은 영상 길이에 따라 10~30초 정도 소요됩니다.
+          💡 <strong style="color:var(--text);">자막이 있으면 빠르게 (5~10초)</strong>, 없으면 영상을 직접 분석합니다 (20~60초). 공개 영상만 지원.
         </div>
 
         <div id="vidResultArea" style="margin-top:16px;"></div>
@@ -8339,6 +8338,9 @@ function renderVideoSummary(data) {
   const resultEl = document.getElementById('vidResultArea');
   const info = data.videoInfo || {};
   const lengthMin = info.lengthSeconds ? Math.ceil(info.lengthSeconds/60) : 0;
+  const methodBadge = data.method === 'video'
+    ? '<span style="background:rgba(170,136,255,.15);color:#aa88ff;border:1px solid rgba(170,136,255,.35);padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;">🎥 영상 직접 분석</span>'
+    : '<span style="background:rgba(68,136,255,.15);color:var(--blue);border:1px solid rgba(68,136,255,.35);padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;">📝 자막 기반</span>';
   resultEl.innerHTML = `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:18px;">
       <div style="display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;">
@@ -8348,15 +8350,18 @@ function renderVideoSummary(data) {
           <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">📺 ${escapeHtml(info.author||'-')}</div>
           <div style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">
             ${lengthMin?`⏱️ 약 ${lengthMin}분`:''}
-            · 자막: ${escapeHtml(data.captionLang||'-')}
-            · 본문 ${(data.transcriptLength||0).toLocaleString()}자
+            ${data.method==='transcript'?` · 자막: ${escapeHtml(data.captionLang||'-')}`:''}
+            ${data.transcriptLength?` · 본문 ${(data.transcriptLength||0).toLocaleString()}자`:''}
           </div>
           <a href="https://www.youtube.com/watch?v=${escapeHtml(data.videoId)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--blue);text-decoration:none;margin-top:6px;display:inline-block;">🔗 영상 보러가기</a>
         </div>
       </div>
       <div style="border-top:1px solid var(--border);padding-top:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:700;color:var(--green);">🤖 AI 요약</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--green);">🤖 AI 요약</div>
+            ${methodBadge}
+          </div>
           <button class="btn btn-ghost btn-sm" onclick="copyVideoSummary()" style="font-size:11px;">📋 복사</button>
         </div>
         <div id="vidSummaryText" style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;background:var(--bg2);padding:14px 16px;border-radius:6px;border:1px solid var(--border);">${escapeHtml(data.summary||'(요약 없음)')}</div>
