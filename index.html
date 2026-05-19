@@ -1257,7 +1257,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       </div>
 
       <!-- 테이블 -->
-      <div class="section-card" style="overflow-x:auto;" onwheel="if(event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
+      <div class="section-card" style="overflow-x:auto;" onwheel="if(event.shiftKey && event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
         <table class="tbl" style="min-width:1140px;">
           <thead>
             <tr>
@@ -1903,7 +1903,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="section-head-title">펀딩 등록 목록</div>
           <div style="font-size:11px;color:var(--text3);" id="fundingCount">6건</div>
         </div>
-        <div style="overflow-x:auto;" id="fundingTableScroll" onwheel="if(event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
+        <div style="overflow-x:auto;" id="fundingTableScroll" onwheel="if(event.shiftKey && event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
         <table class="tbl" style="min-width:1700px;white-space:nowrap;">
           <thead><tr>
             <th style="width:36px;text-align:center;white-space:nowrap;"></th>
@@ -1993,7 +1993,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
               <div class="section-head-title">전체 배분 DB</div>
               <div style="font-size:11px;color:var(--text3);">행 클릭 → 회수 선택</div>
             </div>
-            <div style="overflow-x:auto;" onwheel="if(event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
+            <div style="overflow-x:auto;" onwheel="if(event.shiftKey && event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
             <table class="tbl">
               <thead><tr>
                 <th style="width:36px;"><input type="checkbox" id="reclaimCheckAll" onchange="toggleReclaimAll(this)" style="cursor:pointer;accent-color:var(--red);"></th>
