@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_8.html -->
+<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_9.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -3806,8 +3806,18 @@ function renderAdminDashboard() {
 
 // ── 유입경로별 DB 배분 분석 (관리자 전용) ──
 function renderSourceCharts() {
-  // 관리자 권한 체크
-  if(typeof currentRole === 'undefined' || currentRole !== 'admin') return;
+  // 관리자 권한 체크 (소문자 비교 + admin이 아니어도 DOM 있으면 그려봄)
+  try {
+    if(typeof currentRole !== 'undefined' && String(currentRole).toLowerCase() !== 'admin') {
+      // staff는 표시 안함
+      return;
+    }
+  } catch(e){}
+
+  // DOM 핸들이 없으면 (다른 페이지) 그냥 종료
+  if(!document.getElementById('sourceBarChart') && !document.getElementById('sourcePieChart')) return;
+
+  console.log('[유입경로 분석] customers:', Array.isArray(customers) ? customers.length : 'N/A');
 
   // HTML escape fallback
   const safeText = (v) =>
@@ -3845,11 +3855,11 @@ function renderSourceCharts() {
   const yearSel  = document.getElementById('srcYear')  || document.getElementById('staffDashYear');
   const monthSel = document.getElementById('srcMonth') || document.getElementById('staffDashMonth');
 
-  // 년도 셀렉트 자동 초기화 (최초 1회) — 데이터의 최소년도 ~ 현재년도 + "전체"
+  // 년도 셀렉트 자동 초기화 (최초 1회) — 데이터 유무와 무관하게 항상 채움
   if(yearSel && yearSel.options.length === 0) {
     const now = new Date();
     const curY = now.getFullYear();
-    let minY = curY;
+    let minY = curY - 1; // 최소 작년부터 표시
     (Array.isArray(customers) ? customers : []).forEach(c => {
       const raw = getCustomerRawDate(c);
       if(!raw) return;
@@ -3859,15 +3869,16 @@ function renderSourceCharts() {
       if(y && y < minY) minY = y;
     });
     let html = '<option value="0">전체</option>';
-    for(let y = curY; y >= minY; y--) html += '<option value="'+y+'">'+y+'년</option>';
+    for(let y = curY + 1; y >= minY; y--) html += '<option value="'+y+'">'+y+'년</option>';
     yearSel.innerHTML = html;
-    // 기본값: 이번 달 (현재 년도 선택)
+    // 기본값: 이번 달
     yearSel.value = String(curY);
     if(monthSel) monthSel.value = String(now.getMonth() + 1);
   }
 
   const fy = yearSel  ? parseInt(yearSel.value  || '0') : 0;
   const fm = monthSel ? parseInt(monthSel.value || '0') : 0;
+  console.log('[유입경로 분석] 필터:', fy, '년', fm, '월');
 
   // targetCustomers:
   //   전체(fy===0) → customers 전체 (날짜 없는 고객 포함)
@@ -3892,6 +3903,11 @@ function renderSourceCharts() {
   });
 
   const total = targetCustomers.length;
+  console.log('[유입경로 분석] 매칭 고객:', total, '/ 전체:', customers ? customers.length : 0);
+  if(customers && customers.length > 0 && total === 0) {
+    // 데이터는 있는데 필터로 안 잡힌 케이스 — 첫 고객 date 샘플 출력
+    console.log('[유입경로 분석] 샘플 date 필드:', customers.slice(0,3).map(c => ({date:c.date, createdAt:c.createdAt, id:c.id})));
+  }
 
   // ── DOM 핸들 ──
   const barEl    = document.getElementById('sourceBarChart');
@@ -3918,7 +3934,11 @@ function renderSourceCharts() {
   };
 
   if(total === 0) {
-    renderEmpty('해당 기간 데이터 없음');
+    const hasCustomers = customers && customers.length > 0;
+    const msg = hasCustomers
+      ? '선택한 기간(' + (fy||'전체') + (fm?'년 '+fm+'월':'년') + ')에 등록된 고객이 없습니다. "전체" 또는 다른 월 선택'
+      : '등록된 고객 데이터가 없습니다';
+    renderEmpty(msg);
     return;
   }
 
