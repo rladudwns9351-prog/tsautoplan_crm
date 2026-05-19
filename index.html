@@ -4549,7 +4549,7 @@ function renderDB(list) {
   const pg = paginate(sorted, 'db');
   const body = document.getElementById('dbBody');
   body.innerHTML = pg.items.map((c,i) => {
-    const no = pg.startIndex + i + 1;  // 1번부터 (최신 등록 = 1번)
+    const no = pg.total - (pg.startIndex + i);  // 오래된 게 1번, 최신이 큰 번호
     return '<tr id="dbrow-'+c.id+'" onclick="openDetail('+c.id+')" style="'+(c.important?'background:rgba(255,204,68,.04);':'')+'">'+
       '<td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="db-check" data-id="'+c.id+'" onchange="onCheckChange()" style="cursor:pointer;accent-color:var(--accent);"></td>'+
       '<td style="text-align:center;font-family:JetBrains Mono,monospace;font-size:12px;color:var(--text3);">'+no+'</td>'+
@@ -5736,7 +5736,7 @@ function renderFundingPage() {
       '<td style="text-align:center;" onclick="event.stopPropagation()">'+
         '<input type="checkbox" class="funding-check" data-id="'+f.id+'" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);">'+
       '</td>'+
-      '<td style="text-align:center;font-size:12px;color:var(--text3);">'+(pg.startIndex+i+1)+'</td>'+
+      '<td style="text-align:center;font-size:12px;color:var(--text3);">'+(pg.total-(pg.startIndex+i))+'</td>'+
       '<td style="font-weight:600;white-space:nowrap;">'+escapeHtml(f.customerName||'')+fileBadge+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">'+f.phone+'</td>'+
       '<td style="font-size:12px;white-space:nowrap;">'+f.car+(colorStr?' <span style="color:var(--text3);font-size:10px;">'+colorStr+'</span>':'')+'</td>'+
@@ -9631,7 +9631,7 @@ async function renderFeedbackAdmin() {
       <tbody>
         ${pg.items.map((f,idx)=>`
           <tr style="cursor:pointer;" onclick="openFeedbackDetail(${f.id})">
-            <td style="font-family:JetBrains Mono,monospace;color:var(--text3);">${pg.startIndex+idx+1}</td>
+            <td style="font-family:JetBrains Mono,monospace;color:var(--text3);">${pg.total-(pg.startIndex+idx)}</td>
             <td style="font-weight:600;">${escapeHtml(f.title)}</td>
             <td>${escapeHtml(f.author||'-')}</td>
             <td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);">${formatFeedbackDate(f.created_at)}</td>
