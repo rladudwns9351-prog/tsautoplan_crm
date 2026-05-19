@@ -1267,6 +1267,8 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
               <th style="min-width:130px;">연락처</th>
               <th style="min-width:120px;">관심차량</th>
               <th style="min-width:80px;">유입경로</th>
+              <th style="min-width:80px;">구분</th>
+              <th style="min-width:100px;">메모태그</th>
               <th style="min-width:80px;">담당자</th>
               <th style="min-width:100px;">상태</th>
               <th style="min-width:160px;">최근 메모</th>
@@ -1290,6 +1292,12 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
               </th>
               <th style="padding:4px 8px;">
                 <select id="colF_source" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option><option value="네이버">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
+              </th>
+              <th style="padding:4px 8px;">
+                <select id="colF_division" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option></select>
+              </th>
+              <th style="padding:4px 8px;">
+                <select id="colF_memoTag" onchange="colFilterDB()" style="width:100%;padding:3px 4px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"><option value="">전체</option></select>
               </th>
               <th style="padding:4px 8px;">
                 <select id="colF_assign" onchange="colFilterDB()" style="width: 100%; padding: 3px 4px; background: var(--bg4); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-size: 11px; font-family: inherit; outline: none; opacity: 1;"><option value="">전체</option><option value="김영준">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
@@ -4531,6 +4539,8 @@ function renderDB(list) {
       '<td style="font-family:JetBrains Mono,monospace;font-size:12px;">'+c.phone+'</td>'+
       '<td style="font-size:13px;">'+c.car+'</td>'+
       '<td><span style="font-size:12px;color:var(--text2);">'+c.source+'</span></td>'+
+      '<td><span style="font-size:12px;color:var(--text2);">'+(c.division||'-')+'</span></td>'+
+      '<td><span style="font-size:12px;color:var(--text2);">'+(c.memoTag||'-')+'</span></td>'+
       '<td style="font-size:13px;">'+c.assign+'</td>'+
       '<td onclick="event.stopPropagation()">'+buildStatusCell(c)+'</td>'+
       '<td>'+latestMemoPreview(c)+'</td>'+
@@ -6760,6 +6770,13 @@ function syncDivisionSelects() {
     dbF.innerHTML = '<option value="">전체 구분</option>'+
       divisionOptions.map(s=>'<option value="'+s+'"'+(s===prev?' selected':'')+'>'+s+'</option>').join('');
   }
+  // 컬럼 필터 동기화
+  const colF = document.getElementById('colF_division');
+  if(colF) {
+    const prev = colF.value;
+    colF.innerHTML = '<option value="">전체</option>'+
+      divisionOptions.map(s=>'<option value="'+s+'"'+(s===prev?' selected':'')+'>'+s+'</option>').join('');
+  }
 }
 function syncMemoTagSelects() {
   const f = document.getElementById('f_memoTag');
@@ -6768,6 +6785,13 @@ function syncMemoTagSelects() {
   if(dbF) {
     const prev = dbF.value;
     dbF.innerHTML = '<option value="">전체 메모태그</option>'+
+      memoTagOptions.map(s=>'<option value="'+s+'"'+(s===prev?' selected':'')+'>'+s+'</option>').join('');
+  }
+  // 컬럼 필터 동기화
+  const colF = document.getElementById('colF_memoTag');
+  if(colF) {
+    const prev = colF.value;
+    colF.innerHTML = '<option value="">전체</option>'+
       memoTagOptions.map(s=>'<option value="'+s+'"'+(s===prev?' selected':'')+'>'+s+'</option>').join('');
   }
 }
@@ -6993,6 +7017,8 @@ function colFilterDB() {
   const phone  = (document.getElementById('colF_phone')?.value||'').toLowerCase();
   const car    = (document.getElementById('colF_car')?.value||'').toLowerCase();
   const source = document.getElementById('colF_source')?.value||'';
+  const division = document.getElementById('colF_division')?.value||'';
+  const memoTag = document.getElementById('colF_memoTag')?.value||'';
   const assign = currentRole==='admin' ? (document.getElementById('colF_assign')?.value||'') : currentUser;
   const status = document.getElementById('colF_status')?.value||'';
 
@@ -7010,6 +7036,8 @@ function colFilterDB() {
     if(phone  && !c.phone.includes(phone)) return false;
     if(car    && !c.car.toLowerCase().includes(car)) return false;
     if(source && c.source!==source) return false;
+    if(division && (c.division||'')!==division) return false;
+    if(memoTag && (c.memoTag||'')!==memoTag) return false;
     if(assign && c.assign!==assign) return false;
     if(status && c.status!==status) return false;
     // 상단 검색/필터
@@ -7026,7 +7054,7 @@ function clearColFilters() {
   ['colF_name','colF_phone','colF_car'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
-  ['colF_source','colF_status'].forEach(id=>{
+  ['colF_source','colF_status','colF_division','colF_memoTag'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   if(currentRole==='admin') {
