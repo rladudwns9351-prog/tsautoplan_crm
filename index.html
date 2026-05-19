@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_4.html -->
+<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_8.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -762,7 +762,20 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 
       <!-- ===== 유입경로별 DB 배분 분석 (관리자 전용) ===== -->
       <div class="admin-only" style="margin-top:20px;">
-        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">📊 유입경로별 DB 배분 분석</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:700;">📊 유입경로별 DB 배분 분석</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:11px;color:var(--text3);">DB 등록일 기준</span>
+            <select id="srcYear" onchange="renderSourceCharts()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+            <select id="srcMonth" onchange="renderSourceCharts()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;outline:none;font-family:inherit;">
+              <option value="0">전체</option>
+              <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+              <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+              <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+              <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+            </select>
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <!-- 좌측: 막대그래프 -->
           <div class="section-card" style="padding:18px;">
@@ -3828,9 +3841,31 @@ function renderSourceCharts() {
     return String(raw || '').trim() || '유입경로없음';
   };
 
-  // ─── 기간 필터 ───
-  const yearSel  = document.getElementById('staffDashYear');
-  const monthSel = document.getElementById('staffDashMonth');
+  // ─── 기간 필터 (관리자 대시보드 전용 srcYear/srcMonth 우선, 없으면 staffDash로 fallback) ───
+  const yearSel  = document.getElementById('srcYear')  || document.getElementById('staffDashYear');
+  const monthSel = document.getElementById('srcMonth') || document.getElementById('staffDashMonth');
+
+  // 년도 셀렉트 자동 초기화 (최초 1회) — 데이터의 최소년도 ~ 현재년도 + "전체"
+  if(yearSel && yearSel.options.length === 0) {
+    const now = new Date();
+    const curY = now.getFullYear();
+    let minY = curY;
+    (Array.isArray(customers) ? customers : []).forEach(c => {
+      const raw = getCustomerRawDate(c);
+      if(!raw) return;
+      let y;
+      if(typeof raw === 'string' && /^\d{4}-\d{2}/.test(raw)) y = parseInt(raw.split('-')[0]);
+      else { const d = new Date(raw); if(!isNaN(d.getTime())) y = d.getFullYear(); }
+      if(y && y < minY) minY = y;
+    });
+    let html = '<option value="0">전체</option>';
+    for(let y = curY; y >= minY; y--) html += '<option value="'+y+'">'+y+'년</option>';
+    yearSel.innerHTML = html;
+    // 기본값: 이번 달 (현재 년도 선택)
+    yearSel.value = String(curY);
+    if(monthSel) monthSel.value = String(now.getMonth() + 1);
+  }
+
   const fy = yearSel  ? parseInt(yearSel.value  || '0') : 0;
   const fm = monthSel ? parseInt(monthSel.value || '0') : 0;
 
@@ -3930,22 +3965,26 @@ function renderSourceCharts() {
     return;
   }
 
-  // ── 막대 그래프 ──
-  if(barEl && lblEl) {
+  // ── 막대 그래프 (가로형: 라벨 | 막대 | 건수+%) ──
+  if(barEl) {
+    barEl.style.cssText = 'display:flex;flex-direction:column;gap:10px;height:auto;min-height:160px;';
     const maxVal = entries[0].count || 1;
     barEl.innerHTML = entries.map(e => {
-      const h = Math.round((e.count / maxVal) * 130) + 4;
-      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
-        '<div style="font-size:11px;color:var(--text);font-family:JetBrains Mono,monospace;font-weight:600;">' + e.count + '</div>' +
-        '<div style="width:100%;height:' + h + 'px;background:' + e.color + ';border-radius:4px 4px 0 0;opacity:.85;transition:.5s;"></div>' +
+      const pct = Math.round((e.count / total) * 100);
+      const w = Math.round((e.count / maxVal) * 100);
+      return '<div style="display:grid;grid-template-columns:80px 1fr 80px;align-items:center;gap:10px;">' +
+        '<div style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + safeText(e.label) + '">' + safeText(e.label) + '</div>' +
+        '<div style="height:18px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative;">' +
+          '<div style="height:100%;width:' + w + '%;background:' + e.color + ';border-radius:4px;opacity:.9;transition:width .5s;"></div>' +
+        '</div>' +
+        '<div style="font-size:12px;font-family:JetBrains Mono,monospace;text-align:right;">' +
+          '<span style="color:var(--text);font-weight:700;">' + e.count + '건</span> ' +
+          '<span style="color:var(--text3);font-size:11px;">(' + pct + '%)</span>' +
+        '</div>' +
       '</div>';
     }).join('');
-    lblEl.innerHTML = entries.map(e =>
-      '<div style="flex:1;text-align:center;font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
-        safeText(e.label) +
-      '</div>'
-    ).join('');
   }
+  if(lblEl) lblEl.innerHTML = '';
 
   // ── 원 그래프 ──
   if(canvas) {
@@ -6944,6 +6983,8 @@ async function saveSourceOptions() {
     await sbSaveSetting('sourceOptions', [...sourceOptions]);
     showGlobalToast('💾 유입경로가 영구 저장되었습니다.');
     closeModal('sourceMgrModal');
+    // 대시보드 유입경로 분석 자동 갱신
+    if(typeof renderSourceCharts === 'function') renderSourceCharts();
   } catch(e) {
     alert('저장 실패: ' + e.message);
   }
