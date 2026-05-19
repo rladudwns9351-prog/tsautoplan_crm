@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_9.html -->
+<!-- saved from url=(0046)file:///C:/Users/rladu/Downloads/index_10.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -3577,7 +3577,17 @@ function initApp(restorePage) {
 
 // ===== DASHBOARD =====
 // monthlyData: 더미 제거 - 실시간 고객DB 기준으로 집계
-const months6 = ['12월','1월','2월','3월','4월','5월'];
+// months6: 현재월 기준 최근 6개월 라벨 동적 생성 (getter로 매번 최신)
+function getMonths6() {
+  const now = new Date();
+  const arr = [];
+  for(let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    arr.push((d.getMonth() + 1) + '월');
+  }
+  return arr;
+}
+let months6 = getMonths6();
 
 function renderRecentTable() {
   const body = document.getElementById('recentBody');
@@ -3683,9 +3693,28 @@ function renderAdminDashboard() {
   document.getElementById('perfRankList').innerHTML  = rankHTML(ranked,      'performance', '건', false);
   document.getElementById('salesRankList').innerHTML = rankHTML(salesRanked, 'sales',       '원', true);
 
-  // 전체 실적 추이 차트 (월별 합산)
-  const totals = months6.map((_,i)=>Object.values(monthlyData).reduce((s,arr)=>s+(arr[i]||0),0));
-  const maxT = Math.max(...totals);
+  // 전체 실적 추이 차트 (월별 합산) - customers의 계약완료 기준 실시간 집계
+  months6 = getMonths6(); // 항상 현재월 기준 최신화
+  // months6 = ['12월','1월','2월','3월','4월','5월'] → 작년 12월 ~ 올해 5월 (현재월 기준 최근 6개월)
+  const nowD = new Date();
+  const curYM = nowD.getFullYear() * 12 + nowD.getMonth(); // 현재 년월 인덱스
+  const totals = new Array(6).fill(0);
+  (Array.isArray(customers) ? customers : []).forEach(c => {
+    if(c.status !== '계약완료') return;
+    const raw = c.date || c.createdAt || c.created_at || '';
+    if(!raw) return;
+    let y, m;
+    if(typeof raw === 'string' && /^\d{4}-\d{2}/.test(raw)) {
+      const p = raw.split('-').map(Number); y = p[0]; m = p[1] - 1;
+    } else {
+      const d = new Date(raw); if(isNaN(d.getTime())) return;
+      y = d.getFullYear(); m = d.getMonth();
+    }
+    const ym = y * 12 + m;
+    const diff = curYM - ym; // 0 = 이번달, 5 = 5개월 전
+    if(diff >= 0 && diff <= 5) totals[5 - diff] += 1;
+  });
+  const maxT = Math.max(...totals, 1);
   const H = 130;
   document.getElementById('adminBarChart').innerHTML = totals.map((v,i)=>`
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
