@@ -2371,9 +2371,9 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
         <div style="text-align:center;padding:30px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;">
           <div style="font-size:48px;margin-bottom:14px;">🚛</div>
           <div style="font-size:14px;color:var(--text2);margin-bottom:18px;">아래 버튼을 클릭하면 새 창에서 탁송조회 사이트가 열립니다.</div>
-          <button class="btn btn-primary" onclick="openTracking()" style="font-size:14px;padding:12px 28px;">
+          <a href="https://glink.glovis.net/newcar/c/tracking.do" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size:14px;padding:12px 28px;text-decoration:none;display:inline-block;">
             🔗 탁송조회 사이트 열기
-          </button>
+          </a>
           <div style="margin-top:14px;font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">
             glink.glovis.net/newcar/c/tracking.do
           </div>
@@ -8625,11 +8625,14 @@ function calcAge() {
 // 🚛 탁송조회
 // ============================================================
 function openTracking() {
-  const url = 'https://glink.glovis.net/newcar/c/tracking.do';
-  const win = window.open(url, '_blank', 'noopener,noreferrer');
-  if(!win) {
-    alert('팝업이 차단되었습니다.\n브라우저 주소창의 팝업 차단을 해제하거나, 아래 주소를 직접 복사해서 이용하세요.\n\n' + url);
-  }
+  // a 태그 클릭 방식으로 변경 (window.open 팝업 차단 회피)
+  const a = document.createElement('a');
+  a.href = 'https://glink.glovis.net/newcar/c/tracking.do';
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 // ============================================================
