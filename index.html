@@ -414,6 +414,12 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <div class="nav-item" onclick="goPage(&#39;script&#39;,this)">
         <span class="nav-icon">📝</span> 스크립트생성
       </div>
+      <div class="nav-item" onclick="goPage(&#39;news&#39;,this)">
+        <span class="nav-icon">📰</span> 뉴스 검색
+      </div>
+      <div class="nav-item" onclick="goPage(&#39;videosum&#39;,this)">
+        <span class="nav-icon">🎬</span> 영상 요약
+      </div>
       <div class="nav-item" onclick="goPage(&#39;feedback&#39;,this)">
         <span class="nav-icon">💡</span> 수정사항 요청
       </div>
@@ -1190,7 +1196,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="page-sub" id="dbCount">전체 3명</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-ghost admin-only" onclick="exportCustomerExcel()" style="font-size:12px;">📊 엑셀</button>
+          <button class="btn btn-ghost" onclick="exportCustomerExcel()" style="font-size:12px;">📊 엑셀</button>
           <button class="btn btn-ghost admin-only" onclick="openStatusMgrModal()" style="align-items: center; gap: 6px; font-size: 13px;">
             <span>🏷️</span> 상태 관리
           </button>
@@ -1836,7 +1842,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="page-sub">고객별 펀딩 등록 및 현황을 관리합니다</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-ghost admin-only" onclick="exportFundingExcel()" style="align-items: center; gap: 5px; font-size: 12px;">📊 엑셀 출력</button>
+          <button class="btn btn-ghost" onclick="exportFundingExcel()" style="align-items: center; gap: 5px; font-size: 12px;">📊 엑셀 출력</button>
           <button class="btn btn-primary" onclick="openFundingModal(null)">+ 펀딩 등록</button>
         </div>
       </div>
@@ -2057,9 +2063,6 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
         <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:14px;letter-spacing:1px;">📅 만기예정일 기준</div>
         <div class="form-grid" id="alarmMsgExpiryGrid" style="margin-bottom:24px;"></div>
 
-        <div style="font-size:13px;font-weight:700;color:#aa88ff;margin-bottom:14px;letter-spacing:1px;">🚚 인도예정일 기준 (도달 후)</div>
-        <div class="form-grid" id="alarmMsgDeliveryGrid" style="margin-bottom:24px;"></div>
-
         <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:14px;letter-spacing:1px;">✅ 인도완료일 기준 (도달 후)</div>
         <div class="form-grid" id="alarmMsgDeliveredGrid"></div>
       </div>
@@ -2138,6 +2141,72 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           </div>
           <textarea id="scr_result" rows="20" placeholder="좌측에서 입력값을 작성하고 &#39;스크립트 생성&#39; 버튼을 클릭하세요." style="width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"></textarea>
         </div>
+      </div>
+    </div>
+
+    <!-- ===== NEWS SEARCH PAGE ===== -->
+    <div class="page" id="page-news">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📰 뉴스 검색</div>
+          <div class="page-sub">5대 종합일간지 (조선·중앙·동아·한겨레·경향) 기준 최신 기사를 검색합니다</div>
+        </div>
+      </div>
+
+      <div class="section-card" style="padding:24px;max-width:1000px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 140px 120px;gap:10px;margin-bottom:18px;">
+          <div class="form-field">
+            <label style="font-size:11px;">대주제 <span style="color:var(--red);">*</span></label>
+            <input type="text" id="news_mainTopic" placeholder="예: 자동차" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+          </div>
+          <div class="form-field">
+            <label style="font-size:11px;">소주제</label>
+            <input type="text" id="news_subTopic" placeholder="예: 장기렌트" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+          </div>
+          <div class="form-field">
+            <label style="font-size:11px;">정렬</label>
+            <select id="news_sort" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+              <option value="sim">정확도순</option>
+              <option value="date">최신순</option>
+            </select>
+          </div>
+          <div class="form-field" style="display:flex;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="searchNews()" style="width:100%;">🔍 검색</button>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">
+          💡 대주제는 필수, 소주제를 함께 입력하면 더 정확한 결과가 나옵니다.
+        </div>
+
+        <div id="newsResultArea" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <!-- ===== VIDEO SUMMARY PAGE ===== -->
+    <div class="page" id="page-videosum">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🎬 영상 요약</div>
+          <div class="page-sub">YouTube 영상 URL을 입력하면 AI가 자막을 분석해 핵심 내용을 요약합니다</div>
+        </div>
+      </div>
+
+      <div class="section-card" style="padding:24px;max-width:1000px;">
+        <div class="form-field" style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">YouTube URL <span style="color:var(--red);">*</span></label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="vid_url" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;outline:none;">
+            <button class="btn btn-primary" onclick="summarizeVideo()" style="white-space:nowrap;">✨ 요약하기</button>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:var(--text2);line-height:1.6;">
+          ⚠️ <strong style="color:var(--text);">자막이 있는 영상만</strong> 요약이 가능합니다. (한국어/영어 자막 지원)<br>
+          요약은 영상 길이에 따라 10~30초 정도 소요됩니다.
+        </div>
+
+        <div id="vidResultArea" style="margin-top:16px;"></div>
       </div>
     </div>
 
@@ -2601,6 +2670,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   </div>
 </div>
 
+<!-- ===== 펀딩 서류 목록 모달 ===== -->
+<div class="modal-bg" id="fundingFilesModal">
+  <div class="modal" style="width:600px;max-height:88vh;overflow-y:auto;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="modal-title" style="margin-bottom:0;">📎 펀딩 서류 <span id="ffm_customerName" style="color:var(--text3);font-weight:400;font-size:14px;margin-left:8px;"></span></div>
+      <button onclick="closeModal(&#39;fundingFilesModal&#39;)" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <div id="ffm_fileList" class="file-list" style="margin-top:8px;"></div>
+  </div>
+</div>
+
 <!-- ===== 파일 미리보기 모달 ===== -->
 <div class="modal-bg" id="filePreviewModal">
   <div class="modal" style="width:90vw;max-width:1000px;height:88vh;padding:0;display:flex;flex-direction:column;">
@@ -2988,6 +3068,13 @@ async function doLogin() {
       if((u.pw||'').trim().toLowerCase() !== pw) {
         alert('비밀번호가 올바르지 않습니다.'); return;
       }
+      // 로그인 탭(loginRole)과 실제 권한 일치 체크
+      if(loginRole === 'staff' && u.role === 'admin') {
+        alert('관리자 계정은 "관리자" 탭으로 로그인해주세요.'); return;
+      }
+      if(loginRole === 'admin' && u.role !== 'admin') {
+        alert('직원 계정은 "직원" 탭으로 로그인해주세요.'); return;
+      }
       acc = {id: u.userid, role: u.role, name: u.name};
     } catch(e) {
       alert('로그인 실패: 서버 연결 오류\n'+e.message);
@@ -3086,6 +3173,8 @@ function goPage(id, navEl) {
   if(id==='alarmsettings') { /* 정적 카드, 별도 렌더 불필요 */ }
   if(id==='alarmperiodic') { renderAlarmPeriodicPage(); }
   if(id==='script')        { renderScriptPage(); }
+  if(id==='news')          { /* 별도 init 불필요 */ }
+  if(id==='videosum')      { /* 별도 init 불필요 */ }
   if(id==='feedback')      { renderFeedbackPage(); }
 
   if(id==='dbstats') {
@@ -4389,51 +4478,180 @@ function onFmCustomerChange() {
   if(carEl && !carEl.value) carEl.value = c.car || '';
 }
 
-// 파일 업로드
-function onFmFileChange(input) {
-  Array.from(input.files).forEach(f=>{ addFmFile(f.name, f.size, false); });
-  renderFmFileList();
+// 파일 업로드 (펀딩 모달) - Supabase Storage + 고객DB 연동
+async function onFmFileChange(input) {
+  await uploadFundingFiles(Array.from(input.files));
   input.value='';
 }
-function onFmDrop(e) {
+async function onFmDrop(e) {
   e.preventDefault();
   const dz = document.getElementById('fm_dropZone');
   if(dz) { dz.style.borderColor='var(--border2)'; dz.style.background=''; }
   const files = e.dataTransfer?.files;
-  if(files) {
-    Array.from(files).forEach(f=>{ addFmFile(f.name, f.size, false); });
-    renderFmFileList();
-  }
+  if(files) await uploadFundingFiles(Array.from(files));
 }
-function addFmFile(name, size, fromDB) {
-  // 중복 방지
-  if(!fmUploadedFiles.find(f=>f.name===name)) {
-    fmUploadedFiles.push({name, size: size||0, fromDB: fromDB||false});
+
+// 펀딩 모달에서 파일 업로드
+// → 연결된 고객이 있으면 고객.files 에 저장 (출처: 'funding')
+// → 없으면 fmUploadedFiles 임시 배열에만 저장 (저장 시 entry.files로)
+async function uploadFundingFiles(files) {
+  if(!files || !files.length) return;
+  if(!isSbConfigured()) {
+    alert('Supabase가 설정되지 않아 파일을 영구 저장할 수 없습니다.');
+    return;
   }
+
+  // 연결 대상 고객 (있으면)
+  const linkedCustomer = fundingLinkedCustomerId
+    ? customers.find(c => c.id === fundingLinkedCustomerId)
+    : null;
+
+  showGlobalToast(`서류 ${files.length}건 업로드 중...`);
+  for(const rawFile of files) {
+    try {
+      const file = await compressImageFile(rawFile);
+      const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+      const safeName = file.name.replace(/[^\w.\-가-힣 ]/g,'_');
+      const id = Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      // 경로: 고객 연결되면 customer_XX, 아니면 funding_tmp_YY
+      const folderId = linkedCustomer
+        ? `customer_${linkedCustomer.id}`
+        : `funding_tmp_${editingFundingId || 'new'}_${currentUserId||'admin'}`;
+      const path = `${folderId}/${id}.${ext}`;
+      await sbStorageUpload(path, file);
+
+      const fileObj = {
+        id,
+        name: safeName,
+        size: formatSize(file.size),
+        sizeBytes: file.size,
+        type: file.type || '',
+        path,
+        date: new Date().toLocaleDateString('ko-KR'),
+        uploader: currentUser || '',
+        origin: 'funding'  // 출처 표시
+      };
+
+      if(linkedCustomer) {
+        // 고객DB의 files에 저장 (양쪽에서 보이게)
+        if(!Array.isArray(linkedCustomer.files)) linkedCustomer.files = [];
+        linkedCustomer.files.push(fileObj);
+      }
+      // 펀딩 모달 임시 표시용 배열에도 추가
+      fmUploadedFiles.push(fileObj);
+    } catch(e) {
+      console.error('업로드 실패:', e);
+      alert(`"${rawFile.name}" 업로드 실패: ${e.message}`);
+    }
+  }
+  renderFmFileList();
+  // 연결 고객이 있으면 즉시 동기화
+  if(linkedCustomer) {
+    try { await sbUpdateCustomer(linkedCustomer); } catch(e){ console.warn(e); }
+  }
+  showGlobalToast('업로드 완료');
 }
+
+function fmRemoveFile(i) {
+  const f = fmUploadedFiles[i];
+  if(!f) return;
+  if(!confirm(`"${f.name}" 파일을 삭제하시겠습니까?`)) return;
+  // Storage 삭제
+  if(f.path) {
+    sbStorageDelete(f.path).catch(e=>console.warn('Storage 삭제 실패:', e));
+  }
+  // 연결된 고객의 files에서도 제거
+  if(fundingLinkedCustomerId) {
+    const c = customers.find(x => x.id === fundingLinkedCustomerId);
+    if(c && Array.isArray(c.files)) {
+      const idx = c.files.findIndex(x => x.id === f.id || x.path === f.path);
+      if(idx >= 0) {
+        c.files.splice(idx, 1);
+        if(isSbConfigured()) sbUpdateCustomer(c).catch(e=>console.warn(e));
+      }
+    }
+  }
+  fmUploadedFiles.splice(i,1);
+  renderFmFileList();
+}
+
 function renderFmFileList() {
   const el = document.getElementById('fm_fileList');
   if(!el) return;
   if(!fmUploadedFiles.length) { el.innerHTML=''; return; }
-  el.innerHTML = fmUploadedFiles.map((f,i)=>
-    '<span style="display:flex;align-items:center;gap:4px;background:'+(f.fromDB?'rgba(68,136,255,.1)':'var(--bg3)')+
-    ';border:1px solid '+(f.fromDB?'rgba(68,136,255,.3)':'var(--border2)')+
-    ';border-radius:4px;padding:4px 10px;font-size:11px;">'+
-    (f.fromDB?'🔗 ':'📎 ')+f.name+
-    (f.fromDB?'<span style="font-size:9px;color:var(--blue);margin-left:4px;">[DB서류]</span>':'')+
-    '<button onclick="fmRemoveFile('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;line-height:1;margin-left:4px;">✕</button>'+
-    '</span>'
-  ).join('');
+  el.innerHTML = fmUploadedFiles.map((f,i)=>{
+    const isFromDB = f.fromDB || (f.origin && f.origin !== 'funding');
+    const bg = isFromDB ? 'rgba(68,136,255,.1)' : 'var(--bg3)';
+    const border = isFromDB ? 'rgba(68,136,255,.3)' : 'var(--border2)';
+    const icon = isFromDB ? '🔗 ' : '📎 ';
+    const tag = isFromDB ? '<span style="font-size:9px;color:var(--blue);margin-left:4px;">[고객DB]</span>' : '';
+    const canPreview = !!f.path;
+    return '<span style="display:flex;align-items:center;gap:4px;background:'+bg+';border:1px solid '+border+';border-radius:4px;padding:4px 10px;font-size:11px;">'+
+      icon+escapeHtml(f.name)+tag+
+      (canPreview ? '<button onclick="previewFmFile('+i+')" title="미리보기" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;line-height:1;margin-left:6px;padding:0;">👁️</button>' : '')+
+      (canPreview ? '<button onclick="downloadFmFile('+i+')" title="다운로드" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;line-height:1;margin-left:2px;padding:0;">⬇️</button>' : '')+
+      '<button onclick="fmRemoveFile('+i+')" title="삭제" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;line-height:1;margin-left:4px;padding:0;">✕</button>'+
+      '</span>';
+  }).join('');
 }
-function fmRemoveFile(i) { fmUploadedFiles.splice(i,1); renderFmFileList(); }
 
-// DB 연결 시 고객 서류 자동 반영
+// 펀딩 모달의 파일 미리보기/다운로드 (고객DB와 동일 UX)
+async function previewFmFile(i) {
+  const f = fmUploadedFiles[i];
+  if(!f || !f.path) { alert('파일 정보를 찾을 수 없습니다.'); return; }
+  _currentPreview = f;
+  document.getElementById('fpv_icon').textContent = fileIcon(f.name);
+  document.getElementById('fpv_name').textContent = f.name;
+  document.getElementById('fpv_size').textContent = f.size || '';
+  const body = document.getElementById('fpv_body');
+  body.innerHTML = '<div style="color:#888;padding:40px;">불러오는 중...</div>';
+  document.getElementById('filePreviewModal').classList.add('open');
+  try {
+    const blob = await sbStorageDownload(f.path);
+    const url = URL.createObjectURL(blob);
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if(['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) {
+      body.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+    } else if(ext==='pdf') {
+      body.innerHTML = `<iframe src="${url}" style="width:100%;height:100%;border:0;background:#fff;"></iframe>`;
+    } else if(['txt','md','json','csv','log'].includes(ext)) {
+      const text = await blob.text();
+      body.innerHTML = `<pre style="margin:0;padding:20px;color:#ddd;background:#1a1a1a;width:100%;height:100%;overflow:auto;white-space:pre-wrap;font-family:JetBrains Mono,monospace;font-size:12px;">${escapeHtml(text)}</pre>`;
+    } else {
+      body.innerHTML = `<div style="text-align:center;color:#ddd;padding:40px;">
+        <div style="font-size:64px;margin-bottom:16px;">${fileIcon(f.name)}</div>
+        <div style="font-size:14px;margin-bottom:8px;">${escapeHtml(f.name)}</div>
+        <button class="btn btn-primary" onclick="downloadCurrentPreview()">⬇️ 다운로드</button>
+      </div>`;
+    }
+  } catch(e) {
+    body.innerHTML = `<div style="color:#f55;padding:40px;">파일을 불러올 수 없습니다: ${e.message}</div>`;
+  }
+}
+async function downloadFmFile(i) {
+  const f = fmUploadedFiles[i];
+  if(!f || !f.path) { alert('파일 정보를 찾을 수 없습니다.'); return; }
+  try {
+    const blob = await sbStorageDownload(f.path);
+    triggerDownload(blob, f.name);
+  } catch(e) {
+    alert('다운로드 실패: ' + e.message);
+  }
+}
+
+// DB 연결 시 고객 서류 자동 반영 (고객DB의 모든 files를 펀딩 모달에 표시)
 function autoAttachDBFiles(customerId) {
   const c = customers.find(c=>c.id===customerId);
-  if(!c || !c.files || !c.files.length) return;
-  c.files.forEach(f=>{ addFmFile(f.name, f.size||0, true); });
+  if(!c || !Array.isArray(c.files) || !c.files.length) return;
+  // 실제 path가 있는 (Storage에 저장된) 파일만 표시
+  c.files.forEach(f => {
+    if(f.path && !fmUploadedFiles.find(x => x.id === f.id || x.path === f.path)) {
+      fmUploadedFiles.push({ ...f, fromDB: true });
+    }
+  });
   renderFmFileList();
-  if(c.files.length) showGlobalToast('고객 서류 '+c.files.length+'건 자동 첨부되었습니다.');
+  const validCount = c.files.filter(f=>f.path).length;
+  if(validCount) showGlobalToast('고객 서류 '+validCount+'건 자동 첨부되었습니다.');
 }
 
 // 차량 옵션 행
@@ -4680,7 +4898,11 @@ async function saveFunding() {
       return (typeof calcExpiryDateStr === 'function') ? calcExpiryDateStr(d, m) : '';
     })(),
     memo: document.getElementById('fm_memo').value,
-    files: [...fmUploadedFiles],
+    // 고객DB와 연결된 펀딩은 고객.files 에만 저장 (펀딩에는 빈 배열)
+    // 수기입력 펀딩은 펀딩 자체에 저장
+    files: fundingLinkedCustomerId
+      ? []
+      : fmUploadedFiles.filter(f => f.path && !f.fromDB),
     options: getOptionRows(),
     buui: getBuuiRows(),
   };
@@ -4781,8 +5003,22 @@ function editFunding(id) {
   }
 
   editingFundingId = id;
-  fmUploadedFiles = [...(f.files||[])];
+  // 옛 메타데이터 파일(path 없음) 자동 제거, 실제 Storage 파일만 유지
+  const realFundingFiles = (f.files||[]).filter(x => x && x.path);
+  fmUploadedFiles = [...realFundingFiles];
   fundingLinkedCustomerId = f.customerId || null;
+
+  // 연결된 고객이 있으면 고객DB의 files도 함께 표시 (중복 제외)
+  if(fundingLinkedCustomerId) {
+    const c = customers.find(x => x.id === fundingLinkedCustomerId);
+    if(c && Array.isArray(c.files)) {
+      c.files.forEach(cf => {
+        if(cf.path && !fmUploadedFiles.find(x => x.id === cf.id || x.path === cf.path)) {
+          fmUploadedFiles.push({ ...cf, fromDB: true });
+        }
+      });
+    }
+  }
 
   document.getElementById('fundingModalTitle').textContent = '펀딩 수정';
 
@@ -5082,12 +5318,20 @@ function renderFundingPage() {
     const deliveryBtn = hasDelivery
       ? '<button class="btn btn-sm" onclick="event.stopPropagation();markDelivery('+f.id+')" style="font-size:10px;padding:3px 8px;background:rgba(68,255,136,.12);border:1px solid rgba(68,255,136,.35);color:var(--green);cursor:pointer;white-space:nowrap;">인도완료</button>'
       : '<button class="btn btn-sm" onclick="event.stopPropagation();markDelivery('+f.id+')" style="font-size:10px;padding:3px 8px;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.35);color:var(--red);cursor:pointer;white-space:nowrap;">미인도</button>';
+    // 해당 펀딩의 서류 개수 계산 (연결된 고객의 서류 + 펀딩 자체 서류)
+    const linkedC = f.customerId ? customers.find(c => c.id === f.customerId) : null;
+    const customerFileCount = linkedC && Array.isArray(linkedC.files) ? linkedC.files.filter(x => x.path).length : 0;
+    const fundingFileCount = Array.isArray(f.files) ? f.files.filter(x => x.path).length : 0;
+    const totalFileCount = customerFileCount + fundingFileCount;
+    const fileBadge = totalFileCount > 0
+      ? '<span onclick="event.stopPropagation();openFundingFilesModal('+f.id+')" title="서류 '+totalFileCount+'건 보기" style="display:inline-flex;align-items:center;gap:3px;background:rgba(68,136,255,.15);border:1px solid rgba(68,136,255,.35);color:var(--blue);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:6px;cursor:pointer;font-family:JetBrains Mono,monospace;">📎 '+totalFileCount+'</span>'
+      : '';
     return '<tr style="cursor:pointer;'+(isConfirmed?'background:rgba(68,255,136,.03);':'')+'" onclick="editFundingById('+f.id+')">'+
       '<td style="text-align:center;" onclick="event.stopPropagation()">'+
         '<input type="checkbox" class="funding-check" data-id="'+f.id+'" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);">'+
       '</td>'+
       '<td style="text-align:center;font-size:12px;color:var(--text3);">'+(i+1)+'</td>'+
-      '<td style="font-weight:600;white-space:nowrap;">'+f.customerName+'</td>'+
+      '<td style="font-weight:600;white-space:nowrap;">'+escapeHtml(f.customerName||'')+fileBadge+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">'+f.phone+'</td>'+
       '<td style="font-size:12px;white-space:nowrap;">'+f.car+(colorStr?' <span style="color:var(--text3);font-size:10px;">'+colorStr+'</span>':'')+'</td>'+
       '<td style="font-size:12px;color:var(--text2);white-space:nowrap;">'+f.assign+'</td>'+
@@ -6618,7 +6862,7 @@ function renderFiles() {
   }).join('');
 }
 
-function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeHtml(s) { return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 async function deleteFile(i) {
   const f = currentCustomer.files[i];
@@ -6681,9 +6925,10 @@ async function downloadFile(i) {
   }
 }
 function downloadCurrentPreview() {
-  if(!_currentPreview) return;
-  const i = currentCustomer.files.indexOf(_currentPreview);
-  if(i>=0) downloadFile(i);
+  if(!_currentPreview || !_currentPreview.path) return;
+  sbStorageDownload(_currentPreview.path)
+    .then(blob => triggerDownload(blob, _currentPreview.name))
+    .catch(e => alert('다운로드 실패: ' + e.message));
 }
 function triggerDownload(blob, name) {
   const url = URL.createObjectURL(blob);
@@ -6691,6 +6936,95 @@ function triggerDownload(blob, name) {
   a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+// ===== 펀딩 서류 목록 모달 (펀딩 리스트에서 📎 클릭) =====
+let _ffmFiles = []; // 현재 모달에 표시된 파일들 캐시
+function openFundingFilesModal(fundingId) {
+  const f = fundingList.find(x => x.id === fundingId);
+  if(!f) return;
+  // 연결된 고객 files + 펀딩 자체 files 합치기 (중복 제거)
+  const linkedC = f.customerId ? customers.find(c => c.id === f.customerId) : null;
+  const allFiles = [];
+  if(linkedC && Array.isArray(linkedC.files)) {
+    linkedC.files.forEach(file => {
+      if(file.path) allFiles.push({ ...file, _src:'customer' });
+    });
+  }
+  if(Array.isArray(f.files)) {
+    f.files.forEach(file => {
+      if(file.path && !allFiles.find(x => x.id === file.id || x.path === file.path)) {
+        allFiles.push({ ...file, _src:'funding' });
+      }
+    });
+  }
+  _ffmFiles = allFiles;
+  document.getElementById('ffm_customerName').textContent = '· ' + (f.customerName || '');
+  const list = document.getElementById('ffm_fileList');
+  if(!allFiles.length) {
+    list.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">서류가 없습니다.</div>';
+  } else {
+    list.innerHTML = allFiles.map((file, i) => {
+      const srcTag = file._src === 'customer'
+        ? '<span style="font-size:9px;color:var(--blue);background:rgba(68,136,255,.1);border:1px solid rgba(68,136,255,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">고객DB</span>'
+        : '<span style="font-size:9px;color:var(--accent);background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">펀딩</span>';
+      return `
+        <div class="file-item">
+          <div class="file-icon">${fileIcon(file.name)}</div>
+          <div class="file-info" style="cursor:pointer;" onclick="previewFfmFile(${i})">
+            <div class="file-name">${escapeHtml(file.name)}${srcTag}</div>
+            <div class="file-size">${file.size||''} · ${file.date||''}${file.uploader?' · '+escapeHtml(file.uploader):''}</div>
+          </div>
+          <div class="file-actions">
+            <button class="btn btn-ghost btn-sm" onclick="previewFfmFile(${i})">👁️ 보기</button>
+            <button class="btn btn-ghost btn-sm" onclick="downloadFfmFile(${i})">⬇️</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  document.getElementById('fundingFilesModal').classList.add('open');
+}
+async function previewFfmFile(i) {
+  const f = _ffmFiles[i];
+  if(!f || !f.path) return;
+  _currentPreview = f;
+  document.getElementById('fpv_icon').textContent = fileIcon(f.name);
+  document.getElementById('fpv_name').textContent = f.name;
+  document.getElementById('fpv_size').textContent = f.size || '';
+  const body = document.getElementById('fpv_body');
+  body.innerHTML = '<div style="color:#888;padding:40px;">불러오는 중...</div>';
+  document.getElementById('filePreviewModal').classList.add('open');
+  try {
+    const blob = await sbStorageDownload(f.path);
+    const url = URL.createObjectURL(blob);
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if(['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) {
+      body.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+    } else if(ext==='pdf') {
+      body.innerHTML = `<iframe src="${url}" style="width:100%;height:100%;border:0;background:#fff;"></iframe>`;
+    } else if(['txt','md','json','csv','log'].includes(ext)) {
+      const text = await blob.text();
+      body.innerHTML = `<pre style="margin:0;padding:20px;color:#ddd;background:#1a1a1a;width:100%;height:100%;overflow:auto;white-space:pre-wrap;font-family:JetBrains Mono,monospace;font-size:12px;">${escapeHtml(text)}</pre>`;
+    } else {
+      body.innerHTML = `<div style="text-align:center;color:#ddd;padding:40px;">
+        <div style="font-size:64px;margin-bottom:16px;">${fileIcon(f.name)}</div>
+        <div style="font-size:14px;margin-bottom:8px;">${escapeHtml(f.name)}</div>
+        <button class="btn btn-primary" onclick="downloadCurrentPreview()">⬇️ 다운로드</button>
+      </div>`;
+    }
+  } catch(e) {
+    body.innerHTML = `<div style="color:#f55;padding:40px;">파일을 불러올 수 없습니다: ${e.message}</div>`;
+  }
+}
+async function downloadFfmFile(i) {
+  const f = _ffmFiles[i];
+  if(!f || !f.path) return;
+  try {
+    const blob = await sbStorageDownload(f.path);
+    triggerDownload(blob, f.name);
+  } catch(e) {
+    alert('다운로드 실패: ' + e.message);
+  }
 }
 
 function fileIcon(name) {
@@ -7557,7 +7891,13 @@ let editingAlarmId = null;
 
 function getAlarms() {
   try {
-    return JSON.parse(localStorage.getItem(ALARM_STORAGE_KEY) || '[]');
+    const arr = JSON.parse(localStorage.getItem(ALARM_STORAGE_KEY) || '[]');
+    // delivery(인도예정일) 타입 알람은 더 이상 사용하지 않음 → 자동 정리
+    const cleaned = arr.filter(a => a.type !== 'delivery' && a.alarmType !== 'delivery');
+    if(cleaned.length !== arr.length) {
+      try { localStorage.setItem(ALARM_STORAGE_KEY, JSON.stringify(cleaned)); } catch(e){}
+    }
+    return cleaned;
   } catch(e) { return []; }
 }
 
@@ -7692,14 +8032,6 @@ function renderAlarmPeriodicPage() {
     ['expiry_2','만기 2개월 전'],
     ['expiry_1','만기 1개월 전'],
   ];
-  const dFields = [
-    ['delivery_1', '인도예정 +1개월'],
-    ['delivery_3', '인도예정 +3개월'],
-    ['delivery_6', '인도예정 +6개월'],
-    ['delivery_12','인도예정 +12개월'],
-    ['delivery_18','인도예정 +18개월'],
-    ['delivery_24','인도예정 +24개월'],
-  ];
   const ddFields = [
     ['delivered_1', '인도완료 +1개월'],
     ['delivered_3', '인도완료 +3개월'],
@@ -7713,14 +8045,12 @@ function renderAlarmPeriodicPage() {
     '<input type="text" id="alarmMsg_'+k+'" maxlength="20" value="'+(msgs[k]||'').replace(/"/g,'&quot;')+'" placeholder="최대 20자" style="padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;width:100%;outline:none;">'+
     '</div>';
   const e = document.getElementById('alarmMsgExpiryGrid');    if(e)  e.innerHTML  = fields.map(renderRow).join('');
-  const d = document.getElementById('alarmMsgDeliveryGrid');  if(d)  d.innerHTML  = dFields.map(renderRow).join('');
   const f = document.getElementById('alarmMsgDeliveredGrid'); if(f)  f.innerHTML  = ddFields.map(renderRow).join('');
 }
 
 function saveAlarmMessages() {
   const keys = [
     'expiry_6','expiry_5','expiry_4','expiry_3','expiry_2','expiry_1',
-    'delivery_1','delivery_3','delivery_6','delivery_12','delivery_18','delivery_24',
     'delivered_1','delivered_3','delivered_6','delivered_12','delivered_18','delivered_24',
   ];
   const out = {};
@@ -7802,52 +8132,7 @@ function generateExpiryAlarms() {
       }
     }
 
-    // ============ 2) 인도예정일 기준 알람 (도달 후 1/3/6/12/이후 6개월) ============
-    if(f.deliveryDate) {
-      const triggers = [1,3,6,12,18,24,30,36];  // 12 이후 6개월 간격
-      triggers.forEach(m => {
-        if(m > 12 && (m-12) % 6 !== 0) return; // 12 이후는 6개월 단위만
-        const targetDate = addMonthsKeep(f.deliveryDate, m);
-        if(!targetDate || targetDate > today) return; // 미도래
-        // 한 번만 알람 (도래 후 7일 이내 활성)
-        const exist = list.find(a =>
-          a.type === 'delivery' &&
-          a.fundingId === f.id &&
-          a.monthsAfter === m
-        );
-        if(!exist) {
-          const tip = msgs['delivery_'+m] || '';
-          const baseMsg = (f.customerName||'고객') + ' / 인도 ' + m + '개월 경과';
-          list.push({
-            id: Date.now() + Math.floor(Math.random()*100000) + f.id + 1000 + m,
-            type: 'delivery',
-            alarmType: 'delivery',
-            ownerEmpId: fundingEmpId || 'admin',
-            fundingId: f.id,
-            customerId: f.customerId || null,
-            customerName: f.customerName || '',
-            alarmDate: targetDate,
-            monthsAfter: m,
-            memo: tip ? baseMsg + ' · ' + tip : baseMsg,
-            tip: tip,
-            createdAt: new Date().toISOString(),
-            checked: false
-          });
-          changed = true;
-          // 직전 delivery 알람(monthsAfter < 현재) 자동 확인 처리
-          // 예: 3개월 알람 발생 시 1개월 알람 자동 checked
-          list.forEach(a => {
-            if(a.type === 'delivery' &&
-               a.fundingId === f.id &&
-               a.monthsAfter < m &&
-               !a.checked) {
-              a.checked = true;
-              a.autoChecked = true;
-            }
-          });
-        }
-      });
-    }
+    // ============ 2) 인도예정일 기준 알람 - 사용 안 함 (사양 변경으로 삭제) ============
 
     // ============ 3) 인도완료일 기준 알람 (인도완료 상태일 때) ============
     if(f.deliveryDate && f.status === '인도완료') {
@@ -7953,6 +8238,141 @@ function renderScriptPage() {
 
   // 구버전 잔존 API Key 제거 (보안 처리)
   try { localStorage.removeItem('ts_crm_gemini_api_key'); } catch(e){}
+}
+
+// ============================================================
+// 📰 뉴스 검색 (Supabase Edge Function: news-search)
+// ============================================================
+async function searchNews() {
+  const main = (document.getElementById('news_mainTopic').value || '').trim();
+  const sub = (document.getElementById('news_subTopic').value || '').trim();
+  const sort = document.getElementById('news_sort').value || 'sim';
+  if(!main) { alert('대주제를 입력해주세요.'); return; }
+  const query = sub ? `${main} ${sub}` : main;
+
+  const resultEl = document.getElementById('newsResultArea');
+  resultEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">🔍 검색 중...</div>';
+
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/news-search`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SB_KEY,
+        'apikey': SB_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query, sort })
+    });
+    const data = await res.json();
+    if(!res.ok) {
+      resultEl.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;">검색 실패: ${escapeHtml(data.error||'알 수 없는 오류')}</div>`;
+      return;
+    }
+    renderNewsResults(data);
+  } catch(e) {
+    resultEl.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;">네트워크 오류: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderNewsResults(data) {
+  const resultEl = document.getElementById('newsResultArea');
+  const results = data.results || [];
+  if(!results.length) {
+    resultEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">검색 결과가 없습니다.</div>';
+    return;
+  }
+  const notice = data.notice
+    ? `<div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--text2);">⚠️ ${escapeHtml(data.notice)}</div>`
+    : '';
+  resultEl.innerHTML = notice + results.map((r,i)=>`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;">
+        <span style="background:rgba(68,136,255,.15);color:var(--blue);padding:2px 8px;border-radius:10px;font-weight:600;">${escapeHtml(r.press)}</span>
+        <span style="color:var(--text3);font-family:JetBrains Mono,monospace;">${escapeHtml(r.pubDate)}</span>
+        <span style="color:var(--text3);margin-left:auto;font-family:JetBrains Mono,monospace;">#${i+1}</span>
+      </div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px;line-height:1.4;">
+        <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${escapeHtml(r.title)}</a>
+      </div>
+      ${r.aiSummary ? `<div style="background:rgba(40,200,120,.06);border-left:3px solid var(--green);padding:10px 12px;margin:10px 0;font-size:12px;line-height:1.6;color:var(--text);"><strong style="color:var(--green);font-size:11px;">🤖 AI 요약</strong><br>${escapeHtml(r.aiSummary)}</div>` : ''}
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px;">${escapeHtml(r.description)}</div>
+      <a href="${escapeHtml(r.link)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--blue);text-decoration:none;font-family:JetBrains Mono,monospace;">🔗 ${escapeHtml(r.link.length>80?r.link.slice(0,80)+'...':r.link)}</a>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// 🎬 영상 요약 (Supabase Edge Function: summarize-video)
+// ============================================================
+async function summarizeVideo() {
+  const url = (document.getElementById('vid_url').value || '').trim();
+  if(!url) { alert('YouTube URL을 입력해주세요.'); return; }
+  if(!/youtube\.com|youtu\.be/i.test(url)) {
+    alert('YouTube URL만 지원합니다.'); return;
+  }
+
+  const resultEl = document.getElementById('vidResultArea');
+  resultEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">🎬 영상 분석 중... (자막 추출 + AI 요약, 10~30초 소요)</div>';
+
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/summarize-video`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SB_KEY,
+        'apikey': SB_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    if(!res.ok) {
+      resultEl.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;">요약 실패: ${escapeHtml(data.error||'알 수 없는 오류')}</div>`;
+      return;
+    }
+    renderVideoSummary(data);
+  } catch(e) {
+    resultEl.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;">네트워크 오류: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderVideoSummary(data) {
+  const resultEl = document.getElementById('vidResultArea');
+  const info = data.videoInfo || {};
+  const lengthMin = info.lengthSeconds ? Math.ceil(info.lengthSeconds/60) : 0;
+  resultEl.innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:18px;">
+      <div style="display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;">
+        <img src="https://i.ytimg.com/vi/${escapeHtml(data.videoId)}/mqdefault.jpg" style="width:160px;height:90px;border-radius:6px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px;line-height:1.4;">${escapeHtml(info.title||'영상')}</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">📺 ${escapeHtml(info.author||'-')}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">
+            ${lengthMin?`⏱️ 약 ${lengthMin}분`:''}
+            · 자막: ${escapeHtml(data.captionLang||'-')}
+            · 본문 ${(data.transcriptLength||0).toLocaleString()}자
+          </div>
+          <a href="https://www.youtube.com/watch?v=${escapeHtml(data.videoId)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--blue);text-decoration:none;margin-top:6px;display:inline-block;">🔗 영상 보러가기</a>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--green);">🤖 AI 요약</div>
+          <button class="btn btn-ghost btn-sm" onclick="copyVideoSummary()" style="font-size:11px;">📋 복사</button>
+        </div>
+        <div id="vidSummaryText" style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;background:var(--bg2);padding:14px 16px;border-radius:6px;border:1px solid var(--border);">${escapeHtml(data.summary||'(요약 없음)')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function copyVideoSummary() {
+  const text = document.getElementById('vidSummaryText')?.textContent || '';
+  if(!text) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    showGlobalToast('요약 내용이 클립보드에 복사되었습니다.');
+  }).catch(()=>{
+    alert('복사 실패. 직접 선택해서 복사해주세요.');
+  });
 }
 
 // ============================================================
@@ -8756,11 +9176,6 @@ function onAlarmItemClick(alarmId) {
   }
 }
 
-// 안전한 escape
-function escapeHtml(s) {
-  if(s == null) return '';
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
-}
 
 // 드롭다운 외부 클릭 시 닫기
 document.addEventListener('click', function(e) {
