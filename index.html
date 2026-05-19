@@ -1318,15 +1318,15 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             <div class="info-avatar" id="detailAvatar">👤</div>
             <div class="info-name" id="detailName">-</div>
             <div class="info-phone" id="detailPhone">-</div>
-            <div class="info-row"><span class="info-key">관심차량</span><span class="info-val" id="detailCar">-</span></div>
-            <div class="info-row"><span class="info-key">유입경로</span><span class="info-val" id="detailSource">-</span></div>
-            <div class="info-row" style="align-items:center;">
+            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val" id="detailCar">-</span></div>
+            <div class="info-row" data-field="source"><span class="info-key">유입경로</span><span class="info-val" id="detailSource">-</span></div>
+            <div class="info-row" data-field="division" style="align-items:center;">
               <span class="info-key">구분</span>
               <span class="info-val">
                 <select id="detailDivisionSel" onchange="changeCustomerDivision(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"></select>
               </span>
             </div>
-            <div class="info-row" style="align-items:center;">
+            <div class="info-row" data-field="memoTag" style="align-items:center;">
               <span class="info-key">메모태그</span>
               <span class="info-val">
                 <select id="detailMemoTagSel" onchange="changeCustomerMemoTag(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"></select>
@@ -1334,7 +1334,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             </div>
 
             <!-- 담당자 변경 (관리자 전용) -->
-            <div class="info-row" style="align-items:center;">
+            <div class="info-row" data-field="assign" style="align-items:center;">
               <span class="info-key">담당자</span>
               <span class="info-val admin-only" id="detailAssignWrap">
                 <select id="detailAssignSel" onchange="changeAssign(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="김영준" selected="">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
@@ -1343,7 +1343,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
             </div>
 
             <!-- 상태 변경 (관리자 + 직원 모두 드롭다운) -->
-            <div class="info-row" style="align-items:center;">
+            <div class="info-row" data-field="status" style="align-items:center;">
               <span class="info-key">상태</span>
               <span class="info-val" id="detailStatusWrap">
                 <select id="detailStatusSel" onchange="changeStatus(this.value)" style="background: var(--bg3); border-color: rgb(68, 136, 255); border-radius: 5px; color: rgb(68, 136, 255); font-size: 12px; padding: 4px 8px; font-family: inherit; outline: none; cursor: pointer; font-weight: 600;"><option value="신규문의" selected="" style="background:#1a1a1a;color:#f0f0f0;">신규문의</option><option value="상담중" style="background:#1a1a1a;color:#f0f0f0;">상담중</option><option value="계약완료" style="background:#1a1a1a;color:#f0f0f0;">계약완료</option><option value="종결" style="background:#1a1a1a;color:#f0f0f0;">종결</option><option value="취소" style="background:#1a1a1a;color:#f0f0f0;">취소</option><option value="펀딩완료" style="background:#1a1a1a;color:#f0f0f0;">펀딩완료</option></select>
@@ -2912,27 +2912,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 <!-- Add Customer -->
 <div class="modal-bg" id="addModal">
   <div class="modal">
-    <div class="modal-title">신규 고객 등록</div>
-    <div class="form-grid">
-      <div class="form-field"><label>고객명 *</label><input type="text" id="f_name" placeholder="홍길동"></div>
-      <div class="form-field"><label>연락처 *</label><input type="text" id="f_phone" placeholder="010-0000-0000" oninput="onPhoneInput(this)"></div>
-      <div class="form-field"><label>관심차량</label><input type="text" id="f_car" placeholder="제네시스 G80"></div>
-      <div class="form-field"><label>유입경로</label>
-        <select id="f_source"><option value="네이버" selected="">네이버</option><option value="인스타그램">인스타그램</option><option value="카카오">카카오</option><option value="지인소개">지인소개</option><option value="기타">기타</option></select>
-      </div>
-      <div class="form-field"><label>구분</label>
-        <select id="f_division"></select>
-      </div>
-      <div class="form-field"><label>메모태그</label>
-        <select id="f_memoTag"></select>
-      </div>
-      <div class="form-field"><label>담당자</label>
-        <select id="f_assign"><option value="김영준" selected="">김영준</option><option value="1241">1241</option><option value="D">D</option><option value="강민지">강민지</option></select>
-      </div>
-      <div class="form-field"><label>상태</label>
-        <select id="f_status"><option value="신규문의" selected="" style="background:#1a1a1a;color:#f0f0f0;">신규문의</option><option value="상담중" style="background:#1a1a1a;color:#f0f0f0;">상담중</option><option value="계약완료" style="background:#1a1a1a;color:#f0f0f0;">계약완료</option><option value="종결" style="background:#1a1a1a;color:#f0f0f0;">종결</option><option value="취소" style="background:#1a1a1a;color:#f0f0f0;">취소</option><option value="펀딩완료" style="background:#1a1a1a;color:#f0f0f0;">펀딩완료</option></select>
-      </div>
-      <div class="form-field full"><label>메모</label><textarea id="f_memo" placeholder="첫 상담 내용..."></textarea></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="modal-title" style="margin-bottom:0;">신규 고객 등록</div>
+      <span id="addModalDragHint" class="admin-only" style="font-size:11px;color:var(--text3);">💡 항목을 드래그해서 순서 변경 가능</span>
+    </div>
+    <div class="form-grid" id="addModalGrid">
+      <!-- 동적 렌더링: renderAddModalFields() -->
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal(&#39;addModal&#39;)">취소</button>
@@ -4252,6 +4237,8 @@ function openDetail(id) {
   // 구분/메모태그 드롭다운 채우기
   fillDivisionSelect(document.getElementById('detailDivisionSel'), c.division || '');
   fillMemoTagSelect(document.getElementById('detailMemoTagSel'), c.memoTag || '');
+  // 필드 순서 적용
+  try { refreshDetailFieldOrder(); } catch(e){}
   document.getElementById('detailDate').textContent = c.date;
   document.getElementById('detailMemoCount').textContent = c.memos.length+'건';
 
@@ -4366,6 +4353,34 @@ async function changeCustomerMemoTag(newVal) {
     catch(e) { showGlobalToast('⚠️ 저장 실패: ' + (e.message||e)); }
   }
   refreshAllViews();
+}
+
+// 고객 상세 페이지의 info-row 순서를 addModalFieldOrder 기준으로 재정렬
+function refreshDetailFieldOrder() {
+  // info-row 중 data-field 있는 것만 대상 (name/phone/memo는 별도 영역이라 제외)
+  const reorderable = ['car','source','division','memoTag','assign','status'];
+  const parent = document.querySelector('.info-card');
+  if(!parent) return;
+  // 순서: addModalFieldOrder 중 reorderable인 것만, 그 순서대로
+  const targetOrder = addModalFieldOrder.filter(k => reorderable.includes(k));
+  // 빠진 필드 보강
+  reorderable.forEach(k => { if(!targetOrder.includes(k)) targetOrder.push(k); });
+  // DOM 재배치 (data-field 가진 row들 순서 정렬)
+  const rows = {};
+  parent.querySelectorAll('[data-field]').forEach(el => { rows[el.dataset.field] = el; });
+  // anchor 찾기: 마지막 reorderable row의 다음 형제 (등록일 등의 위치 보존)
+  let anchor = null;
+  Object.values(rows).forEach(el => {
+    if(!anchor || el.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_PRECEDING) {
+      anchor = el.nextElementSibling;
+    }
+  });
+  // 다시 삽입
+  targetOrder.forEach(k => {
+    const el = rows[k];
+    if(!el) return;
+    parent.insertBefore(el, anchor);
+  });
 }
 
 
@@ -6089,6 +6104,11 @@ async function loadAppSettings() {
   if(Array.isArray(tags) && tags.length > 0) {
     memoTagOptions.length = 0;
     tags.forEach(t => memoTagOptions.push(t));
+  }
+  // 신규 등록 모달 필드 순서
+  const order = await sbLoadSetting('addModalFieldOrder');
+  if(Array.isArray(order) && order.length > 0) {
+    addModalFieldOrder = order;
   }
   // 드롭다운 동기화
   syncDivisionSelects();
@@ -7987,6 +8007,9 @@ function fillAssignSelect(el, selectedName) {
 
 // 고객 등록 모달 열기 - 담당자 목록 최신화
 function openAddModal() {
+  // 동적 필드 렌더 (저장된 순서 기준)
+  renderAddModalFields();
+
   const sel = document.getElementById('f_assign');
   fillAssignSelect(sel, currentRole === 'staff' ? currentUser : getActiveStaff()[0]?.name || '');
   // 직원 로그인 시 본인 고정
@@ -8003,6 +8026,129 @@ function openAddModal() {
   fillDivisionSelect(document.getElementById('f_division'), '');
   fillMemoTagSelect(document.getElementById('f_memoTag'), '');
   document.getElementById('addModal').classList.add('open');
+}
+
+// ============================================================
+// 📋 신규 등록 모달 - 필드 순서 관리
+// ============================================================
+const ADD_MODAL_DEFAULT_FIELDS = [
+  'name','phone','car','source','division','memoTag','assign','status','memo'
+];
+let addModalFieldOrder = [...ADD_MODAL_DEFAULT_FIELDS];
+
+const ADD_MODAL_FIELD_DEFS = {
+  name:     { label:'고객명 *', html:'<input type="text" id="f_name" placeholder="홍길동">' },
+  phone:    { label:'연락처 *', html:'<input type="text" id="f_phone" placeholder="010-0000-0000" oninput="onPhoneInput(this)">' },
+  car:      { label:'관심차량', html:'<input type="text" id="f_car" placeholder="제네시스 G80">' },
+  source:   { label:'유입경로', html:'<select id="f_source"></select>' },
+  division: { label:'구분',     html:'<select id="f_division"></select>' },
+  memoTag:  { label:'메모태그', html:'<select id="f_memoTag"></select>' },
+  assign:   { label:'담당자',   html:'<select id="f_assign"></select>' },
+  status:   { label:'상태',     html:'<select id="f_status"><option value="신규문의" selected style="background:#1a1a1a;color:#f0f0f0;">신규문의</option><option value="상담중" style="background:#1a1a1a;color:#f0f0f0;">상담중</option><option value="계약완료" style="background:#1a1a1a;color:#f0f0f0;">계약완료</option><option value="종결" style="background:#1a1a1a;color:#f0f0f0;">종결</option><option value="취소" style="background:#1a1a1a;color:#f0f0f0;">취소</option><option value="펀딩완료" style="background:#1a1a1a;color:#f0f0f0;">펀딩완료</option></select>' },
+  memo:     { label:'메모', full:true, html:'<textarea id="f_memo" placeholder="첫 상담 내용..."></textarea>' },
+};
+
+function renderAddModalFields() {
+  const grid = document.getElementById('addModalGrid');
+  if(!grid) return;
+  const isAdmin = currentRole === 'admin';
+  // 유효한 필드만 (정의 안 된 건 자동 제외)
+  const order = addModalFieldOrder.filter(k => ADD_MODAL_FIELD_DEFS[k]);
+  // 누락된 필드 추가 (신규 필드 추가 대비)
+  ADD_MODAL_DEFAULT_FIELDS.forEach(k => { if(!order.includes(k)) order.push(k); });
+
+  grid.innerHTML = order.map(key => {
+    const def = ADD_MODAL_FIELD_DEFS[key];
+    const cls = 'form-field' + (def.full?' full':'');
+    const dragAttr = isAdmin ? 'draggable="true"' : '';
+    const handle = isAdmin ? '<span class="drag-handle" style="cursor:grab;color:var(--text3);font-size:14px;margin-right:6px;user-select:none;">⋮⋮</span>' : '';
+    return `<div class="${cls}" data-field="${key}" ${dragAttr} style="${isAdmin?'cursor:move;':''}">
+      <label style="display:flex;align-items:center;">${handle}${def.label}</label>
+      ${def.html}
+    </div>`;
+  }).join('');
+
+  // 드래그 핸들러 (관리자만)
+  if(isAdmin) {
+    let dragSrcKey = null;
+    grid.querySelectorAll('[data-field]').forEach(el => {
+      el.addEventListener('dragstart', (e) => {
+        dragSrcKey = el.dataset.field;
+        el.style.opacity = '0.4';
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      el.addEventListener('dragend', () => {
+        el.style.opacity = '1';
+        grid.querySelectorAll('[data-field]').forEach(x => x.style.borderTop = '');
+      });
+      el.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if(el.dataset.field !== dragSrcKey) {
+          el.style.borderTop = '2px solid var(--accent)';
+        }
+      });
+      el.addEventListener('dragleave', () => {
+        el.style.borderTop = '';
+      });
+      el.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const targetKey = el.dataset.field;
+        if(!dragSrcKey || dragSrcKey === targetKey) return;
+        // 순서 재배치
+        const newOrder = [...addModalFieldOrder];
+        const fromIdx = newOrder.indexOf(dragSrcKey);
+        const toIdx = newOrder.indexOf(targetKey);
+        if(fromIdx < 0 || toIdx < 0) return;
+        newOrder.splice(fromIdx, 1);
+        newOrder.splice(toIdx, 0, dragSrcKey);
+        addModalFieldOrder = newOrder;
+        // 재렌더 + Supabase 저장
+        const formData = collectAddFormValues();
+        renderAddModalFields();
+        // 드롭다운 다시 채우기
+        fillSourceSelect(document.getElementById('f_source'), formData.source||'');
+        fillDivisionSelect(document.getElementById('f_division'), formData.division||'');
+        fillMemoTagSelect(document.getElementById('f_memoTag'), formData.memoTag||'');
+        fillAssignSelect(document.getElementById('f_assign'), formData.assign || currentUser);
+        // 값 복원
+        restoreAddFormValues(formData);
+        // 영구 저장
+        if(isSbConfigured()) {
+          sbSaveSetting('addModalFieldOrder', [...addModalFieldOrder])
+            .then(() => showGlobalToast('💾 필드 순서가 저장되었습니다.'))
+            .catch(e => console.warn('필드 순서 저장 실패:', e));
+        }
+        // 고객 상세 페이지 정보 순서도 재렌더 (열려 있다면)
+        try { if(typeof refreshDetailFieldOrder === 'function') refreshDetailFieldOrder(); } catch(e){}
+      });
+    });
+  }
+}
+
+function collectAddFormValues() {
+  return {
+    name:     document.getElementById('f_name')?.value     || '',
+    phone:    document.getElementById('f_phone')?.value    || '',
+    car:      document.getElementById('f_car')?.value      || '',
+    source:   document.getElementById('f_source')?.value   || '',
+    division: document.getElementById('f_division')?.value || '',
+    memoTag:  document.getElementById('f_memoTag')?.value  || '',
+    assign:   document.getElementById('f_assign')?.value   || '',
+    status:   document.getElementById('f_status')?.value   || '',
+    memo:     document.getElementById('f_memo')?.value     || '',
+  };
+}
+function restoreAddFormValues(data) {
+  if(!data) return;
+  ['name','phone','car','memo'].forEach(k => {
+    const el = document.getElementById('f_'+k);
+    if(el && data[k] !== undefined) el.value = data[k];
+  });
+  ['source','division','memoTag','assign','status'].forEach(k => {
+    const el = document.getElementById('f_'+k);
+    if(el && data[k]) el.value = data[k];
+  });
 }
 
 function openUserModal() { showUserForm(null); }
