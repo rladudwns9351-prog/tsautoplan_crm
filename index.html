@@ -2370,13 +2370,17 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 
         <div style="text-align:center;padding:30px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;">
           <div style="font-size:48px;margin-bottom:14px;">🚛</div>
-          <div style="font-size:14px;color:var(--text2);margin-bottom:18px;">아래 버튼을 클릭하면 새 창에서 탁송조회 사이트가 열립니다.</div>
-          <a href="https://glink.glovis.net/newcar/c/tracking.do" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size:14px;padding:12px 28px;text-decoration:none;display:inline-block;">
+          <div style="font-size:14px;color:var(--text2);margin-bottom:20px;">아래 링크를 클릭하면 새 탭으로 열립니다.</div>
+
+          <a href="https://glink.glovis.net/newcar/c/tracking.do" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:var(--accent);color:#000;font-weight:700;font-size:14px;padding:12px 28px;border-radius:6px;text-decoration:none;margin-bottom:14px;">
             🔗 탁송조회 사이트 열기
           </a>
-          <div style="margin-top:14px;font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">
-            glink.glovis.net/newcar/c/tracking.do
+
+          <div style="margin-top:16px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;">
+            <input type="text" id="tracking_url" value="https://glink.glovis.net/newcar/c/tracking.do" readonly style="padding:8px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text3);font-size:12px;font-family:JetBrains Mono,monospace;width:360px;max-width:80%;outline:none;">
+            <button class="btn btn-ghost btn-sm" onclick="copyTrackingUrl()" style="font-size:12px;">📋 복사</button>
           </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text3);">버튼이 안 열리면 URL을 복사해 새 탭에 붙여넣으세요.</div>
         </div>
       </div>
     </div>
@@ -2738,8 +2742,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <button class="btn btn-primary btn-sm" onclick="addSourceOption()">+ 추가</button>
       </div>
     </div>
+    <div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:4px;padding:8px 12px;margin-top:14px;font-size:11px;color:var(--text2);">
+      ⚠️ 변경사항은 <strong style="color:var(--text);">저장 버튼</strong>을 눌러야 영구 반영됩니다.
+    </div>
     <div class="modal-actions" style="margin-top:14px;">
       <button class="btn btn-ghost" onclick="closeModal(&#39;sourceMgrModal&#39;)">닫기</button>
+      <button class="btn btn-primary" onclick="saveSourceOptions()">💾 저장</button>
     </div>
   </div>
 </div>
@@ -2768,8 +2776,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       </div>
     </div>
 
-    <div class="modal-actions" style="margin-top:16px;">
+    <div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:4px;padding:8px 12px;margin-top:16px;font-size:11px;color:var(--text2);">
+      ⚠️ 변경사항은 <strong style="color:var(--text);">저장 버튼</strong>을 눌러야 영구 반영됩니다.
+    </div>
+
+    <div class="modal-actions" style="margin-top:14px;">
       <button class="btn btn-ghost" onclick="closeModal(&#39;statusMgrModal&#39;)">닫기</button>
+      <button class="btn btn-primary" onclick="saveStatusOptionsToServer()">💾 저장</button>
     </div>
   </div>
 </div>
@@ -5865,6 +5878,53 @@ function quickReclaimDB(id) {
 
 // ===== END 회수 DB =====
 
+// ============================================================
+// 🛠️ 시스템 설정 (유입경로/상태 등) - Supabase 영구 저장
+// ============================================================
+const APP_SETTINGS_TABLE = 'app_settings';
+
+async function sbLoadSetting(key) {
+  try {
+    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}&select=value`);
+    return (rows && rows[0]) ? rows[0].value : null;
+  } catch(e) { return null; }
+}
+
+async function sbSaveSetting(key, value) {
+  // upsert: 있으면 update, 없으면 insert
+  const row = { key, value, updated_at: new Date().toISOString() };
+  try {
+    // 먼저 update 시도
+    const updated = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}`, 'PATCH', row);
+    if(Array.isArray(updated) && updated.length > 0) return updated[0];
+    // 없으면 insert
+    const inserted = await sbFetch(APP_SETTINGS_TABLE, 'POST', [row]);
+    return Array.isArray(inserted) ? inserted[0] : inserted;
+  } catch(e) {
+    console.error('settings 저장 실패:', e);
+    throw e;
+  }
+}
+
+// 로그인 후 자동 로드
+async function loadAppSettings() {
+  if(!isSbConfigured()) return;
+  // 유입경로
+  const srcs = await sbLoadSetting('sourceOptions');
+  if(Array.isArray(srcs) && srcs.length > 0) {
+    sourceOptions.length = 0;
+    srcs.forEach(s => sourceOptions.push(s));
+    syncSourceSelects();
+  }
+  // 상태
+  const stats = await sbLoadSetting('statusOptions');
+  if(Array.isArray(stats) && stats.length > 0) {
+    statusOptions.length = 0;
+    stats.forEach(s => statusOptions.push(s));
+    syncAllStatusSelects();
+  }
+}
+
 // ===== 데이터 영속성 (Supabase 단일 저장소) =====
 
 // saveData / autoSave → no-op (localStorage 저장 완전 제거)
@@ -5898,6 +5958,9 @@ async function loadData() {
     staffList.length = 0; // 하드코딩 초기값 완전 제거
     dbStaff.forEach(s => staffList.push(s));
     // staff가 0이면 하드코딩 fallback 없음 (SQL seed 실행 필요)
+
+    // ─── 시스템 설정 (유입경로, 상태) ───
+    try { await loadAppSettings(); } catch(e) { console.warn('settings 로드 실패:', e); }
 
     // 모든 담당자 드롭다운 최신화
     syncAllAssignSelects();
@@ -6428,6 +6491,34 @@ function moveSource(i, dir) {
   if(j<0||j>=sourceOptions.length) return;
   [sourceOptions[i],sourceOptions[j]] = [sourceOptions[j],sourceOptions[i]];
   renderSourceMgrList();
+}
+
+async function saveSourceOptions() {
+  if(!isSbConfigured()) {
+    showGlobalToast('Supabase 미설정으로 영구 저장이 불가합니다.');
+    return;
+  }
+  try {
+    await sbSaveSetting('sourceOptions', [...sourceOptions]);
+    showGlobalToast('💾 유입경로가 영구 저장되었습니다.');
+    closeModal('sourceMgrModal');
+  } catch(e) {
+    alert('저장 실패: ' + e.message);
+  }
+}
+
+async function saveStatusOptionsToServer() {
+  if(!isSbConfigured()) {
+    showGlobalToast('Supabase 미설정으로 영구 저장이 불가합니다.');
+    return;
+  }
+  try {
+    await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
+    showGlobalToast('💾 상태 항목이 영구 저장되었습니다.');
+    closeModal('statusMgrModal');
+  } catch(e) {
+    alert('저장 실패: ' + e.message);
+  }
 }
 
 function syncSourceSelects() {
@@ -8624,15 +8715,16 @@ function calcAge() {
 // ============================================================
 // 🚛 탁송조회
 // ============================================================
-function openTracking() {
-  // a 태그 클릭 방식으로 변경 (window.open 팝업 차단 회피)
-  const a = document.createElement('a');
-  a.href = 'https://glink.glovis.net/newcar/c/tracking.do';
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+function copyTrackingUrl() {
+  const input = document.getElementById('tracking_url');
+  if(!input) return;
+  input.select();
+  navigator.clipboard.writeText(input.value).then(()=>{
+    showGlobalToast('URL이 클립보드에 복사되었습니다.');
+  }).catch(()=>{
+    document.execCommand('copy');
+    showGlobalToast('URL이 클립보드에 복사되었습니다.');
+  });
 }
 
 // ============================================================
