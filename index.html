@@ -114,6 +114,15 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 .page.active { display:block; }
 .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
 .page-title { font-size:20px; font-weight:700; }
+
+/* 페이지 네비게이션 */
+.pagination { display:flex; align-items:center; justify-content:center; gap:4px; padding:16px 8px; flex-wrap:wrap; }
+.pagination .page-info { font-size:11px; color:var(--text3); margin-right:12px; font-family:JetBrains Mono,monospace; }
+.pagination button { min-width:32px; height:30px; padding:0 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:5px; color:var(--text2); font-size:12px; cursor:pointer; transition:.15s; }
+.pagination button:hover:not(:disabled) { background:var(--bg4); color:var(--text); border-color:var(--accent); }
+.pagination button.active { background:var(--accent); color:#000; border-color:var(--accent); font-weight:700; }
+.pagination button:disabled { opacity:.35; cursor:not-allowed; }
+.pagination button.nav-btn { padding:0 12px; }
 .page-sub { font-size:13px; color:var(--text2); margin-top:3px; }
 
 /* ===== STAT CARDS ===== */
@@ -4527,11 +4536,20 @@ function latestConsultDate(c) {
 }
 
 function renderDB(list) {
-  const sorted = [...list].sort((a,b) => b.date.localeCompare(a.date));
+  // 정렬: 먼저 등록한 게 1번 (오래된 것이 위)
+  const sorted = [...list].sort((a,b) => {
+    // date 동일하면 id 작은 게 먼저 (먼저 등록순)
+    const dc = (a.date||'').localeCompare(b.date||'');
+    if(dc !== 0) return dc;
+    return (a.id||0) - (b.id||0);
+  });
   document.getElementById('dbCount').textContent = '전체 '+sorted.length+'명';
+
+  // 페이징
+  const pg = paginate(sorted, 'db');
   const body = document.getElementById('dbBody');
-  body.innerHTML = sorted.map((c,i) => {
-    const no = sorted.length - i;
+  body.innerHTML = pg.items.map((c,i) => {
+    const no = pg.startIndex + i + 1;  // 1번부터 (먼저 등록 = 1번)
     return '<tr id="dbrow-'+c.id+'" onclick="openDetail('+c.id+')" style="'+(c.important?'background:rgba(255,204,68,.04);':'')+'">'+
       '<td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="db-check" data-id="'+c.id+'" onchange="onCheckChange()" style="cursor:pointer;accent-color:var(--accent);"></td>'+
       '<td style="text-align:center;font-family:JetBrains Mono,monospace;font-size:12px;color:var(--text3);">'+no+'</td>'+
@@ -4566,6 +4584,16 @@ function renderDB(list) {
       : '') +
     '</tr>';
   }).join('');
+
+  // 페이지 네비게이션 표시
+  let navEl = document.getElementById('dbPaginationBar');
+  if(!navEl) {
+    navEl = document.createElement('div');
+    navEl.id = 'dbPaginationBar';
+    const table = body.closest('.section-card');
+    if(table && table.parentNode) table.parentNode.insertBefore(navEl, table.nextSibling);
+  }
+  navEl.innerHTML = buildPaginationHtml('db', pg.page, pg.totalPages, pg.total);
 }
 
 function isNewDB(c) {
@@ -4602,9 +4630,11 @@ function getNextConsult(c) {
 }
 
 function filterDB() {
+  // 필터 변경 시 페이지 1로 리셋
+  resetPage('db');
   // 컬럼 필터가 활성화된 경우 colFilterDB 우선 호출
   const hasColFilter = ['colF_name','colF_phone','colF_car'].some(id=>(document.getElementById(id)?.value||'')!=='') ||
-    ['colF_source','colF_assign','colF_status'].some(id=>{
+    ['colF_source','colF_assign','colF_status','colF_division','colF_memoTag'].some(id=>{
       const el=document.getElementById(id); return el && !el.disabled && (el.value||'')!=='';
     });
   if(hasColFilter) { colFilterDB(); return; }
@@ -5675,7 +5705,16 @@ function renderFundingPage() {
   const now = new Date();
   const thisMonth = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
-  body.innerHTML = myList.map((f,i)=>{
+  // 먼저 등록=1번 (오래된 게 위)
+  const sortedList = [...myList].sort((a,b) => {
+    const dc = (a.fundingDate||'').localeCompare(b.fundingDate||'');
+    if(dc !== 0) return dc;
+    return (a.id||0) - (b.id||0);
+  });
+  // 페이징
+  const pg = paginate(sortedList, 'funding');
+
+  body.innerHTML = pg.items.map((f,i)=>{
     const stColor = FUNDING_STATUS_COLOR[f.status]||'#888';
     const colorStr = [f.colorOut, f.colorIn].filter(Boolean).join('/');
     const isConfirmed = f.confirmed === true;
@@ -5697,7 +5736,7 @@ function renderFundingPage() {
       '<td style="text-align:center;" onclick="event.stopPropagation()">'+
         '<input type="checkbox" class="funding-check" data-id="'+f.id+'" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);">'+
       '</td>'+
-      '<td style="text-align:center;font-size:12px;color:var(--text3);">'+(i+1)+'</td>'+
+      '<td style="text-align:center;font-size:12px;color:var(--text3);">'+(pg.startIndex+i+1)+'</td>'+
       '<td style="font-weight:600;white-space:nowrap;">'+escapeHtml(f.customerName||'')+fileBadge+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">'+f.phone+'</td>'+
       '<td style="font-size:12px;white-space:nowrap;">'+f.car+(colorStr?' <span style="color:var(--text3);font-size:10px;">'+colorStr+'</span>':'')+'</td>'+
@@ -5730,6 +5769,16 @@ function renderFundingPage() {
       '</div></td>'+
     '</tr>';
   }).join('') || '<tr><td colspan="21" style="text-align:center;color:var(--text3);padding:24px;">등록된 펀딩이 없습니다.</td></tr>';
+
+  // 페이지네이션 바
+  let navEl = document.getElementById('fundingPaginationBar');
+  if(!navEl) {
+    navEl = document.createElement('div');
+    navEl.id = 'fundingPaginationBar';
+    const tableWrap = body.closest('.section-card') || body.closest('table')?.parentNode;
+    if(tableWrap && tableWrap.parentNode) tableWrap.parentNode.insertBefore(navEl, tableWrap.nextSibling);
+  }
+  navEl.innerHTML = buildPaginationHtml('funding', pg.page, pg.totalPages, pg.total);
 }
 // ===== END 펀딩 현황 =====
 
@@ -5874,7 +5923,14 @@ function renderReclaimPage() {
   // 전체 DB 테이블
   const body = document.getElementById('reclaimBody');
   if(!body) return;
-  body.innerHTML = all.sort((a,b)=>b.date.localeCompare(a.date)).map((c,i)=>{
+  // 먼저 등록 = 1번 (오래된 게 위)
+  const sortedAll = [...all].sort((a,b) => {
+    const dc = (a.date||'').localeCompare(b.date||'');
+    if(dc !== 0) return dc;
+    return (a.id||0) - (b.id||0);
+  });
+  const pg = paginate(sortedAll, 'recovered');
+  body.innerHTML = pg.items.map((c,i)=>{
     const days = calcDaysElapsed(c);
     const isSelected = reclaimSelected.includes(c.id);
     const daysColor = days>3?'var(--red)':days>1?'var(--yellow)':'var(--green)';
@@ -5895,6 +5951,16 @@ function renderReclaimPage() {
       '<td style="text-align:center;font-size:11px;color:'+(c.retrieved?'var(--text3)':'var(--text2)')+';"> '+(c.retrieved?'⬛ 회수됨':'⬜ 배분중')+'</td>'+
     '</tr>';
   }).join('');
+
+  // 페이지네이션 바
+  let navEl = document.getElementById('reclaimPaginationBar');
+  if(!navEl) {
+    navEl = document.createElement('div');
+    navEl.id = 'reclaimPaginationBar';
+    const tableWrap = body.closest('.section-card') || body.closest('table')?.parentNode;
+    if(tableWrap && tableWrap.parentNode) tableWrap.parentNode.insertBefore(navEl, tableWrap.nextSibling);
+  }
+  navEl.innerHTML = buildPaginationHtml('recovered', pg.page, pg.totalPages, pg.total);
 }
 
 function selectReclaimRow(id) {
@@ -6057,6 +6123,81 @@ function quickReclaimDB(id) {
 }
 
 // ===== END 회수 DB =====
+
+// ============================================================
+// 📄 페이징 유틸 (모든 리스트 공통)
+// ============================================================
+const PAGE_SIZE = 50;
+const _pageState = {}; // 페이지별 현재 페이지 번호 저장
+
+function getPage(key) { return _pageState[key] || 1; }
+function setPage(key, n) { _pageState[key] = n; }
+
+// 리스트를 페이지로 자르기
+function paginate(list, key) {
+  const total = list.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  let cur = getPage(key);
+  if(cur > totalPages) { cur = totalPages; setPage(key, cur); }
+  if(cur < 1) { cur = 1; setPage(key, cur); }
+  const start = (cur - 1) * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  return {
+    items: list.slice(start, end),
+    page: cur,
+    totalPages,
+    total,
+    startIndex: start  // 전체 리스트에서의 시작 인덱스 (NO 번호 매기기용)
+  };
+}
+
+// 페이지 네비게이션 HTML 생성
+function buildPaginationHtml(key, page, totalPages, total) {
+  if(totalPages <= 1 && total <= PAGE_SIZE) return '';
+  // 표시할 페이지 번호 (현재 페이지 기준 좌우 2개씩, 최대 5~7개)
+  let start = Math.max(1, page - 2);
+  let end = Math.min(totalPages, start + 4);
+  start = Math.max(1, end - 4);
+
+  let html = '<div class="pagination">';
+  html += '<span class="page-info">총 '+total+'건 · '+page+'/'+totalPages+' 페이지</span>';
+  html += '<button class="nav-btn" onclick="goPaginate(\''+key+'\',1)" '+(page<=1?'disabled':'')+'>«</button>';
+  html += '<button class="nav-btn" onclick="goPaginate(\''+key+'\','+(page-1)+')" '+(page<=1?'disabled':'')+'>이전</button>';
+  for(let i = start; i <= end; i++) {
+    html += '<button class="'+(i===page?'active':'')+'" onclick="goPaginate(\''+key+'\','+i+')">'+i+'</button>';
+  }
+  html += '<button class="nav-btn" onclick="goPaginate(\''+key+'\','+(page+1)+')" '+(page>=totalPages?'disabled':'')+'>다음</button>';
+  html += '<button class="nav-btn" onclick="goPaginate(\''+key+'\','+totalPages+')" '+(page>=totalPages?'disabled':'')+'>»</button>';
+  html += '</div>';
+  return html;
+}
+
+// 페이지 이동 (각 리스트별 재렌더)
+function goPaginate(key, n) {
+  setPage(key, n);
+  // 키별로 해당 리스트 재렌더
+  switch(key) {
+    case 'db': try { filterDB(); } catch(e){} break;
+    case 'consult': try { renderConsultPage(); } catch(e){} break;
+    case 'funding': try {
+      if(typeof renderFundingPage === 'function') renderFundingPage();
+      else if(typeof renderFundingList === 'function') renderFundingList();
+    } catch(e){} break;
+    case 'recovered': try {
+      if(typeof renderReclaimPage === 'function') renderReclaimPage();
+    } catch(e){} break;
+    case 'feedback': try { renderFeedbackAdmin(); } catch(e){} break;
+  }
+  // 페이지 변경 후 스크롤 위로
+  try {
+    const main = document.querySelector('.main') || document.body;
+    main.scrollTop = 0;
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch(e){}
+}
+
+// 필터 변경 시 페이지 1로 리셋 (다른 페이지에 있을 때 필터하면 이상해지므로)
+function resetPage(key) { setPage(key, 1); }
 
 // ============================================================
 // 🛠️ 시스템 설정 (유입경로/상태 등) - Supabase 영구 저장
@@ -6928,6 +7069,7 @@ function initConsultFilters() {
 }
 
 function filterConsult() {
+  resetPage('consult');
   const q = (document.getElementById('consultSearchQ')?.value||'').toLowerCase();
   const status = document.getElementById('consultStatusFilter')?.value||'';
   const assign = currentRole==='admin' ? (document.getElementById('consultAssignFilter')?.value||'') : currentUser;
@@ -6945,9 +7087,24 @@ function filterConsult() {
   const body = document.getElementById('consultBody');
   if(!body) return;
 
+  // 먼저 등록=1번 순서 (오래된 게 위)
+  const sortFn = (a,b) => {
+    const dc = (a.date||'').localeCompare(b.date||'');
+    if(dc !== 0) return dc;
+    return (a.id||0) - (b.id||0);
+  };
+
   if(currentRole==='admin') {
-    list = list.sort((a,b)=>latestConsultDateRaw(b).localeCompare(latestConsultDateRaw(a)));
-    body.innerHTML = list.map(c=>`
+    list = list.sort(sortFn);
+  } else {
+    list = list.filter(c=>c.memos.some(m=>!m.isSystem)).sort(sortFn);
+  }
+
+  // 페이징
+  const pg = paginate(list, 'consult');
+
+  if(currentRole==='admin') {
+    body.innerHTML = pg.items.map(c=>`
       <tr onclick="openDetail(${c.id})">
         <td class="tbl-name">${c.name}</td>
         <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">${c.phone}</td>
@@ -6958,9 +7115,7 @@ function filterConsult() {
         <td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.memos.filter(m=>!m.isSystem)[0]?.text?.slice(0,30)||'-'}</td>
       </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">고객 없음</td></tr>';
   } else {
-    list = list.filter(c=>c.memos.some(m=>!m.isSystem))
-      .sort((a,b)=>latestConsultDateRaw(b).localeCompare(latestConsultDateRaw(a)));
-    body.innerHTML = list.map(c=>{
+    body.innerHTML = pg.items.map(c=>{
       const lastMemo = c.memos.filter(m=>!m.isSystem)[0];
       return `<tr onclick="openDetail(${c.id})">
         <td class="tbl-name">${c.name}</td>
@@ -6973,7 +7128,20 @@ function filterConsult() {
       </tr>`;
     }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">상담 메모가 없습니다.</td></tr>';
   }
+
+  // 페이지네이션 바
+  let navEl = document.getElementById('consultPaginationBar');
+  if(!navEl) {
+    navEl = document.createElement('div');
+    navEl.id = 'consultPaginationBar';
+    const tableWrap = body.closest('.section-card') || body.closest('table')?.parentNode;
+    if(tableWrap && tableWrap.parentNode) tableWrap.parentNode.insertBefore(navEl, tableWrap.nextSibling);
+  }
+  navEl.innerHTML = buildPaginationHtml('consult', pg.page, pg.totalPages, pg.total);
 }
+
+// goPaginate에서 호출할 alias
+function renderConsultPage() { filterConsult(); }
 
 function clearConsultFilter() {
   ['consultSearchQ','consultStatusFilter','consultAssignFilter','consultCarFilter'].forEach(id=>{
@@ -7013,6 +7181,8 @@ function initColFilters() {
 }
 
 function colFilterDB() {
+  // 필터 변경 시 페이지 1로 리셋
+  resetPage('db');
   const name   = (document.getElementById('colF_name')?.value||'').toLowerCase();
   const phone  = (document.getElementById('colF_phone')?.value||'').toLowerCase();
   const car    = (document.getElementById('colF_car')?.value||'').toLowerCase();
@@ -9435,9 +9605,19 @@ async function renderFeedbackAdmin() {
   const all = await sbLoadFeedback();
   _feedbackCache = all;
   const filter = document.getElementById('feedbackFilterStatus')?.value || '';
-  const list = filter ? all.filter(f => f.status === filter) : all;
+  let list = filter ? all.filter(f => f.status === filter) : all;
+  // 먼저 등록 = 1번 (오래된 게 위)
+  list = [...list].sort((a,b) => {
+    const ac = a.created_at || '';
+    const bc = b.created_at || '';
+    const dc = ac.localeCompare(bc);
+    if(dc !== 0) return dc;
+    return (a.id||0) - (b.id||0);
+  });
   document.getElementById('feedbackTotalCount').textContent = `${list.length}건`;
   if(!list.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">제출된 요청이 없습니다.</div>'; return; }
+  // 페이징
+  const pg = paginate(list, 'feedback');
   el.innerHTML = `
     <table class="table" style="width:100%;">
       <thead><tr>
@@ -9449,9 +9629,9 @@ async function renderFeedbackAdmin() {
         <th style="width:80px;"></th>
       </tr></thead>
       <tbody>
-        ${list.map((f,idx)=>`
+        ${pg.items.map((f,idx)=>`
           <tr style="cursor:pointer;" onclick="openFeedbackDetail(${f.id})">
-            <td style="font-family:JetBrains Mono,monospace;color:var(--text3);">${list.length-idx}</td>
+            <td style="font-family:JetBrains Mono,monospace;color:var(--text3);">${pg.startIndex+idx+1}</td>
             <td style="font-weight:600;">${escapeHtml(f.title)}</td>
             <td>${escapeHtml(f.author||'-')}</td>
             <td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);">${formatFeedbackDate(f.created_at)}</td>
@@ -9461,6 +9641,7 @@ async function renderFeedbackAdmin() {
         `).join('')}
       </tbody>
     </table>
+    ${buildPaginationHtml('feedback', pg.page, pg.totalPages, pg.total)}
   `;
 }
 
