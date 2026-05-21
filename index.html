@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/rladu/Downloads/index_10.html -->
+<!-- saved from url=(0045)file:///C:/Users/rladu/Downloads/index_4.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -4446,8 +4446,24 @@ async function changeAssign(newAssign) {
     try { await sbUpdateCustomer(currentCustomer); }
     catch(e) { showGlobalToast('⚠️ 담당자 저장 실패: '+(e.message||e)); }
   }
+  // 펀딩 측 담당자 동기화
+  await syncFundingAssign(currentCustomer.id, newAssign);
   refreshAllViews();
   renderHistory();
+}
+
+// 고객DB 담당자 변경 시, 연결된 펀딩의 담당자(assign)도 동기화
+// - customerId로 매칭되는 모든 펀딩의 assign을 갱신
+// - Supabase에 저장 후 fundingList 갱신
+async function syncFundingAssign(customerId, newAssign) {
+  if(!customerId || typeof fundingList === 'undefined' || !Array.isArray(fundingList)) return;
+  const targets = fundingList.filter(f => f.customerId === customerId && f.assign !== newAssign);
+  if(targets.length === 0) return;
+  targets.forEach(f => { f.assign = newAssign; });
+  if(isSbConfigured()) {
+    try { await Promise.all(targets.map(f => sbUpdateFunding(f))); }
+    catch(e) { showGlobalToast('⚠️ 펀딩 담당자 동기화 실패: '+(e.message||e)); }
+  }
 }
 
 async function changeCustomerDivision(newVal) {
@@ -6260,6 +6276,9 @@ async function confirmReassign() {
     try { await Promise.all(toUpdate.map(c=>sbUpdateCustomer(c))); }
     catch(e) { showGlobalToast('⚠️ 재배분 저장 실패: '+(e.message||e)); return; }
   }
+
+  // 연결된 펀딩 담당자도 동기화 (관리자 재배분)
+  await Promise.all(toUpdate.map(c => syncFundingAssign(c.id, newAssign)));
 
   const cnt = reclaimPendingIds.length;
   closeModal('reassignModal');
