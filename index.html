@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/rladu/Downloads/index_32.html -->
+<!-- saved from url=(0046)file:///C:/Users/rladu/Downloads/index_45.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -11,7 +11,7 @@
 </head>
 <body>
 <!-- ===== LOGIN ===== -->
-<div id="loginScreen" style="display: none;">
+<div id="loginScreen" style="display: flex;">
   <div class="login-box">
     <div class="login-logo">TS AUTO PLAN <span style="font-weight:400;font-size:14px;letter-spacing:1px;">/ 타소</span></div>
     <div class="login-sub">장기렌트 CRM 시스템</div>
@@ -31,7 +31,7 @@
   </div>
 </div>
 <!-- ===== APP ===== -->
-<div id="app" class="active">
+<div id="app" class="">
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-logo" onclick="(function(){var n=document.querySelector(&#39;.nav-item[onclick*=\&#39;dashboard\&#39;]&#39;);goPage(&#39;dashboard&#39;,n);})()" style="cursor:pointer;" title="대시보드로 이동">TS AUTO PLAN <span style="font-weight:400;font-size:12px;color:var(--text2);letter-spacing:1px;">/ 타소</span></div>
@@ -39,7 +39,7 @@
       <button id="topFundingCheckBtn" onclick="openFundingCheckDropdown()" title="펀딩 체크" class="admin-only" style="align-items: center; gap: 6px; padding: 6px 12px; background: transparent; border: 1px solid var(--border2); border-radius: 18px; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; transition: 0.2s; display: inline-flex;" onmouseover="this.style.background=&#39;var(--bg3)&#39;;this.style.borderColor=&#39;var(--green)&#39;;this.style.color=&#39;var(--green)&#39;;" onmouseout="this.style.background=&#39;transparent&#39;;this.style.borderColor=&#39;var(--border2)&#39;;this.style.color=&#39;var(--text2)&#39;;">
         <span style="font-size:14px;">💰</span>
         <span>펀딩체크</span>
-        <span id="topFundingCheckBadge" style="min-width: 18px; height: 18px; padding: 0px 5px; border-radius: 9px; background: var(--green); color: rgb(0, 0, 0); font-size: 10px; font-weight: 700; font-family: &quot;JetBrains Mono&quot;, monospace; display: inline-flex; align-items: center; justify-content: center; line-height: 1;">1</span>
+        <span id="topFundingCheckBadge" style="min-width: 18px; height: 18px; padding: 0px 5px; border-radius: 9px; background: var(--bg4); color: var(--text3); font-size: 10px; font-weight: 700; font-family: &quot;JetBrains Mono&quot;, monospace; display: inline-flex; align-items: center; justify-content: center; line-height: 1;">0</span>
       </button>
       <button id="topAlarmBtn" onclick="openAlarmDropdown()" title="오늘 알람" style="position:relative;background:transparent;border:1px solid var(--border2);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;" onmouseover="this.style.background=&#39;var(--bg3)&#39;;this.style.borderColor=&#39;var(--accent)&#39;;" onmouseout="this.style.background=&#39;transparent&#39;;this.style.borderColor=&#39;var(--border2)&#39;;">
         💡
@@ -1799,7 +1799,7 @@
         <span id="fundingBulkCount" style="font-size:13px;font-weight:600;color:var(--accent);">0건 선택</span>
         <button class="btn btn-ghost btn-sm" onclick="clearFundingChecks()">선택 해제</button>
         <div class="admin-only" style="align-items: center; gap: 8px; margin-left: auto;">
-          <button class="btn btn-sm" style="background:rgba(68,136,255,.15);border:1px solid rgba(68,136,255,.4);color:var(--blue);" onclick="confirmSelectedFunding()">✓ 확정 처리</button>
+          <button class="btn btn-sm" style="background:rgba(68,136,255,.15);border:1px solid rgba(68,136,255,.4);color:var(--blue);" onclick="confirmSelectedFunding()">✓ 최종확정</button>
           <button class="btn btn-ghost btn-sm" onclick="exportFundingExcel()">📊 선택 엑셀</button>
         </div>
       </div>
@@ -1847,7 +1847,7 @@
             <th style="min-width:90px;white-space:nowrap;">인도완료일</th>
             <th style="min-width:80px;white-space:nowrap;">등록일</th>
             <th style="min-width:80px;white-space:nowrap;text-align:center;">인도</th>
-            <th style="min-width:60px;white-space:nowrap;text-align:center;">확정</th>
+            <th style="min-width:80px;white-space:nowrap;text-align:center;">최종확정</th>
             <th style="min-width:100px;white-space:nowrap;"></th>
           </tr></thead>
           <tbody id="fundingBody"><tr style="cursor:pointer;" onclick="editFundingById(32)"><td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="funding-check" data-id="32" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);"></td><td style="text-align:center;font-size:12px;color:var(--text3);">1</td><td style="font-weight:600;white-space:nowrap;">테스트 12 <span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,153,68,.4);margin-left:4px;letter-spacing:.3px;">직영업</span></td><td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">010-8248-0939</td><td style="font-size:12px;white-space:nowrap;"></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">강민지</td><td style="white-space:nowrap;"><span style="font-size:11px;background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px;">렌트</span></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">BNK캐피탈</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">50,000,000원</td><td style="text-align:center;font-size:12px;color:var(--text2);">1%</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">500,000원</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">+500,000(1%)</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">+1,000,000</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;font-weight:700;color:var(--green);">2,000,000원</td><td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:#4488ff22;color:#4488ff;">최종심사진행</span></td><td style="font-size:11px;color:var(--text2);">-</td><td style="font-size:11px;color:var(--green);">2026-05-26</td><td style="font-size:11px;color:var(--text2);">2026-05-25</td><td style="text-align:center;" onclick="event.stopPropagation()"><button class="btn btn-sm" onclick="event.stopPropagation();markDelivery(32)" style="font-size:10px;padding:3px 8px;background:rgba(68,255,136,.12);border:1px solid rgba(68,255,136,.35);color:var(--green);cursor:pointer;white-space:nowrap;">인도완료</button></td><td style="text-align:center;"><button class="btn btn-sm" style="font-size:10px;padding:3px 8px;background:rgba(68,255,136,.1);border:1px solid rgba(68,255,136,.3);color:var(--green);cursor:pointer;" onclick="event.stopPropagation();confirmOneFunding(32)">확정</button></td><td onclick="event.stopPropagation()"><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editFundingById(32)" style="cursor:pointer;pointer-events:all;">수정</button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteFunding(32)" style="cursor:pointer;">삭제</button></div></td></tr></tbody>
@@ -2539,11 +2539,15 @@
         <input type="date" id="fm_fundingDate" style="color-scheme:dark;">
       </div>
       <div class="form-field">
-        <label>인도예정/완료일자</label>
-        <input type="date" id="fm_deliveryDate" style="color-scheme:dark;" onchange="calcExpiryDate()">
+        <label>인도예정일자</label>
+        <input type="date" id="fm_expectedDeliveryDate" style="color-scheme:dark;" onchange="calcExpiryDate()">
       </div>
     </div>
     <div class="form-grid" style="margin-bottom:14px;">
+      <div class="form-field">
+        <label>인도완료일자</label>
+        <input type="date" id="fm_deliveryDate" style="color-scheme:dark;color:var(--green);" onchange="calcExpiryDate()">
+      </div>
       <div class="form-field">
         <label>계약개월수</label>
         <select id="fm_contractMonths" onchange="calcExpiryDate()" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;">
@@ -2555,6 +2559,8 @@
           <option value="60">60개월</option>
         </select>
       </div>
+    </div>
+    <div class="form-grid" style="margin-bottom:14px;">
       <div class="form-field">
         <label>선수/보증금</label>
         <div style="display:flex;gap:6px;">
@@ -2565,12 +2571,12 @@
           <input type="text" id="fm_depositAmount" placeholder="0원" oninput="fmFormatWon(this)" style="flex:1;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:JetBrains Mono,monospace;outline:none;text-align:right;">
         </div>
       </div>
-    </div>
-    <div class="form-grid" style="margin-bottom:20px;">
       <div class="form-field">
         <label>약정주행거리</label>
         <input type="text" id="fm_mileageLimit" placeholder="0km" oninput="fmFormatKm(this)" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:JetBrains Mono,monospace;outline:none;text-align:right;width:100%;">
       </div>
+    </div>
+    <div class="form-grid" style="margin-bottom:20px;">
       <div class="form-field">
         <label>렌트/리스료</label>
         <input type="text" id="fm_monthlyFee" placeholder="0원" oninput="fmFormatWon(this)" style="padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:JetBrains Mono,monospace;outline:none;text-align:right;width:100%;">
@@ -2583,7 +2589,7 @@
     <div style="background:rgba(170,136,255,.06);border:1px solid rgba(170,136,255,.25);border-radius:6px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-size:12px;font-weight:700;color:#aa88ff;">⏰ 만기예정일자</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px;">= 인도예정/완료일자 + 계약개월수 − 1일</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;">= 인도완료일자 + 계약개월수 − 1일</div>
       </div>
       <div id="fm_expiryDateDisplay" style="font-size:18px;font-weight:700;font-family:JetBrains Mono,monospace;color:#aa88ff;">-</div>
     </div>
@@ -3052,6 +3058,7 @@ function fundingToRow(f) {
     confirmed_date: f.confirmedDate || null,
     confirmed_by:   f.confirmedBy   || null,
     contract_date:  f.contractDate  || null,
+    expected_delivery_date: f.expectedDeliveryDate || null,
     delivery_date:  f.deliveryDate  || null,
     date:           f.date          || null,
     funding_date:    f.fundingDate    || null,
@@ -3096,6 +3103,7 @@ function rowToFunding(r) {
     confirmedDate: r.confirmed_date,
     confirmedBy:   r.confirmed_by,
     contractDate:  r.contract_date,
+    expectedDeliveryDate: r.expected_delivery_date || null,
     deliveryDate:  r.delivery_date,
     date:          r.date,
     fundingDate:     r.funding_date    || null,
@@ -3137,21 +3145,54 @@ async function sbDeleteCustomer(id) {
 }
 async function sbLoadFundings() {
   const rows = await sbFetch('fundings?order=id.desc&select=*');
-  return rows.map(rowToFunding);
+  const list = rows.map(rowToFunding);
+  // 마이그레이션: expectedDeliveryDate가 비어있고 deliveryDate가 있는데 인도완료 상태가 아닌 경우
+  // → 기존 deliveryDate 값을 expectedDeliveryDate(인도예정일자)로 이동
+  list.forEach(f => {
+    if(!f.expectedDeliveryDate && f.deliveryDate && f.status !== '인도완료') {
+      f.expectedDeliveryDate = f.deliveryDate;
+      f.deliveryDate = null;
+    }
+  });
+  return list;
 }
 async function sbSaveFunding(f) {
   const row = fundingToRow(f);
-  const result = await sbFetch('fundings?on_conflict=id', 'POST', [row]);
-  const saved = Array.isArray(result) ? result[0] : result;
-  if(typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
-  return saved ? rowToFunding(saved) : null;
+  try {
+    const result = await sbFetch('fundings?on_conflict=id', 'POST', [row]);
+    const saved = Array.isArray(result) ? result[0] : result;
+    if(typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
+    return saved ? rowToFunding(saved) : null;
+  } catch(e) {
+    // expected_delivery_date 컬럼이 DB에 없으면 제거 후 재시도
+    if(String(e?.message||e).includes('expected_delivery_date')) {
+      delete row.expected_delivery_date;
+      console.warn('expected_delivery_date 컬럼이 Supabase에 없습니다. 해당 필드 제외하고 저장합니다.');
+      const result = await sbFetch('fundings?on_conflict=id', 'POST', [row]);
+      const saved = Array.isArray(result) ? result[0] : result;
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
+      return saved ? rowToFunding(saved) : null;
+    }
+    throw e;
+  }
 }
 async function sbUpdateFunding(f) {
   const row = fundingToRow(f);
   delete row.id;
-  const result = await sbFetch(`fundings?id=eq.${f.id}`, 'PATCH', row);
-  const saved = Array.isArray(result) ? result[0] : result;
-  return saved ? rowToFunding(saved) : null;
+  try {
+    const result = await sbFetch(`fundings?id=eq.${f.id}`, 'PATCH', row);
+    const saved = Array.isArray(result) ? result[0] : result;
+    return saved ? rowToFunding(saved) : null;
+  } catch(e) {
+    if(String(e?.message||e).includes('expected_delivery_date')) {
+      delete row.expected_delivery_date;
+      console.warn('expected_delivery_date 컬럼이 Supabase에 없습니다. 해당 필드 제외하고 저장합니다.');
+      const result = await sbFetch(`fundings?id=eq.${f.id}`, 'PATCH', row);
+      const saved = Array.isArray(result) ? result[0] : result;
+      return saved ? rowToFunding(saved) : null;
+    }
+    throw e;
+  }
 }
 async function sbDeleteFunding(id) {
   const r = await sbFetch(`fundings?id=eq.${id}`, 'DELETE');
@@ -5004,7 +5045,7 @@ function resetFundingModal() {
   document.getElementById('fm_commRate').value='';
   document.getElementById('fm_status').value='최종심사진행';
   document.getElementById('fm_date').value = new Date().toISOString().split('T')[0];
-  ['fm_contractDate','fm_deliveryDate'].forEach(id=>{
+  ['fm_contractDate','fm_expectedDeliveryDate','fm_deliveryDate'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   ['fm_fundingDate','fm_depositAmount','fm_mileageLimit','fm_monthlyFee'].forEach(id=>{
@@ -5082,17 +5123,8 @@ async function saveFunding() {
     custAssign = document.getElementById('fm_manualAssign')?.value||currentUser;
     custCar = document.getElementById('fm_car')?.value||'';
     if(!custName) { alert('고객명을 입력해주세요.'); return; }
-    const normPhone = (custPhone||'').replace(/[^0-9]/g,'');
+    // 직영업 펀딩 등록은 항상 새 고객으로 생성 (동명이인/동일연락처도 별도 DB로 처리)
     let existCust = null;
-    if(normPhone) {
-      existCust = customers.find(c => (c.phone||'').replace(/[^0-9]/g,'') === normPhone);
-    }
-    if(!existCust && custName) {
-      existCust = customers.find(c =>
-        (c.name||'').trim() === custName &&
-        (c.phone||'').replace(/[^0-9]/g,'') === normPhone
-      );
-    }
     if(existCust) {
       cust = existCust;
       fundingLinkedCustomerId = existCust.id;
@@ -5170,6 +5202,7 @@ async function saveFunding() {
     netRevenue: revenue + Math.round(fmParseNumber(document.getElementById('fm_carPrice')?.value)*(parseFloat(document.getElementById('fm_promo')?.value)||0)/100) + fmParseNumber(document.getElementById('fm_agency')?.value) - Array.from(document.querySelectorAll('#fm_buuiRows > div')).reduce((s,r)=>s+fmParseNumber(r.querySelectorAll('input')[1]?.value),0),
     status: document.getElementById('fm_status').value,
     contractDate: document.getElementById('fm_contractDate').value,
+    expectedDeliveryDate: document.getElementById('fm_expectedDeliveryDate')?.value || '',
     deliveryDate: document.getElementById('fm_deliveryDate').value,
     date: document.getElementById('fm_date').value || new Date().toISOString().split('T')[0],
     fundingDate:     document.getElementById('fm_fundingDate')?.value || '',
@@ -5344,6 +5377,7 @@ function editFunding(id) {
   setValNum('fm_agency', f.agency);
   document.getElementById('fm_netRevDisplay').textContent = (f.netRevenue||0).toLocaleString('ko-KR')+' 원';
   setVal('fm_contractDate', f.contractDate);
+  setVal('fm_expectedDeliveryDate', f.expectedDeliveryDate);
   setVal('fm_deliveryDate', f.deliveryDate);
   setVal('fm_date', f.date);
   setVal('fm_memo', f.memo);
@@ -5683,8 +5717,8 @@ function renderFundingPage() {
       '<td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">'+(f.agency?'+'+f.agency.toLocaleString('ko-KR'):'-')+'</td>'+
       (()=>{ const nr=f.netRevenue||0; const col=nr<0?'#ff6666':nr===0?'var(--text2)':'var(--green)'; return '<td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;font-weight:700;color:'+col+';">'+nr.toLocaleString('ko-KR')+'원</td>'; })()+
       '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:'+stColor+'22;color:'+stColor+';">'+f.status+'</span></td>'+
-      '<td style="font-size:11px;color:var(--text2);">'+(f.contractDate||'-')+'</td>'+
-      '<td style="font-size:11px;color:'+(hasDelivery?'var(--green)':'var(--text3)')+';">'+(f.deliveryDate||'-')+'</td>'+
+      '<td style="font-size:11px;color:var(--text2);">'+(f.expectedDeliveryDate||'-')+'</td>'+
+      '<td style="font-size:11px;font-weight:'+(hasDelivery?'700':'400')+';color:'+(hasDelivery?'var(--green)':'var(--text3)')+';">'+(f.deliveryDate||'-')+'</td>'+
       '<td style="font-size:11px;color:var(--text2);">'+(f.date||'-')+'</td>'+
       '<td style="text-align:center;"onclick="event.stopPropagation()">'+deliveryBtn+'</td>'+
       '<td style="text-align:center;">'+
@@ -6384,23 +6418,23 @@ function clearFundingChecks() {
   if(bar) bar.style.display='none';
 }
 async function confirmOneFunding(id) {
-  if(currentRole!=='admin') { showGlobalToast('관리자만 확정 처리할 수 있습니다.'); return; }
-  if(!confirm('이 펀딩을 확정 처리하시겠습니까?\n확정 후에는 수정이 불가합니다.')) return;
+  if(currentRole!=='admin') { showGlobalToast('관리자만 최종확정할 수 있습니다.'); return; }
+  if(!confirm('이 펀딩을 최종확정하시겠습니까?\n확정 후에는 수정이 불가합니다.')) return;
   const f = fundingList.find(f=>f.id===id);
   if(f) {
     f.confirmed=true; f.confirmedDate=new Date().toISOString().split('T')[0]; f.confirmedBy=currentUser;
     try {
       if(isSbConfigured()) await sbUpdateFunding(f);
-    } catch(e) { showGlobalToast('⚠️ 확정 저장 실패: '+(e.message||e)); return; }
+    } catch(e) { showGlobalToast('⚠️ 최종확정 저장 실패: '+(e.message||e)); return; }
   }
   renderFundingPage();
-  showGlobalToast('펀딩 확정 처리 완료');
+  showGlobalToast('펀딩 최종확정 완료');
 }
 async function confirmSelectedFunding() {
-  if(currentRole!=='admin') { showGlobalToast('관리자만 확정 처리할 수 있습니다.'); return; }
+  if(currentRole!=='admin') { showGlobalToast('관리자만 최종확정할 수 있습니다.'); return; }
   const ids = Array.from(document.querySelectorAll('.funding-check:checked')).map(c=>parseInt(c.dataset.id));
   if(!ids.length) return;
-  if(!confirm(ids.length+'건을 확정 처리하시겠습니까?\n확정 후 수정이 불가합니다.')) return;
+  if(!confirm(ids.length+'건을 최종확정하시겠습니까?\n확정 후 수정이 불가합니다.')) return;
   const d = new Date().toISOString().split('T')[0];
   const targets = [];
   ids.forEach(id=>{
@@ -6409,10 +6443,10 @@ async function confirmSelectedFunding() {
   });
   try {
     if(isSbConfigured()) await Promise.all(targets.map(f=>sbUpdateFunding(f)));
-  } catch(e) { showGlobalToast('⚠️ 확정 저장 실패: '+(e.message||e)); return; }
+  } catch(e) { showGlobalToast('⚠️ 최종확정 저장 실패: '+(e.message||e)); return; }
   clearFundingChecks();
   renderFundingPage();
-  showGlobalToast(ids.length+'건 확정 처리 완료');
+  showGlobalToast(ids.length+'건 최종확정 완료');
 }
 function editFundingById(id) {
   editFunding(id);
@@ -8838,6 +8872,14 @@ function calcExpiryDate() {
   const m = document.getElementById('fm_contractMonths')?.value;
   const el = document.getElementById('fm_expiryDateDisplay');
   if(!el) return;
+  if(m && !d) {
+    el.textContent = '인도완료일자 입력 필요';
+    el.style.fontSize = '13px';
+    el.style.color = 'var(--yellow)';
+    return;
+  }
+  el.style.fontSize = '18px';
+  el.style.color = '#aa88ff';
   el.textContent = calcExpiryDateStr(d, m) || '-';
 }
 const ALARM_MSG_KEY_PREFIX = 'ts_crm_alarm_messages_'; // employee_id 별로 키 분리
