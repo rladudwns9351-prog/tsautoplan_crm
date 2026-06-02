@@ -844,8 +844,8 @@
               <th style="min-width:100px;">상태</th>
               <th style="min-width:160px;">최근 메모</th>
               <th style="min-width:90px;text-align:right;">등록일</th>
-              <th style="min-width:90px;text-align:right;">최근상담일</th>
-              <th style="min-width:90px;text-align:right;">다음상담일</th>
+              <th id="sortHead_lastConsult" onclick="sortDB('lastConsult')" style="min-width:90px;text-align:right;cursor:pointer;user-select:none;">최근상담일<span style="color:var(--text3);font-size:9px;margin-left:3px;">⇅</span></th>
+              <th id="sortHead_nextConsult" onclick="sortDB('nextConsult')" style="min-width:90px;text-align:right;cursor:pointer;user-select:none;">다음상담일<span style="color:var(--text3);font-size:9px;margin-left:3px;">⇅</span></th>
               <th style="width:40px;text-align:center;">⭐</th>
               <th id="reclaimColHead" style="width: 52px; text-align: center;">회수</th>
             </tr>
@@ -4670,12 +4670,53 @@ function latestConsultDate(c) {
   if(!iso) return '<span style="font-size:11px;color:var(--text3);">-</span>';
   return '<span style="font-size:11px;color:var(--text2);">'+iso+'</span>';
 }
+var dbSortKey = '';   // '', 'lastConsult', 'nextConsult'
+var dbSortDir = 'desc'; // 'asc' | 'desc'
+function dbSortVal(c, key) {
+  if(key === 'lastConsult') return consultDateISO(c) || c.date || '';
+  if(key === 'nextConsult') return getNextConsult(c) || '';
+  return '';
+}
+function sortDB(key) {
+  if(dbSortKey === key) {
+    dbSortDir = (dbSortDir === 'asc') ? 'desc' : 'asc';
+  } else {
+    dbSortKey = key; dbSortDir = 'asc';
+  }
+  filterDB();
+}
+function sortArrowHtml(key) {
+  if(dbSortKey !== key) return '<span style="color:var(--text3);font-size:9px;margin-left:3px;">⇅</span>';
+  return '<span style="color:var(--accent);font-size:9px;margin-left:3px;">'+(dbSortDir==='asc'?'▲':'▼')+'</span>';
+}
+function refreshDBSortHeaders() {
+  const lh = document.getElementById('sortHead_lastConsult');
+  const nh = document.getElementById('sortHead_nextConsult');
+  if(lh) lh.innerHTML = '최근상담일'+sortArrowHtml('lastConsult');
+  if(nh) nh.innerHTML = '다음상담일'+sortArrowHtml('nextConsult');
+}
 function renderDB(list) {
-  const sorted = [...list].sort((a,b) => {
-    const dc = (b.date||'').localeCompare(a.date||'');
-    if(dc !== 0) return dc;
-    return (b.id||0) - (a.id||0);
-  });
+  let sorted;
+  if(dbSortKey) {
+    const dir = dbSortDir === 'asc' ? 1 : -1;
+    sorted = [...list].sort((a,b) => {
+      const av = dbSortVal(a, dbSortKey), bv = dbSortVal(b, dbSortKey);
+      // 빈 값은 항상 맨 아래로
+      if(!av && !bv) return (b.id||0) - (a.id||0);
+      if(!av) return 1;
+      if(!bv) return -1;
+      const c = av.localeCompare(bv);
+      if(c !== 0) return c * dir;
+      return (b.id||0) - (a.id||0);
+    });
+  } else {
+    sorted = [...list].sort((a,b) => {
+      const dc = (b.date||'').localeCompare(a.date||'');
+      if(dc !== 0) return dc;
+      return (b.id||0) - (a.id||0);
+    });
+  }
+  refreshDBSortHeaders();
   document.getElementById('dbCount').textContent = '전체 '+sorted.length+'명';
   const pg = paginate(sorted, 'db');
   const body = document.getElementById('dbBody');
@@ -4742,8 +4783,8 @@ function directBadge(c) {
   return '';
 }
 function getNextConsult(c) {
-  // 펀딩완료 상태는 다음상담일 카운팅 제외
-  if(c && c.status === '펀딩완료') return '';
+  // 펀딩완료/고객진행미희망 상태는 다음상담일 카운팅 제외
+  if(c && (c.status === '펀딩완료' || c.status === '고객진행미희망')) return '';
   if(c.nextConsult) return c.nextConsult;
   const real = (c.memos||[]).filter(m=>!m.isSystem);
   if(!real.length) return '';
@@ -6158,6 +6199,15 @@ async function confirmReassign() {
     c.retrieved     = false;
     c.reassignDate  = now.toISOString().split('T')[0]; // 구DB 기준일 (담당자 변경일)
     c.date          = now.toISOString().split('T')[0];
+    // 고객진행미희망 → 재배분 시 상담중으로 복귀 + 다음상담일 카운팅 재개
+    if(c.status === '고객진행미희망') {
+      c.status = '상담중';
+      c.nextConsult = null; // 리셋 → 재배분일 기준 재계산
+      c.memos.unshift({
+        text:'[상태변경] 고객진행미희망 → 상담중 (재배분)',
+        author:'관리자', date:timeStr, dateISO:now.toISOString().split('T')[0], isSystem:true
+      });
+    }
     c.memos.unshift({
       text:'[재배분] '+newAssign+'으로 재배분'+(memo?' - '+memo:''),
       author:'관리자', date:timeStr, dateISO:now.toISOString().split('T')[0], resetConsult:true, isSystem:true
