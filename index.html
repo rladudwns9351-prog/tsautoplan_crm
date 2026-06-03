@@ -9,6 +9,8 @@
 <link href="file:///C:/Users/rladu/Downloads/index_files/css2" rel="stylesheet">
 <style>:root{--bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;--bg4:#222222;--border:#2a2a2a;--border2:#333333;--text:#f0f0f0;--text2:#999999;--text3:#555555;--accent:#ffffff;--accent2:#e0e0e0;--red:#ff4444;--green:#44ff88;--yellow:#ffcc44;--blue:#4488ff;--sidebar:220px;--radius:8px}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg);background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,var(--border) 39px,var(--border) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,var(--border) 39px,var(--border) 40px)}.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:48px;width:400px}.login-logo{font-size:22px;font-weight:700;letter-spacing:2px;margin-bottom:8px}.login-sub{color:var(--text2);font-size:13px;margin-bottom:36px}.login-tabs{display:flex;gap:0;margin-bottom:28px;border:1px solid var(--border2);border-radius:6px;overflow:hidden}.login-tab{flex:1;padding:10px;text-align:center;font-size:13px;cursor:pointer;background:transparent;color:var(--text2);border:none;transition:.2s}.login-tab.active{background:var(--accent);color:#000;font-weight:600}.login-field{margin-bottom:16px}.login-field label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;letter-spacing:.5px}.login-field input{width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:.2s}.login-field input:focus{border-color:#555}.login-btn{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;letter-spacing:.5px;transition:.15s}.login-btn:hover{background:#ddd}.login-hint{font-size:11px;color:var(--text3);text-align:center;margin-top:16px}#app{display:none;flex:1;overflow:hidden;flex-direction:row}#app.active{display:flex}.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;z-index:100;gap:16px}.topbar-logo{font-size:15px;font-weight:700;letter-spacing:2px;color:var(--accent);width:var(--sidebar);flex-shrink:0}.topbar-right{margin-left:auto;display:flex;align-items:center;gap:16px}.role-badge{font-size:11px;letter-spacing:1px;padding:4px 10px;border-radius:999px;font-weight:600}.role-admin{background:#fff;color:#000}.role-staff{background:var(--bg4);color:var(--text2);border:1px solid var(--border2)}.topbar-user{font-size:13px;color:var(--text2)}.logout-btn{font-size:12px;color:var(--text3);cursor:pointer;background:none;border:none;padding:6px 10px;border-radius:4px;transition:.15s}.logout-btn:hover{color:var(--text);background:var(--bg3)}.sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);padding-top:52px;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}.sidebar-section{padding:20px 0 8px 0}.sidebar-label{font-size:10px;color:var(--text3);letter-spacing:2px;padding:0 20px 8px;text-transform:uppercase}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--text2);font-size:13px;transition:.15s;border-left:3px solid transparent}.nav-item:hover{color:var(--text);background:var(--bg3)}.nav-item.active{color:var(--accent);background:var(--bg3);border-left-color:var(--accent)}.nav-icon{font-size:15px;width:18px;text-align:center}.sidebar-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}.sidebar-version{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}.main{flex:1;padding-top:52px;overflow-y:auto;background:var(--bg)}.page{display:none;padding:28px}.page.active{display:block}.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.page-title{font-size:20px;font-weight:700}.pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:16px 8px;flex-wrap:wrap}.pagination .page-info{font-size:11px;color:var(--text3);margin-right:12px;font-family:JetBrains Mono,monospace}.pagination button{min-width:32px;height:30px;padding:0 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;cursor:pointer;transition:.15s}.pagination button:hover:not(:disabled){background:var(--bg4);color:var(--text);border-color:var(--accent)}.pagination button.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}.pagination button:disabled{opacity:.35;cursor:not-allowed}.pagination button.nav-btn{padding:0 12px}.page-sub{font-size:13px;color:var(--text2);margin-top:3px}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}.stat-card::after{content:'';position:absolute;top:0;right:0;width:3px;height:100%}.stat-card.c-white::after{background:#fff}.stat-card.c-green::after{background:var(--green)}.stat-card.c-yellow::after{background:var(--yellow)}.stat-card.c-blue::after{background:var(--blue)}.stat-label{font-size:11px;color:var(--text2);letter-spacing:.5px;margin-bottom:10px}.stat-value{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace}.stat-change{font-size:11px;color:var(--text2);margin-top:6px}.stat-change.up{color:var(--green)}.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}.chart-title{font-size:13px;font-weight:600;margin-bottom:16px}.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}.bar{width:100%;background:var(--bg4);border-radius:3px 3px 0 0;position:relative;transition:.6s}.bar-val{font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace}.bar-lbl{font-size:10px;color:var(--text3)}.pie-legend{display:flex;flex-direction:column;gap:10px;margin-top:12px}.legend-item{display:flex;align-items:center;gap:10px;font-size:12px}.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.legend-label{color:var(--text2);flex:1}.legend-val{color:var(--text);font-weight:600;font-family:'JetBrains Mono',monospace}.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}.section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}.section-head-title{font-size:13px;font-weight:600}.section-action{font-size:12px;color:var(--text2);cursor:pointer;transition:.15s}.section-action:hover{color:var(--text)}.tbl{width:100%;border-collapse:collapse}.tbl th{font-size:11px;color:var(--text3);letter-spacing:.5px;text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);font-weight:500;text-transform:uppercase}.tbl td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}.tbl tr:last-child td{border-bottom:none}.tbl tr:hover td{background:var(--bg3);cursor:pointer}.tbl-name{font-weight:600}.tbl-sub{font-size:11px;color:var(--text2);margin-top:2px}.badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:4px}.badge-new{background:rgba(68,136,255,.15);color:var(--blue)}.badge-consult{background:rgba(255,204,68,.12);color:var(--yellow)}.badge-contract{background:rgba(68,255,136,.12);color:var(--green)}.badge-complete{background:rgba(255,255,255,.08);color:var(--text2)}.badge-cancel{background:rgba(255,68,68,.12);color:var(--red)}.badge-admin{background:#fff;color:#000;font-size:10px}.badge-staff{background:var(--bg4);color:var(--text2);border:1px solid var(--border2);font-size:10px}.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}.search-wrap{position:relative;flex:1;min-width:200px}.search-wrap input{width:100%;padding:9px 14px 9px 36px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.search-wrap input:focus{border-color:#444}.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}.select-filter{padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:13px;font-family:inherit;outline:none;cursor:pointer}.btn{padding:9px 16px;border-radius:6px;font-size:13px;font-family:inherit;cursor:pointer;border:none;transition:.15s;font-weight:500}.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:#ddd}.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text);border-color:#444}.btn-sm{padding:6px 12px;font-size:12px}.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(255,68,68,.3)}.btn-danger:hover{background:rgba(255,68,68,.1)}.detail-back{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:20px;transition:.15s}.detail-back:hover{color:var(--text)}.detail-grid{display:grid;grid-template-columns:320px 1fr;gap:20px}.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}.info-avatar{width:60px;height:60px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border2);margin-bottom:16px}.info-name{font-size:18px;font-weight:700;margin-bottom:4px}.info-phone{font-size:14px;color:var(--text2);margin-bottom:16px;font-family:'JetBrains Mono',monospace}.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}.info-row:last-child{border-bottom:none}.info-key{color:var(--text2)}.info-val{font-weight:500;text-align:right}.info-edit-btn{width:100%;margin-top:16px}.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}.tab{padding:10px 20px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:.15s;margin-bottom:-1px}.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}.tab-content{display:none}.tab-content.active{display:block}.memo-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:10px}.memo-meta{display:flex;justify-content:space-between;margin-bottom:8px}.memo-author{font-size:11px;color:var(--text2)}.memo-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}.memo-text{font-size:13px;line-height:1.6}.memo-input{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;margin-bottom:10px}.memo-input:focus{border-color:#444}.file-drop{border:2px dashed var(--border2);border-radius:8px;padding:32px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:16px}.file-drop:hover{border-color:#555;background:var(--bg3)}.file-drop-icon{font-size:32px;margin-bottom:10px}.file-drop-text{font-size:13px;color:var(--text2)}.file-list{display:flex;flex-direction:column;gap:8px}.file-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}.file-icon{font-size:20px}.file-info{flex:1}.file-name{font-size:13px;font-weight:500}.file-size{font-size:11px;color:var(--text2);margin-top:2px;font-family:'JetBrains Mono',monospace}.file-actions{display:flex;gap:8px}.user-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}.user-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px}.user-card-top{display:flex;align-items:center;gap:12px}.user-ava{width:44px;height:44px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}.user-card-name{font-weight:600;font-size:14px}.user-card-sub{font-size:12px;color:var(--text2);margin-top:2px}.user-stats{display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)}.user-stat{text-align:center}.user-stat-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}.user-stat-lbl{font-size:10px;color:var(--text2);margin-top:2px}.user-card-actions{display:flex;gap:8px;margin-top:4px}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}.modal-bg.open{display:flex}.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-height:85vh;overflow-y:auto}.modal-title{font-size:16px;font-weight:700;margin-bottom:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-field{display:flex;flex-direction:column;gap:6px}.form-field.full{grid-column:1/-1}.form-field label{font-size:12px;color:var(--text2)}.form-field input,.form-field select,.form-field textarea{padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:#555}.form-field textarea{resize:vertical;min-height:70px}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <!-- ===== LOGIN ===== -->
@@ -117,6 +119,9 @@
       </div>
       <div class="nav-item" onclick="goPage(&#39;calcage&#39;,this)">
         <span class="nav-icon">🎂</span> 만나이 계산기
+      </div>
+      <div class="nav-item" onclick="goPage(&#39;corp-analysis&#39;,this)">
+        <span class="nav-icon">🏢</span> 법인 재무분석
       </div>
       <div class="nav-item" onclick="goPage(&#39;tracking&#39;,this)">
         <span class="nav-icon">🚛</span> 탁송조회
@@ -2481,6 +2486,82 @@
         </div>
       </div>
     </div>
+
+    <!-- ===== 법인 재무분석 ===== -->
+    <div class="page" id="page-corp-analysis">
+      <style>
+        /* 통정 변수명 → CRM 변수 매핑 (이 페이지 한정) */
+        #page-corp-analysis{
+          --bg-tertiary:var(--bg3);--bg-secondary:var(--bg2);--bg-card:var(--bg2);
+          --text-primary:var(--text);--text-secondary:var(--text2);--text-muted:var(--text3);
+          --success:var(--green);--danger:var(--red);--warning:var(--yellow);--accent:var(--blue);
+        }
+        #page-corp-analysis .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+        #page-corp-analysis .topbar h2{font-size:20px;font-weight:700;color:var(--text);margin:0}
+        #page-corp-analysis .topbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+        #page-corp-analysis .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px}
+        #page-corp-analysis .cf-in{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;width:100%;box-sizing:border-box}
+        #page-corp-analysis .cf-in:focus{outline:none;border-color:var(--blue)}
+        #page-corp-analysis .cf-sub{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px}
+        #page-corp-analysis .cf-fld{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+        #page-corp-analysis .cf-fld label{font-size:13px;color:var(--text2);width:84px;flex-shrink:0}
+        #page-corp-analysis .cf-num{text-align:right}
+        #page-corp-analysis .cf-mcard{background:var(--bg3);border-radius:8px;padding:12px 14px}
+        #page-corp-analysis .cf-crit{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+        #page-corp-analysis .cf-pill{font-size:11px;font-weight:600;padding:2px 10px;border-radius:99px}
+      </style>
+      <div class="topbar">
+        <div>
+          <h2>🏢 법인 재무분석</h2>
+          <p style="color:var(--text3);font-size:12px;margin-top:4px">고객사 재무제표 입력 → 자본잠식·부채비율·유동비율·영업이익률 자동판정 + 종합 한줄평 (여신심사 참고용)</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-sm" onclick="document.getElementById('cf-xlsx-in').click()">📊 엑셀 자동입력</button>
+          <input type="file" id="cf-xlsx-in" style="display:none" accept=".xlsx,.xls,.csv">
+          <button class="btn btn-sm" onclick="document.getElementById('cf-doc-in').click()">📎 이미지/PDF 첨부</button>
+          <input type="file" id="cf-doc-in" style="display:none" accept="image/*,.pdf">
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center">
+          <input id="cf-name" type="text" class="cf-in" placeholder="회사명" style="flex:1;min-width:180px">
+          <input id="cf-year" type="text" class="cf-in" placeholder="사업연도 (예: 2022)" style="width:170px;flex:0 0 auto">
+          <span id="cf-docname" style="font-size:12px;color:var(--text3)"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px">
+          <div>
+            <div class="cf-sub">📋 재무상태표</div>
+            <div class="cf-fld"><label>유동자산</label><input id="cf-ca" class="cf-in cf-num" placeholder="0"></div>
+            <div class="cf-fld"><label>비유동자산</label><input id="cf-nca" class="cf-in cf-num" placeholder="0"></div>
+            <div class="cf-fld"><label>유동부채</label><input id="cf-cl" class="cf-in cf-num" placeholder="0"></div>
+            <div class="cf-fld"><label>비유동부채</label><input id="cf-ncl" class="cf-in cf-num" placeholder="0"></div>
+          </div>
+          <div>
+            <div class="cf-sub">📈 손익계산서</div>
+            <div class="cf-fld"><label>매출액</label><input id="cf-rev" class="cf-in cf-num" placeholder="0"></div>
+            <div class="cf-fld"><label>영업이익</label><input id="cf-oi" class="cf-in cf-num" placeholder="0"></div>
+            <div class="cf-fld"><label>당기순이익</label><input id="cf-ni" class="cf-in cf-num" placeholder="0"></div>
+            <div class="cf-fld"><label>이자비용</label><input id="cf-ie" class="cf-in cf-num" placeholder="0"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="cf-result">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <span id="cf-rname" style="font-size:16px;font-weight:600;color:var(--text)">—</span>
+          <span id="cf-ryear" style="font-size:13px;color:var(--text3)"></span>
+          <span style="margin-left:auto;font-size:11px;color:var(--text3)">단위: 원 · 여신심사 참고용 자동 산출</span>
+        </div>
+        <div id="cf-totals" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+        <div id="cf-crit-wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:18px"></div>
+        <div id="cf-verdict"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="btn btn-sm" onclick="cfExportPNG()">🖼️ PNG</button>
+        <button class="btn btn-sm" onclick="cfExportPDF()">📄 PDF</button>
+        <button class="btn btn-sm" onclick="cfExportXLSX()">📊 Excel</button>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 <style>input[type="date"],input[type="date"]::-webkit-datetime-edit,input[type="date"]::-webkit-inner-spin-button{color-scheme:dark !important}input[type="date"]::-webkit-calendar-picker-indicator{filter:brightness(0) invert(1) !important;cursor:pointer !important;opacity:1 !important;width:16px !important;height:16px !important;padding:0 2px !important}</style>
@@ -10724,6 +10805,181 @@ async function confirmBulkImport(){
     alert(`일괄등록 완료: ${ok}명 성공${fail?`, ${fail}명 실패`:''}`);
   }
 }
+</script>
+<script>
+/* ===== 법인 재무분석 (통정 이식) ===== */
+(function(){
+  function el(id){return document.getElementById(id);}
+  function cfNum(id){var v=el(id);if(!v)return 0;return parseFloat((v.value||'').replace(/[^0-9.\-]/g,''))||0;}
+  function cfFmt(v){return Math.round(v).toLocaleString('ko-KR');}
+  function sStyle(s){if(s==='양호')return{c:'var(--success)',b:'rgba(52,211,153,0.15)'};if(s==='주의')return{c:'var(--danger)',b:'rgba(248,113,113,0.15)'};return{c:'var(--warning)',b:'rgba(251,191,36,0.15)'};}
+  var STORE='tsautoplan_corpfin_v1';
+  var last=null;
+
+  function totalCard(label,val,danger){
+    return '<div class="cf-mcard"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">'+label+'</div><div style="font-size:15px;font-weight:600;'+(danger?'color:var(--danger)':'color:var(--text-primary)')+'">'+val+'</div></div>';
+  }
+  function critCard(title,val,status,basis){
+    var st=sStyle(status);
+    return '<div class="cf-crit"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px"><span style="font-size:13px;color:var(--text-secondary)">'+title+'</span><span class="cf-pill" style="color:'+st.c+';background:'+st.b+'">'+status+'</span></div><div style="font-size:22px;font-weight:700;color:'+st.c+'">'+val+'</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px">'+basis+'</div></div>';
+  }
+
+  function cfCalc(){
+    if(!el('cf-ca'))return;
+    var ca=cfNum('cf-ca'),nca=cfNum('cf-nca'),cl=cfNum('cf-cl'),ncl=cfNum('cf-ncl');
+    var rev=cfNum('cf-rev'),oi=cfNum('cf-oi'),ni=cfNum('cf-ni'),ie=cfNum('cf-ie');
+    var name=(el('cf-name').value||'').trim(),year=(el('cf-year').value||'').trim();
+    el('cf-rname').textContent=name||'—';
+    el('cf-ryear').textContent=year?('· '+year+' 사업연도'):'';
+    var ta=ca+nca, tl=cl+ncl, eq=ta-tl;
+
+    try{localStorage.setItem(STORE,JSON.stringify({ca:el('cf-ca').value,nca:el('cf-nca').value,cl:el('cf-cl').value,ncl:el('cf-ncl').value,rev:el('cf-rev').value,oi:el('cf-oi').value,ni:el('cf-ni').value,ie:el('cf-ie').value,name:name,year:year}));}catch(e){}
+
+    if(ta===0&&tl===0&&rev===0){
+      el('cf-totals').innerHTML='';
+      el('cf-crit-wrap').innerHTML='';
+      el('cf-verdict').innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:24px 0">재무제표 항목을 입력하면 자동으로 분석됩니다.</div>';
+      last=null;return;
+    }
+
+    var eqRatio=ta?eq/ta*100:0;
+    var debt=eq>0?tl/eq*100:NaN;
+    var cur=cl>0?ca/cl*100:(ca>0?Infinity:0);
+    var opm=rev?oi/rev*100:0;
+    var npm=rev?ni/rev*100:0, roa=ta?ni/ta*100:0, roe=eq>0?ni/eq*100:-1, tat=ta?rev/ta:0, icr=ie>0?oi/ie:Infinity;
+
+    el('cf-totals').innerHTML=totalCard('자산총계',cfFmt(ta))+totalCard('부채총계',cfFmt(tl))+totalCard('자본총계',(eq<0?'-'+cfFmt(Math.abs(eq)):cfFmt(eq)),eq<=0);
+
+    var s1=eq<=0?'주의':(eqRatio>=20?'양호':'보통');
+    var v1=(eq<0?'-'+cfFmt(Math.abs(eq)):cfFmt(eq))+(eq<=0?' · 자본잠식':'');
+    var s2=eq<=0?'주의':(debt<=200?'양호':(debt<=400?'보통':'주의'));
+    var v2=eq<=0?'계산불가':debt.toFixed(1)+'%';
+    var s3=cur===Infinity?'양호':(cur>=150?'양호':(cur>=100?'보통':'주의'));
+    var v3=cur===Infinity?'∞':cur.toFixed(1)+'%';
+    var s4=opm>=5?'양호':(opm>=0?'보통':'주의');
+    var v4=opm.toFixed(1)+'%';
+
+    el('cf-crit-wrap').innerHTML=
+      critCard('자본잠식 여부',v1,s1,'자본총계 = 자산 − 부채')
+     +critCard('부채비율',v2,s2,'부채총계 ÷ 자본총계 × 100')
+     +critCard('유동비율',v3,s3,'유동자산 ÷ 유동부채 × 100')
+     +critCard('영업이익률',v4,s4,'영업이익 ÷ 매출액 × 100');
+
+    var sc=0;
+    sc+=(s1==='양호'?20:s1==='보통'?10:0);
+    sc+=(s2==='양호'?20:s2==='보통'?10:0);
+    sc+=(s3==='양호'?15:s3==='보통'?8:0);
+    sc+=(s4==='양호'?15:s4==='보통'?8:0);
+    sc+=(npm>=5?8:npm>=2?5:npm>=0?2:0);
+    sc+=(roa>=5?6:roa>=2?4:roa>=0?2:0);
+    sc+=(roe>=10?5:roe>=5?3:roe>=0?1:0);
+    sc+=(icr===Infinity?6:icr>=3?6:icr>=1.5?4:icr>=1?2:0);
+    sc+=(tat>=1?5:tat>=0.5?3:1);
+    var score=Math.max(0,Math.min(100,Math.round(sc)));
+    var grade=score>=80?'A':score>=65?'B':score>=50?'C':score>=35?'D':'E';
+    var gc=score>=65?'var(--success)':score>=50?'var(--warning)':'var(--danger)';
+    var gb=score>=65?'rgba(52,211,153,0.15)':score>=50?'rgba(251,191,36,0.15)':'rgba(248,113,113,0.15)';
+
+    var line;
+    if(s1==='주의'){line='<b style="color:var(--danger)">자본잠식 상태</b> — 부실 위험이 높습니다. 신규 거래·여신은 보류를 권고합니다.';}
+    else if(s2==='주의'||s4==='주의'||s3==='주의'){
+      var w=[];if(s2==='주의')w.push('과다 부채');if(s4==='주의')w.push('영업적자');if(s3==='주의')w.push('단기 지급력 부족');
+      line='<b style="color:var(--danger)">'+w.join(' · ')+'</b> 확인 — 담보·보증 등 보완 조건이 필요합니다.';
+    } else {
+      var good=[];if(s1==='양호')good.push('자기자본 견실');if(s2==='양호')good.push('부채 안정');if(s3==='양호')good.push('단기지급력 우수');
+      var note=s4==='양호'?' 수익성도 양호하며':' 수익성은 보통 수준이나';
+      line=(good.join(' · ')||'주요 지표 보통')+'.'+note+' 전반적으로 '+(grade==='A'?'안정적인 우량 거래처입니다.':grade==='B'?'무난한 거래처입니다.':'관찰이 필요합니다.');
+    }
+
+    el('cf-verdict').innerHTML=
+      '<div style="display:flex;align-items:center;gap:16px;background:var(--bg-secondary);border-radius:8px;padding:16px 18px">'
+      +'<div style="width:64px;height:64px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;flex-shrink:0;color:'+gc+';background:'+gb+'">'+grade+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:13px;color:var(--text-secondary)">종합 판정</span><span style="font-size:24px;font-weight:700;color:var(--text-primary)">'+score+'</span><span style="font-size:13px;color:var(--text-muted)">/ 100</span></div>'
+      +'<div style="height:6px;background:var(--bg-tertiary);border-radius:99px;margin:6px 0 10px;overflow:hidden"><div style="height:100%;width:'+score+'%;background:'+gc+'"></div></div>'
+      +'<div style="font-size:13px;color:var(--text-secondary);line-height:1.55">'+line+'</div>'
+      +'</div></div>';
+
+    last={name:name,year:year,ta:ta,tl:tl,eq:eq,crit:[['자본잠식 여부',v1,s1],['부채비율',v2,s2],['유동비율',v3,s3],['영업이익률',v4,s4]],score:score,grade:grade,line:line.replace(/<[^>]*>/g,'')};
+  }
+  window.cfCalc=cfCalc;
+
+  function cfParseXlsx(file){
+    if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중입니다. 잠시 후 다시 시도하세요.');return;}
+    var r=new FileReader();
+    r.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var rows=XLSX.utils.sheet_to_json(ws,{header:1});
+        var map=[['cf-nca','비유동자산'],['cf-ca','유동자산'],['cf-ncl','비유동부채'],['cf-cl','유동부채'],['cf-rev','매출액'],['cf-oi','영업이익'],['cf-ni','당기순이익'],['cf-ie','이자비용']];
+        var used={},found=0;
+        map.forEach(function(m){
+          var id=m[0],kw=m[1];
+          for(var i=0;i<rows.length;i++){
+            if(used[i])continue;
+            var row=rows[i]||[];
+            var hit=row.some(function(c){return typeof c==='string'&&c.replace(/\s/g,'').indexOf(kw)>=0;});
+            if(hit){
+              var mx=0;
+              row.forEach(function(c){var num=parseFloat(String(c).replace(/[^0-9.\-]/g,''));if(!isNaN(num)&&Math.abs(num)>Math.abs(mx))mx=num;});
+              if(mx!==0){el(id).value=Math.round(mx).toLocaleString('ko-KR');used[i]=1;found++;break;}
+            }
+          }
+        });
+        cfCalc();
+        var dn=el('cf-docname');dn.textContent='엑셀에서 '+found+'개 항목 자동인식됨 · 값 확인 후 사용';dn.style.color='var(--green)';
+      }catch(err){alert('엑셀 분석 실패: '+err.message);}
+    };
+    r.readAsArrayBuffer(file);
+  }
+
+  function cfAttachDoc(file){
+    var url=URL.createObjectURL(file);
+    var s=el('cf-docname');s.textContent='첨부: '+file.name+' ';s.style.color='var(--text3)';
+    var a=document.createElement('a');a.href=url;a.target='_blank';a.textContent='[보기]';a.style.color='var(--blue)';
+    s.appendChild(a);
+  }
+
+  function cfFileName(ext){var nm=(el('cf-name').value||'법인재무분석').trim().replace(/[\\/:*?"<>|]/g,'')||'법인재무분석';var yr=(el('cf-year').value||'').trim();return nm+(yr?'_'+yr:'')+'_재무분석.'+ext;}
+
+  window.cfExportPNG=function(){
+    if(typeof html2canvas==='undefined'){alert('이미지 라이브러리 로딩 중입니다. 잠시 후 시도하세요.');return;}
+    html2canvas(el('cf-result'),{backgroundColor:'#111111',scale:2}).then(function(cv){
+      var a=document.createElement('a');a.download=cfFileName('png');a.href=cv.toDataURL('image/png');a.click();
+    });
+  };
+  window.cfExportPDF=function(){
+    if(typeof html2canvas==='undefined'||!window.jspdf){alert('PDF 라이브러리 로딩 중입니다. 잠시 후 시도하세요.');return;}
+    html2canvas(el('cf-result'),{backgroundColor:'#111111',scale:2}).then(function(cv){
+      var img=cv.toDataURL('image/png'),pdf=new window.jspdf.jsPDF('p','mm','a4');
+      var pw=210,margin=10,w=pw-margin*2,h=cv.height*w/cv.width;
+      pdf.addImage(img,'PNG',margin,margin,w,h);pdf.save(cfFileName('pdf'));
+    });
+  };
+  window.cfExportXLSX=function(){
+    if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로딩 중입니다. 잠시 후 시도하세요.');return;}
+    if(!last){alert('먼저 재무제표 항목을 입력하세요.');return;}
+    var aoa=[['법인 재무분석'],['회사명',last.name||''],['사업연도',last.year||''],[],['자산총계',last.ta],['부채총계',last.tl],['자본총계',last.eq],[],['항목','값','판정']];
+    last.crit.forEach(function(c){aoa.push([c[0],c[1],c[2]]);});
+    aoa.push([],['종합 점수',last.score+' / 100'],['등급',last.grade],['한줄평',last.line]);
+    var ws=XLSX.utils.aoa_to_sheet(aoa),wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'재무분석');
+    XLSX.writeFile(wb,cfFileName('xlsx'));
+  };
+
+  function cfInit(){
+    if(!el('cf-ca'))return;
+    try{var s=JSON.parse(localStorage.getItem(STORE)||'null');if(s){['ca','nca','cl','ncl','rev','oi','ni','ie'].forEach(function(k){if(el('cf-'+k)&&s[k]!=null)el('cf-'+k).value=s[k];});if(s.name)el('cf-name').value=s.name;if(s.year)el('cf-year').value=s.year;}}catch(e){}
+    ['cf-ca','cf-nca','cf-cl','cf-ncl','cf-rev','cf-oi','cf-ni','cf-ie','cf-name','cf-year'].forEach(function(id){var x=el(id);if(x)x.addEventListener('input',cfCalc);});
+    var xi=el('cf-xlsx-in');if(xi)xi.addEventListener('change',function(e){if(e.target.files[0])cfParseXlsx(e.target.files[0]);e.target.value='';});
+    var di=el('cf-doc-in');if(di)di.addEventListener('change',function(e){if(e.target.files[0])cfAttachDoc(e.target.files[0]);e.target.value='';});
+    cfCalc();
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',cfInit);
+  else cfInit();
+})();
 </script>
 
 <div id="globalToast" style="position: fixed; bottom: 28px; right: 28px; background: var(--bg2); border: 1px solid var(--green); color: var(--green); padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 999; box-shadow: rgba(0, 0, 0, 0.4) 0px 4px 20px; transition: opacity 0.3s; opacity: 0;">✓ "테스트 12" 펀딩 등록 완료</div><div id="claude-ai"><template shadowrootmode="open">
