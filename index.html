@@ -8,6 +8,7 @@
 <title>TS AUTO PLAN CRM</title>
 <link href="file:///C:/Users/rladu/Downloads/index_files/css2" rel="stylesheet">
 <style>:root{--bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;--bg4:#222222;--border:#2a2a2a;--border2:#333333;--text:#f0f0f0;--text2:#999999;--text3:#555555;--accent:#ffffff;--accent2:#e0e0e0;--red:#ff4444;--green:#44ff88;--yellow:#ffcc44;--blue:#4488ff;--sidebar:220px;--radius:8px}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg);background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,var(--border) 39px,var(--border) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,var(--border) 39px,var(--border) 40px)}.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:48px;width:400px}.login-logo{font-size:22px;font-weight:700;letter-spacing:2px;margin-bottom:8px}.login-sub{color:var(--text2);font-size:13px;margin-bottom:36px}.login-tabs{display:flex;gap:0;margin-bottom:28px;border:1px solid var(--border2);border-radius:6px;overflow:hidden}.login-tab{flex:1;padding:10px;text-align:center;font-size:13px;cursor:pointer;background:transparent;color:var(--text2);border:none;transition:.2s}.login-tab.active{background:var(--accent);color:#000;font-weight:600}.login-field{margin-bottom:16px}.login-field label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;letter-spacing:.5px}.login-field input{width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:.2s}.login-field input:focus{border-color:#555}.login-btn{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;letter-spacing:.5px;transition:.15s}.login-btn:hover{background:#ddd}.login-hint{font-size:11px;color:var(--text3);text-align:center;margin-top:16px}#app{display:none;flex:1;overflow:hidden;flex-direction:row}#app.active{display:flex}.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;z-index:100;gap:16px}.topbar-logo{font-size:15px;font-weight:700;letter-spacing:2px;color:var(--accent);width:var(--sidebar);flex-shrink:0}.topbar-right{margin-left:auto;display:flex;align-items:center;gap:16px}.role-badge{font-size:11px;letter-spacing:1px;padding:4px 10px;border-radius:999px;font-weight:600}.role-admin{background:#fff;color:#000}.role-staff{background:var(--bg4);color:var(--text2);border:1px solid var(--border2)}.topbar-user{font-size:13px;color:var(--text2)}.logout-btn{font-size:12px;color:var(--text3);cursor:pointer;background:none;border:none;padding:6px 10px;border-radius:4px;transition:.15s}.logout-btn:hover{color:var(--text);background:var(--bg3)}.sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);padding-top:52px;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}.sidebar-section{padding:20px 0 8px 0}.sidebar-label{font-size:10px;color:var(--text3);letter-spacing:2px;padding:0 20px 8px;text-transform:uppercase}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--text2);font-size:13px;transition:.15s;border-left:3px solid transparent}.nav-item:hover{color:var(--text);background:var(--bg3)}.nav-item.active{color:var(--accent);background:var(--bg3);border-left-color:var(--accent)}.nav-icon{font-size:15px;width:18px;text-align:center}.sidebar-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}.sidebar-version{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}.main{flex:1;padding-top:52px;overflow-y:auto;background:var(--bg)}.page{display:none;padding:28px}.page.active{display:block}.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.page-title{font-size:20px;font-weight:700}.pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:16px 8px;flex-wrap:wrap}.pagination .page-info{font-size:11px;color:var(--text3);margin-right:12px;font-family:JetBrains Mono,monospace}.pagination button{min-width:32px;height:30px;padding:0 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;cursor:pointer;transition:.15s}.pagination button:hover:not(:disabled){background:var(--bg4);color:var(--text);border-color:var(--accent)}.pagination button.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}.pagination button:disabled{opacity:.35;cursor:not-allowed}.pagination button.nav-btn{padding:0 12px}.page-sub{font-size:13px;color:var(--text2);margin-top:3px}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}.stat-card::after{content:'';position:absolute;top:0;right:0;width:3px;height:100%}.stat-card.c-white::after{background:#fff}.stat-card.c-green::after{background:var(--green)}.stat-card.c-yellow::after{background:var(--yellow)}.stat-card.c-blue::after{background:var(--blue)}.stat-label{font-size:11px;color:var(--text2);letter-spacing:.5px;margin-bottom:10px}.stat-value{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace}.stat-change{font-size:11px;color:var(--text2);margin-top:6px}.stat-change.up{color:var(--green)}.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}.chart-title{font-size:13px;font-weight:600;margin-bottom:16px}.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}.bar{width:100%;background:var(--bg4);border-radius:3px 3px 0 0;position:relative;transition:.6s}.bar-val{font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace}.bar-lbl{font-size:10px;color:var(--text3)}.pie-legend{display:flex;flex-direction:column;gap:10px;margin-top:12px}.legend-item{display:flex;align-items:center;gap:10px;font-size:12px}.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.legend-label{color:var(--text2);flex:1}.legend-val{color:var(--text);font-weight:600;font-family:'JetBrains Mono',monospace}.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}.section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}.section-head-title{font-size:13px;font-weight:600}.section-action{font-size:12px;color:var(--text2);cursor:pointer;transition:.15s}.section-action:hover{color:var(--text)}.tbl{width:100%;border-collapse:collapse}.tbl th{font-size:11px;color:var(--text3);letter-spacing:.5px;text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);font-weight:500;text-transform:uppercase}.tbl td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}.tbl tr:last-child td{border-bottom:none}.tbl tr:hover td{background:var(--bg3);cursor:pointer}.tbl-name{font-weight:600}.tbl-sub{font-size:11px;color:var(--text2);margin-top:2px}.badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:4px}.badge-new{background:rgba(68,136,255,.15);color:var(--blue)}.badge-consult{background:rgba(255,204,68,.12);color:var(--yellow)}.badge-contract{background:rgba(68,255,136,.12);color:var(--green)}.badge-complete{background:rgba(255,255,255,.08);color:var(--text2)}.badge-cancel{background:rgba(255,68,68,.12);color:var(--red)}.badge-admin{background:#fff;color:#000;font-size:10px}.badge-staff{background:var(--bg4);color:var(--text2);border:1px solid var(--border2);font-size:10px}.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}.search-wrap{position:relative;flex:1;min-width:200px}.search-wrap input{width:100%;padding:9px 14px 9px 36px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.search-wrap input:focus{border-color:#444}.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}.select-filter{padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:13px;font-family:inherit;outline:none;cursor:pointer}.btn{padding:9px 16px;border-radius:6px;font-size:13px;font-family:inherit;cursor:pointer;border:none;transition:.15s;font-weight:500}.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:#ddd}.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text);border-color:#444}.btn-sm{padding:6px 12px;font-size:12px}.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(255,68,68,.3)}.btn-danger:hover{background:rgba(255,68,68,.1)}.detail-back{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:20px;transition:.15s}.detail-back:hover{color:var(--text)}.detail-grid{display:grid;grid-template-columns:320px 1fr;gap:20px}.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}.info-avatar{width:60px;height:60px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border2);margin-bottom:16px}.info-name{font-size:18px;font-weight:700;margin-bottom:4px}.info-phone{font-size:14px;color:var(--text2);margin-bottom:16px;font-family:'JetBrains Mono',monospace}.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}.info-row:last-child{border-bottom:none}.info-key{color:var(--text2)}.info-val{font-weight:500;text-align:right}.info-edit-btn{width:100%;margin-top:16px}.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}.tab{padding:10px 20px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:.15s;margin-bottom:-1px}.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}.tab-content{display:none}.tab-content.active{display:block}.memo-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:10px}.memo-meta{display:flex;justify-content:space-between;margin-bottom:8px}.memo-author{font-size:11px;color:var(--text2)}.memo-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}.memo-text{font-size:13px;line-height:1.6}.memo-input{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;margin-bottom:10px}.memo-input:focus{border-color:#444}.file-drop{border:2px dashed var(--border2);border-radius:8px;padding:32px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:16px}.file-drop:hover{border-color:#555;background:var(--bg3)}.file-drop-icon{font-size:32px;margin-bottom:10px}.file-drop-text{font-size:13px;color:var(--text2)}.file-list{display:flex;flex-direction:column;gap:8px}.file-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}.file-icon{font-size:20px}.file-info{flex:1}.file-name{font-size:13px;font-weight:500}.file-size{font-size:11px;color:var(--text2);margin-top:2px;font-family:'JetBrains Mono',monospace}.file-actions{display:flex;gap:8px}.user-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}.user-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px}.user-card-top{display:flex;align-items:center;gap:12px}.user-ava{width:44px;height:44px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}.user-card-name{font-weight:600;font-size:14px}.user-card-sub{font-size:12px;color:var(--text2);margin-top:2px}.user-stats{display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)}.user-stat{text-align:center}.user-stat-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}.user-stat-lbl{font-size:10px;color:var(--text2);margin-top:2px}.user-card-actions{display:flex;gap:8px;margin-top:4px}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}.modal-bg.open{display:flex}.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-height:85vh;overflow-y:auto}.modal-title{font-size:16px;font-weight:700;margin-bottom:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-field{display:flex;flex-direction:column;gap:6px}.form-field.full{grid-column:1/-1}.form-field label{font-size:12px;color:var(--text2)}.form-field input,.form-field select,.form-field textarea{padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:#555}.form-field textarea{resize:vertical;min-height:70px}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <!-- ===== LOGIN ===== -->
@@ -766,6 +767,8 @@
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="btn btn-ghost" onclick="openSmsModal()" style="font-size:12px;background:rgba(68,255,136,.08);border:1px solid rgba(68,255,136,.3);color:var(--green);">📨 단체문자</button>
           <button class="btn btn-ghost" onclick="exportCustomerExcel()" style="font-size:12px;">📊 엑셀</button>
+          <input type="file" id="bulkImportFile" accept=".xlsx,.xls" style="display:none;" onchange="handleBulkImportFile(event)">
+          <button class="btn btn-ghost admin-only" onclick="document.getElementById('bulkImportFile').click()" style="font-size:12px;background:rgba(68,136,255,.08);border:1px solid rgba(68,136,255,.3);color:var(--blue);">📥 엑셀 일괄등록</button>
           <button class="btn btn-ghost admin-only" onclick="openDivisionMgrModal()" style="font-size: 13px;">🏷️ 구분 관리</button>
           <button class="btn btn-ghost admin-only" onclick="openMemoTagMgrModal()" style="font-size: 13px;">📝 메모태그 관리</button>
           <button class="btn btn-ghost admin-only" onclick="openStatusMgrModal()" style="align-items: center; gap: 6px; font-size: 13px;">
@@ -10552,6 +10555,175 @@ document.addEventListener('click', function(e) {
 // 초기 + 주기적 갱신
 setTimeout(refreshFundingCheckBadge, 700);
 setInterval(refreshFundingCheckBadge, 30000);
+
+/* ===== 엑셀 일괄 고객등록 ===== */
+const BULK_STAFF = ['강민지','박광석','정서준','강해옥','이성훈','박대원'];
+let bulkImportParsed = [];
+
+function bulkGetField(row, names){
+  for(const n of names){
+    for(const key in row){
+      if(String(key).replace(/\s/g,'') === String(n).replace(/\s/g,'')) return row[key];
+    }
+  }
+  return '';
+}
+function bulkDivision(memoText){
+  const m = String(memoText||'');
+  if(m.includes('법인')) return '법인';
+  if(m.includes('개인사업자')) return '개인사업자';
+  if(m.includes('개인')) return '개인';
+  return '개인'; // 셋 다 없으면 개인
+}
+function bulkCleanAssign(raw){
+  return String(raw||'').replace(/\s*\(.*?\)\s*/g,'').trim();
+}
+
+function handleBulkImportFile(ev){
+  const file = ev.target.files && ev.target.files[0];
+  ev.target.value = ''; // 같은 파일 재선택 허용
+  if(!file) return;
+  if(typeof XLSX === 'undefined'){ alert('엑셀 라이브러리 로딩 실패. 새로고침 후 다시 시도해주세요.'); return; }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      buildBulkPreview(rows);
+    }catch(err){
+      console.error('엑셀 파싱 실패', err);
+      alert('엑셀 파일을 읽지 못했습니다: ' + (err.message||err));
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function buildBulkPreview(rows){
+  const parsed = [];
+  rows.forEach(r=>{
+    const name = String(bulkGetField(r,['이름','고객명'])).trim();
+    const phoneRaw = String(bulkGetField(r,['연락처'])).trim();
+    if(!name && !phoneRaw) return; // 빈 줄 skip
+    const memoCol = bulkGetField(r,['메모']);
+    const assign = bulkCleanAssign(bulkGetField(r,['담당자(FC)','담당자']));
+    parsed.push({
+      name,
+      phone: (typeof formatPhone==='function' ? formatPhone(phoneRaw) : phoneRaw),
+      car: String(bulkGetField(r,['차종','관심차량'])).trim() || '-',
+      source: '투데이즈카유입디비',
+      division: bulkDivision(memoCol),
+      assign: assign,
+      status: '상담중',
+      memo: '투데이즈카 디비 이관처리',
+      _matched: BULK_STAFF.includes(assign)
+    });
+  });
+  bulkImportParsed = parsed;
+
+  if(!parsed.length){ alert('등록할 데이터가 없습니다. (이름/연락처 확인)'); return; }
+
+  // 담당자 분포 + 미일치 집계
+  const dist = {}; let unmatched = 0; let noContact = 0;
+  parsed.forEach(p=>{
+    dist[p.assign||'(미지정)'] = (dist[p.assign||'(미지정)']||0)+1;
+    if(!p._matched) unmatched++;
+    if(!p.phone) noContact++;
+  });
+  const distHtml = Object.entries(dist).map(([k,v])=>{
+    const ok = BULK_STAFF.includes(k);
+    return `<span style="font-size:11px;padding:3px 9px;border-radius:999px;background:${ok?'rgba(68,136,255,.12)':'rgba(255,68,68,.12)'};color:${ok?'#4488ff':'#ff4444'};border:1px solid ${ok?'rgba(68,136,255,.3)':'rgba(255,68,68,.3)'};">${k} ${v}건${ok?'':' ⚠'}</span>`;
+  }).join(' ');
+
+  const previewRows = parsed.slice(0,30).map((p,i)=>`
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:5px 8px;color:var(--text3);font-family:JetBrains Mono,monospace;font-size:11px;">${i+1}</td>
+      <td style="padding:5px 8px;font-size:12px;">${p.name||'<span style=\'color:var(--red)\'>(없음)</span>'}</td>
+      <td style="padding:5px 8px;font-family:JetBrains Mono,monospace;font-size:11px;">${p.phone||'-'}</td>
+      <td style="padding:5px 8px;font-size:12px;">${p.car}</td>
+      <td style="padding:5px 8px;font-size:12px;">${p.division}</td>
+      <td style="padding:5px 8px;font-size:12px;color:${p._matched?'var(--text)':'var(--red)'};">${p.assign||'(미지정)'}${p._matched?'':' ⚠'}</td>
+    </tr>`).join('');
+
+  let modal = document.getElementById('bulkPreviewModal');
+  if(modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'bulkPreviewModal';
+  modal.className = 'modal-bg open';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div class="modal-box" style="background:var(--bg2,#1a1a1a);border:1px solid var(--border2,#333);border-radius:14px;padding:22px;width:760px;max-width:94vw;max-height:88vh;overflow:auto;color:var(--text,#eee);">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;">📥 엑셀 일괄등록 미리보기</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">총 <strong style="color:var(--accent);">${parsed.length}</strong>명 · 유입경로 "투데이즈카유입디비" · 상태 "상담중" · 메모 "투데이즈카 디비 이관처리"로 통일 등록됩니다.</div>
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text2);">담당자 배분</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${distHtml}</div>
+      ${unmatched?`<div style="font-size:12px;color:#ff4444;margin-bottom:10px;">⚠ 담당자 명단과 일치하지 않는 ${unmatched}건이 있습니다. 그대로 진행하면 해당 이름으로 배분됩니다.</div>`:''}
+      ${noContact?`<div style="font-size:12px;color:#ffcc44;margin-bottom:10px;">⚠ 연락처 없는 ${noContact}건 포함</div>`:''}
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="background:var(--bg3,#222);font-size:11px;color:var(--text2);text-align:left;">
+            <th style="padding:6px 8px;">#</th><th style="padding:6px 8px;">고객명</th><th style="padding:6px 8px;">연락처</th><th style="padding:6px 8px;">관심차량</th><th style="padding:6px 8px;">구분</th><th style="padding:6px 8px;">담당자</th>
+          </tr></thead>
+          <tbody>${previewRows}</tbody>
+        </table>
+        ${parsed.length>30?`<div style="padding:8px;text-align:center;font-size:11px;color:var(--text3);">…외 ${parsed.length-30}건</div>`:''}
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('bulkPreviewModal').remove()">취소</button>
+        <button class="btn btn-primary" id="bulkConfirmBtn" onclick="confirmBulkImport()">${parsed.length}명 등록</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function confirmBulkImport(){
+  if(!bulkImportParsed.length) return;
+  const btn = document.getElementById('bulkConfirmBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '등록 중…'; }
+  const today = new Date().toISOString().split('T')[0];
+  const localeDate = new Date().toLocaleDateString('ko-KR');
+  const objs = bulkImportParsed.map(p=>({
+    name:p.name, phone:p.phone, car:p.car, source:p.source,
+    division:p.division, memoTag:'', assign:p.assign, status:p.status,
+    date:today,
+    memos:[{text:p.memo, author:currentUser, date:localeDate}],
+    files:[], important:false, retrieved:false, nextConsult:'',
+    originalAssignedManager:p.assign||null,
+    originalAssignedManagerId:p.assign||null,
+    firstAssignedAt:today
+  }));
+
+  let ok = 0, fail = 0;
+  try{
+    if(typeof isSbConfigured==='function' && isSbConfigured()){
+      const CHUNK = 100;
+      for(let i=0;i<objs.length;i+=CHUNK){
+        const chunk = objs.slice(i,i+CHUNK).map(customerToRow);
+        try{
+          await sbFetch('customers','POST',chunk);
+          ok += chunk.length;
+        }catch(err){ console.error('일괄등록 청크 실패',err); fail += chunk.length; }
+      }
+      try{ await loadData(); }catch(e){ console.warn('재조회 실패',e); }
+    } else {
+      objs.forEach(o=>{ o.id = nextId++; customers.unshift(o); ok++; });
+    }
+    if(typeof filterDB==='function') filterDB();
+    if(typeof renderRecentTable==='function') renderRecentTable();
+    if(typeof renderDashboard==='function'){ try{ renderDashboard(); }catch(_){} }
+    if(typeof notifyDataChanged==='function') notifyDataChanged('customers');
+  }catch(e){
+    console.error('일괄등록 실패',e);
+  }
+  const modal = document.getElementById('bulkPreviewModal');
+  if(modal) modal.remove();
+  bulkImportParsed = [];
+  if(typeof showGlobalToast==='function'){
+    showGlobalToast(`일괄등록 완료: ${ok}명 성공${fail?`, ${fail}명 실패`:''}`);
+  } else {
+    alert(`일괄등록 완료: ${ok}명 성공${fail?`, ${fail}명 실패`:''}`);
+  }
+}
 </script>
 
 <div id="globalToast" style="position: fixed; bottom: 28px; right: 28px; background: var(--bg2); border: 1px solid var(--green); color: var(--green); padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 999; box-shadow: rgba(0, 0, 0, 0.4) 0px 4px 20px; transition: opacity 0.3s; opacity: 0;">✓ "테스트 12" 펀딩 등록 완료</div><div id="claude-ai"><template shadowrootmode="open">
