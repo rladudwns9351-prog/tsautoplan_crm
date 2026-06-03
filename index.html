@@ -2525,10 +2525,10 @@
       <div class="card">
         <div class="cf-notice">📌 <b>국세청 표준재무제표</b> 기준으로만 입력해 주세요. 그 외 양식(자체 결산서·간이 양식 등)은 계정 위치·합산 기준이 달라 결과가 부정확할 수 있습니다.</div>
         <div class="cf-drop" id="cf-drop">
-          <input type="file" id="cf-doc-in" style="display:none" accept="image/*,.pdf">
+          <input type="file" id="cf-doc-in" multiple style="display:none" accept="image/*,.pdf">
           <div style="font-size:30px;margin-bottom:6px">📎</div>
           <div style="font-weight:600;color:var(--text)">재무제표 이미지 / PDF 끌어다 놓기 → 자동 인식·분석</div>
-          <div style="font-size:12px;margin-top:4px">또는 클릭해서 선택 · JPG/PNG/PDF 자동인식, 인식 후 값은 꼭 대조하세요</div>
+          <div style="font-size:12px;margin-top:4px">여러 장 한 번에 가능 (재무상태표 + 손익계산서) · JPG/PNG/PDF · 인식 후 값은 꼭 대조하세요</div>
         </div>
         <div id="cf-docname" style="font-size:12px;color:var(--text3);margin-top:10px"></div>
       </div>
@@ -10913,51 +10913,57 @@ async function confirmBulkImport(){
   }
   window.cfCalc=cfCalc;
 
-  function cfAttachDoc(file){
-    if(!file)return;
-    if(file.type && file.type.indexOf('image/')===0){ cfOcr(file); return; }
-    if((file.type && file.type.indexOf('pdf')>=0) || /\.pdf$/i.test(file.name||'')){ cfOcrPdf(file); return; }
-    var url=URL.createObjectURL(file);
-    var s=el('cf-docname');
-    s.innerHTML='첨부: '+file.name+' <a href="'+url+'" target="_blank" style="color:var(--blue)">[보기]</a> <span style="color:var(--yellow)">· 이미지(JPG/PNG) 또는 PDF만 자동인식됩니다</span>';
-    s.style.color='var(--text3)';
+  // 여러 파일(이미지/PDF) 동시 처리 → 텍스트 합쳐서 한 번에 채움
+  function cfHandleFiles(fileList){
+    var dn=el('cf-docname');
+    var files=Array.prototype.slice.call(fileList||[]).filter(function(f){
+      return (f.type&&f.type.indexOf('image/')===0)||(f.type&&f.type.indexOf('pdf')>=0)||/\.pdf$/i.test(f.name||'');
+    });
+    if(files.length===0){ dn.innerHTML='이미지(JPG/PNG) 또는 PDF만 인식할 수 있습니다.'; dn.style.color='var(--yellow)'; return; }
+    if(typeof Tesseract==='undefined'){ dn.innerHTML='문자인식 라이브러리 로딩 중입니다. 잠시 후 다시 시도하세요.'; dn.style.color='var(--yellow)'; return; }
+    dn.style.color='var(--blue)';
+    dn.innerHTML='⏳ 인식 준비 중... (최초 1회는 인식엔진 다운로드로 10~20초 걸릴 수 있어요)';
+    var combined='', chain=Promise.resolve(), names=[];
+    files.forEach(function(file,idx){
+      var label='⏳ 분석 중... ('+(idx+1)+'/'+files.length+' 파일) ';
+      chain=chain.then(function(){ names.push(file.name); return cfFileToText(file,dn,label); })
+                 .then(function(t){ combined+='\n'+t; });
+    });
+    chain.then(function(){
+      var found=cfFillFromText(combined);
+      cfCalc();
+      if(found>0){ dn.innerHTML='✓ '+files.length+'개 파일에서 '+found+'개 항목 자동입력됨 · 반드시 값 대조 후 사용하세요<br><span style="color:var(--text3)">('+names.join(', ')+')</span>'; dn.style.color='var(--green)'; }
+      else{ dn.innerHTML='⚠️ 항목을 자동인식하지 못했습니다. 화질을 확인하거나 아래에 직접 입력하세요.<br><span style="color:var(--text3)">('+names.join(', ')+')</span>'; dn.style.color='var(--yellow)'; }
+    }).catch(function(e){ dn.innerHTML='분석 실패: '+((e&&e.message)||e); dn.style.color='var(--red)'; });
   }
 
-  function cfFillFromText(text){
-    var lines=String(text||'').split(/\n+/);
-    // 비유동을 유동보다 먼저 처리(부분일치 충돌 방지) + 인식된 줄은 소진 처리
-    var map=[['cf-nca','비유동자산'],['cf-ca','유동자산'],['cf-ncl','비유동부채'],['cf-cl','유동부채'],['cf-rev','매출액'],['cf-oi','영업이익'],['cf-ni','당기순이익'],['cf-ie','이자비용']];
-    var used={},found=0;
-    map.forEach(function(m){
-      var id=m[0],kw=m[1];
-      for(var i=0;i<lines.length;i++){
-        if(used[i])continue;
-        var ln=lines[i].replace(/\s/g,'').replace(/，/g,',');
-        if(ln.indexOf(kw)<0)continue;
-        var nums=ln.match(/-?[\d,]{4,}/g); // 큰 금액만(노트 번호 등 제외)
-        if(nums&&nums.length){
-          var val=parseFloat(nums[0].replace(/,/g,'')); // 당기(좌측 첫 컬럼)
-          if(!isNaN(val)&&val!==0){ el(id).value=Math.round(val).toLocaleString('ko-KR'); used[i]=1; found++; break; }
-        }
-      }
-    });
-    return found;
+  // 단일 파일 → 텍스트(Promise). 이미지=바로 OCR / PDF=페이지 렌더 후 OCR
+  function cfFileToText(file,dn,label){
+    if((file.type&&file.type.indexOf('pdf')>=0)||/\.pdf$/i.test(file.name||'')){
+      if(typeof pdfjsLib==='undefined') return Promise.resolve('');
+      return new Promise(function(resolve,reject){
+        var fr=new FileReader();
+        fr.onload=function(e){
+          pdfjsLib.getDocument({data:new Uint8Array(e.target.result)}).promise.then(function(pdf){
+            var maxPages=Math.min(pdf.numPages,6), txt='', c2=Promise.resolve();
+            for(let i=1;i<=maxPages;i++){
+              c2=c2.then(function(){ return cfRenderPdfPage(pdf,i); })
+                   .then(function(canvas){ return cfRecognize(canvas,dn,label+'PDF '+i+'/'+maxPages+'p '); })
+                   .then(function(t){ txt+='\n'+t; });
+            }
+            return c2.then(function(){ resolve(txt); });
+          }).catch(reject);
+        };
+        fr.onerror=function(){ resolve(''); };
+        fr.readAsArrayBuffer(file);
+      });
+    }
+    return cfRecognize(file,dn,label);
   }
 
   function cfRecognize(source,dn,prefix){
     return Tesseract.recognize(source,'kor+eng',{logger:function(m){ if(m && m.status==='recognizing text' && dn){ dn.innerHTML=prefix+Math.round((m.progress||0)*100)+'%'; } }})
       .then(function(r){ return (r&&r.data&&r.data.text)||''; });
-  }
-
-  function cfOcr(file){
-    var dn=el('cf-docname');
-    var url=URL.createObjectURL(file);
-    if(typeof Tesseract==='undefined'){ dn.innerHTML='문자인식 라이브러리 로딩 중입니다. 잠시 후 다시 시도하세요.'; dn.style.color='var(--yellow)'; return; }
-    dn.innerHTML='⏳ 이미지 분석 중... 0% (최초 1회는 인식엔진 다운로드로 10~20초 걸릴 수 있어요)';
-    dn.style.color='var(--blue)';
-    cfRecognize(file,dn,'⏳ 이미지 분석 중... ')
-      .then(function(text){ cfApplyOcr(text,url,dn); })
-      .catch(function(e){ dn.innerHTML='이미지 분석 실패: '+((e&&e.message)||e); dn.style.color='var(--red)'; });
   }
 
   function cfRenderPdfPage(pdf,i){
@@ -10969,37 +10975,35 @@ async function confirmBulkImport(){
     });
   }
 
-  function cfOcrPdf(file){
-    var dn=el('cf-docname');
-    var url=URL.createObjectURL(file);
-    if(typeof pdfjsLib==='undefined'){ dn.innerHTML='PDF 라이브러리 로딩 중입니다. 잠시 후 다시 시도하세요.'; dn.style.color='var(--yellow)'; return; }
-    if(typeof Tesseract==='undefined'){ dn.innerHTML='문자인식 라이브러리 로딩 중입니다. 잠시 후 다시 시도하세요.'; dn.style.color='var(--yellow)'; return; }
-    dn.innerHTML='⏳ PDF 여는 중...'; dn.style.color='var(--blue)';
-    var fr=new FileReader();
-    fr.onload=function(e){
-      pdfjsLib.getDocument({data:new Uint8Array(e.target.result)}).promise.then(function(pdf){
-        var maxPages=Math.min(pdf.numPages,5), allText='', chain=Promise.resolve();
-        for(let i=1;i<=maxPages;i++){
-          chain=chain.then(function(){
-            dn.innerHTML='⏳ PDF 분석 중... ('+i+'/'+maxPages+' 페이지) ';
-            return cfRenderPdfPage(pdf,i);
-          }).then(function(canvas){
-            return cfRecognize(canvas,dn,'⏳ PDF 분석 중... ('+i+'/'+maxPages+' 페이지) ');
-          }).then(function(t){ allText+='\n'+t; });
+  // 텍스트에서 표준재무제표 항목 추출 → 칸 채움
+  function cfFillFromText(text){
+    var work=String(text||'').replace(/，/g,',').split(/\r?\n/);
+    // 비유동을 유동보다 먼저(부분일치 충돌 방지). 찾은 키워드는 마스킹만(줄은 유지) → 한 줄에 두 계정이 붙어도 둘 다 추출
+    var map=[['cf-nca','비유동자산'],['cf-ca','유동자산'],['cf-ncl','비유동부채'],['cf-cl','유동부채'],['cf-rev','매출액'],['cf-oi','영업이익'],['cf-ni','당기순이익'],['cf-ie','이자비용']];
+    var found=0;
+    function grabAmount(after){
+      var m=after.match(/-?\d{1,3}(?:[,.]\d{3})+/); // 천단위 콤마/마침표 금액(계정코드 001은 콤마 없어 제외)
+      if(m) return parseFloat(m[0].replace(/[,.]/g,''));
+      m=after.match(/-?\d{5,}/); // 콤마 없는 큰 숫자(보조)
+      return m? parseFloat(m[0]):NaN;
+    }
+    map.forEach(function(p){
+      var id=p[0],kw=p[1];
+      var re=new RegExp(kw.split('').join('\\s*')); // OCR 자간 공백 허용
+      for(var i=0;i<work.length;i++){
+        var mm=work[i].match(re);
+        if(!mm)continue;
+        var after=work[i].slice(mm.index+mm[0].length);
+        var val=grabAmount(after);
+        if(!isNaN(val)&&Math.abs(val)>=1000){
+          el(id).value=Math.round(val).toLocaleString('ko-KR'); found++;
+          // 해당 키워드 텍스트만 공백 처리 → 비유동→유동 부분일치/같은줄 중복 방지
+          work[i]=work[i].slice(0,mm.index)+Array(mm[0].length+1).join(' ')+after;
+          break;
         }
-        return chain.then(function(){ cfApplyOcr(allText,url,dn); });
-      }).catch(function(e){ dn.innerHTML='PDF 분석 실패: '+((e&&e.message)||e); dn.style.color='var(--red)'; });
-    };
-    fr.onerror=function(){ dn.innerHTML='PDF 파일을 읽지 못했습니다.'; dn.style.color='var(--red)'; };
-    fr.readAsArrayBuffer(file);
-  }
-
-  function cfApplyOcr(text,url,dn){
-    var found=cfFillFromText(text);
-    cfCalc();
-    var link=' <a href="'+url+'" target="_blank" style="color:var(--blue)">[원본 보기]</a>';
-    if(found>0){ dn.innerHTML='✓ '+found+'개 항목 자동입력됨 · 반드시 값 대조 후 사용하세요'+link; dn.style.color='var(--green)'; }
-    else{ dn.innerHTML='⚠️ 항목을 자동인식하지 못했습니다. 화질을 확인하거나 아래에 직접 입력하세요.'+link; dn.style.color='var(--yellow)'; }
+      }
+    });
+    return found;
   }
 
   function cfFileName(ext){var nm=(el('cf-name').value||'법인재무분석').trim().replace(/[\\/:*?"<>|]/g,'')||'법인재무분석';var yr=(el('cf-year').value||'').trim();return nm+(yr?'_'+yr:'')+'_재무분석.'+ext;}
@@ -11034,13 +11038,13 @@ async function confirmBulkImport(){
     try{ if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }catch(e){}
     try{var s=JSON.parse(localStorage.getItem(STORE)||'null');if(s){['ca','nca','cl','ncl','rev','oi','ni','ie'].forEach(function(k){if(el('cf-'+k)&&s[k]!=null)el('cf-'+k).value=s[k];});if(s.name)el('cf-name').value=s.name;if(s.year)el('cf-year').value=s.year;}}catch(e){}
     ['cf-ca','cf-nca','cf-cl','cf-ncl','cf-rev','cf-oi','cf-ni','cf-ie','cf-name','cf-year'].forEach(function(id){var x=el(id);if(x)x.addEventListener('input',cfCalc);});
-    var di=el('cf-doc-in');if(di)di.addEventListener('change',function(e){if(e.target.files[0])cfAttachDoc(e.target.files[0]);e.target.value='';});
+    var di=el('cf-doc-in');if(di)di.addEventListener('change',function(e){if(e.target.files&&e.target.files.length)cfHandleFiles(e.target.files);e.target.value='';});
     var dz=el('cf-drop');
     if(dz){
       dz.addEventListener('click',function(){var d=el('cf-doc-in');if(d)d.click();});
       ['dragenter','dragover'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();e.stopPropagation();dz.classList.add('drag-over');});});
       ['dragleave','dragend'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();e.stopPropagation();dz.classList.remove('drag-over');});});
-      dz.addEventListener('drop',function(e){e.preventDefault();e.stopPropagation();dz.classList.remove('drag-over');var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)cfAttachDoc(f);});
+      dz.addEventListener('drop',function(e){e.preventDefault();e.stopPropagation();dz.classList.remove('drag-over');var fl=e.dataTransfer&&e.dataTransfer.files;if(fl&&fl.length)cfHandleFiles(fl);});
     }
     cfCalc();
   }
