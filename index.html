@@ -4797,13 +4797,13 @@ function getNextConsult(c) {
   d.setDate(d.getDate() + 3);
   return d.toISOString().split('T')[0];
 }
-function filterDB() {
-  resetPage('db');
+function filterDB(keepPage) {
+  if(!keepPage) resetPage('db');
   const hasColFilter = ['colF_name','colF_phone','colF_car'].some(id=>(document.getElementById(id)?.value||'')!=='') ||
     ['colF_source','colF_assign','colF_status','colF_division','colF_memoTag','colF_grade'].some(id=>{
       const el=document.getElementById(id); return el && !el.disabled && (el.value||'')!=='';
     });
-  if(hasColFilter) { colFilterDB(); return; }
+  if(hasColFilter) { colFilterDB(keepPage); return; }
   const q = (document.getElementById('dbSearchQ')?.value||'').toLowerCase();
   const status = document.getElementById('dbStatusFilter')?.value||'';
   const assignEl = document.getElementById('dbAssignFilter');
@@ -6296,7 +6296,7 @@ function buildPaginationHtml(key, page, totalPages, total) {
 function goPaginate(key, n) {
   setPage(key, n);
   switch(key) {
-    case 'db': try { filterDB(); } catch(e){} break;
+    case 'db': try { filterDB(true); } catch(e){} break;
     case 'consult': try { renderConsultPage(); } catch(e){} break;
     case 'funding': try {
       if(typeof renderFundingPage === 'function') renderFundingPage();
@@ -7152,8 +7152,8 @@ function initColFilters() {
       statusOptions.map(o=>'<option value="'+o.label+'">'+o.label+'</option>').join('');
   }
 }
-function colFilterDB() {
-  resetPage('db');
+function colFilterDB(keepPage) {
+  if(!keepPage) resetPage('db');
   const name   = (document.getElementById('colF_name')?.value||'').toLowerCase();
   const grade  = document.getElementById('colF_grade')?.value||'';
   const phone  = (document.getElementById('colF_phone')?.value||'').toLowerCase();
