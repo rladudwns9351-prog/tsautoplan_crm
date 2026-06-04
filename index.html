@@ -7549,7 +7549,7 @@ async function addMemo() {
     currentCustomer.memos.unshift(newMemo);
     document.getElementById('memoInput').value='';
     document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
-    renderMemos(); renderHistory(); filterDB(); renderConsult();
+    renderMemos(); renderHistory(); filterDB(true); renderConsult();
     if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
     return;
   }
@@ -7565,7 +7565,7 @@ async function addMemo() {
     await sbUpdateCustomer(currentCustomer);
     // 성공 시 확정
     document.getElementById('memoInput').value='';
-    renderHistory(); filterDB(); renderConsult();
+    renderHistory(); filterDB(true); renderConsult();
     if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
     showGlobalToast('✅ 메모가 저장되었습니다.');
   } catch(e) {
