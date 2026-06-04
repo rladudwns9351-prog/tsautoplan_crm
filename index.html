@@ -6610,13 +6610,35 @@ document.addEventListener('click', (e) => {
     }, 300);
   }
 }, true);
+// 동기화 후 데이터가 실제로 바뀌었는지 판별용 시그니처
+// (변화 없으면 화면을 다시 그리지 않아 현재 페이지/스크롤 위치를 보존)
+function _dataSignature() {
+  let s = '';
+  s += 'C' + (Array.isArray(customers) ? customers.length : 0);
+  s += 'F' + (typeof fundingList !== 'undefined' && Array.isArray(fundingList) ? fundingList.length : 0);
+  s += 'S' + (typeof staffList !== 'undefined' && Array.isArray(staffList) ? staffList.length : 0);
+  if(Array.isArray(customers)) {
+    for(const c of customers) {
+      s += '|' + c.id + ':' + (c.memos ? c.memos.length : 0) + ':' + (c.status||'') + ':' + (c.assign||'') + ':' + (c.grade||'') + ':' + (c.important?1:0) + ':' + (c.retrieved?1:0);
+    }
+  }
+  return s;
+}
+// loadData 후 변화가 있을 때만 safeRerender. 변화 없으면 true 반환(=skip)
+function _rerenderIfChanged(type) {
+  const sig = _dataSignature();
+  if(sig === window._lastDataSig) return true; // 변화 없음 → 화면 유지
+  window._lastDataSig = sig;
+  safeRerender(type);
+  return false;
+}
 async function _handleSyncEvent(payload) {
   if(!payload || _isSyncReloading) return;
   if(payload.origin && payload.origin === ((currentUserId || '') + '@' + (window._tabId || 0))) return;
   _isSyncReloading = true;
   try {
     await loadData();
-    safeRerender(payload.type);
+    _rerenderIfChanged(payload.type);
   } catch(e) {
     console.warn('sync reload failed', e);
   } finally {
@@ -6645,7 +6667,7 @@ function initSyncChannel() {
       _isSyncReloading = true;
       try {
         await loadData();
-        safeRerender('poll');
+        _rerenderIfChanged('poll');
       } catch(_){} finally {
         _isSyncReloading = false;
       }
@@ -6703,7 +6725,7 @@ function initSupabaseRealtime() {
           _isSyncReloading = true;
           try {
             await loadData();
-            safeRerender(table || 'realtime');
+            _rerenderIfChanged(table || 'realtime');
           } catch(_){} finally {
             _isSyncReloading = false;
           }
@@ -9151,7 +9173,7 @@ async function _reloadOnFocus() {
   _isSyncReloading = true;
   try {
     await loadData();
-    safeRerender('focus');
+    _rerenderIfChanged('focus');
   } catch(e) {
     console.warn('focus reload failed', e);
   } finally {
