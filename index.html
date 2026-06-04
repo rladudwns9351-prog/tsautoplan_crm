@@ -10645,7 +10645,15 @@ setTimeout(refreshFundingCheckBadge, 700);
 setInterval(refreshFundingCheckBadge, 30000);
 
 /* ===== 엑셀 일괄 고객등록 ===== */
-const BULK_STAFF = ['강민지','박광석','정서준','강해옥','이성훈','박대원'];
+// 엑셀 일괄등록 담당자 검증용 명단: 직원관리(staffList)의 활성 영업자에서 실시간 조회
+// → 직원 등록/삭제/비활성이 자동 반영되어 미일치 오인식 방지
+function getBulkStaff(){
+  if(typeof staffList === 'undefined' || !Array.isArray(staffList)) return [];
+  return staffList
+    .filter(u => u.active && u.role === 'staff')
+    .map(u => (u.name || '').trim())
+    .filter(Boolean);
+}
 let bulkImportParsed = [];
 
 function bulkGetField(row, names){
@@ -10688,6 +10696,7 @@ function handleBulkImportFile(ev){
 }
 
 function buildBulkPreview(rows){
+  const bulkStaff = getBulkStaff();
   const parsed = [];
   rows.forEach(r=>{
     const name = String(bulkGetField(r,['이름','고객명'])).trim();
@@ -10704,7 +10713,7 @@ function buildBulkPreview(rows){
       assign: assign,
       status: '상담중',
       memo: '투데이즈카 디비 이관처리',
-      _matched: BULK_STAFF.includes(assign)
+      _matched: bulkStaff.includes(assign)
     });
   });
   bulkImportParsed = parsed;
@@ -10719,7 +10728,7 @@ function buildBulkPreview(rows){
     if(!p.phone) noContact++;
   });
   const distHtml = Object.entries(dist).map(([k,v])=>{
-    const ok = BULK_STAFF.includes(k);
+    const ok = bulkStaff.includes(k);
     return `<span style="font-size:11px;padding:3px 9px;border-radius:999px;background:${ok?'rgba(68,136,255,.12)':'rgba(255,68,68,.12)'};color:${ok?'#4488ff':'#ff4444'};border:1px solid ${ok?'rgba(68,136,255,.3)':'rgba(255,68,68,.3)'};">${k} ${v}건${ok?'':' ⚠'}</span>`;
   }).join(' ');
 
