@@ -4912,7 +4912,7 @@ async function toggleImportant(id) {
   const c = customers.find(c=>c.id===id);
   if(!c) return;
   c.important = !c.important;
-  filterDB();
+  filterDB(true);
   showGlobalToast(c.important ? '"'+c.name+'" 중요고객으로 설정' : '"'+c.name+'" 중요고객 해제');
   if(isSbConfigured()) {
     try { await sbUpdateCustomer(c); }
@@ -4996,7 +4996,7 @@ async function applyBulkStatus() {
     catch(e) { showGlobalToast('⚠️ 일괄 상태 저장 실패: '+(e.message||e)); return; }
   }
   clearCheckboxes();
-  filterDB();
+  filterDB(true);
   showGlobalToast(ids.length+'건 상태를 "'+newStatus+'"으로 변경했습니다.');
 }
 async function applyBulkMemo() {
@@ -5029,7 +5029,7 @@ async function applyBulkMemo() {
   }
   input.value = '';
   clearCheckboxes();
-  filterDB();
+  filterDB(true);
   showGlobalToast(ids.length+'건에 메모가 추가되었습니다.');
 }
 const FINANCE_LIST = ['현대캐피탈','롯데렌터카','BNK캐피탈','IM캐피탈','KB캐피탈','MG캐피탈',
@@ -6327,7 +6327,7 @@ async function deleteCustomerDB(id) {
     const idx = customers.findIndex(c=>c.id===id);
     if(idx > -1) customers.splice(idx, 1);
     fundingList.forEach(f=>{ if(f.customerId===id) f.customerId=null; });
-    filterDB();
+    filterDB(true);
     refreshAllViews();
     showGlobalToast('"'+c.name+'" 완전 삭제 완료');
   } catch(e) {
@@ -7524,7 +7524,7 @@ function _renderConsultInternal() {
   }
 }
 function refreshAllViews() {
-  filterDB();
+  filterDB(true);
   renderConsult();
   if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
   if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
@@ -8857,7 +8857,7 @@ async function saveCustomer() {
     if(isSbConfigured()) {
       try { await loadData(); } catch(reloadErr) { console.warn('고객 재조회 실패', reloadErr); }
     }
-    filterDB();
+    filterDB(true);
     renderRecentTable();
     if(typeof renderDashboard === 'function') {
       try { renderDashboard(); } catch(_){}
