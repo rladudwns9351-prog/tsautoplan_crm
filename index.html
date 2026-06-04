@@ -912,7 +912,7 @@
     </div>
     <!-- ===== CUSTOMER DETAIL ===== -->
     <div class="page" id="page-detail">
-      <div class="detail-back" onclick="goPage(&#39;db&#39;,null)">← 고객 DB로 돌아가기</div>
+      <div class="detail-back" onclick="goPage(&#39;db&#39;,null,true)">← 고객 DB로 돌아가기</div>
       <div class="detail-grid">
         <!-- Left: Info -->
         <div>
@@ -3622,7 +3622,7 @@ function resetPageFilters(pageId) {
   }
 }
 
-function goPage(id, navEl) {
+function goPage(id, navEl, keepDbPage) {
   // 동일 페이지 재클릭 감지 → 필터 초기화
   const currentActive = document.querySelector('.page.active');
   const isSamePage = currentActive && currentActive.id === 'page-'+id;
@@ -3635,7 +3635,7 @@ function goPage(id, navEl) {
     try { resetPageFilters(id); } catch(e) { console.warn('필터 초기화 실패:', e); }
   }
   if(id==='dashboard') renderDashboard();
-  if(id==='db') { initDBFilters(); filterDB(); }
+  if(id==='db') { initDBFilters(); filterDB(keepDbPage); }
   if(id==='consult') { initConsultFilters(); filterConsult(); }
   if(id==='users') { showUserList(); } // async, self-executing
   if(id==='settings') { renderStatusOptionList(); }
@@ -6563,8 +6563,19 @@ function _rerenderCurrentPage(syncType) {
     if(document.getElementById('page-dashboard')?.classList.contains('active')) {
       if(typeof renderDashboard === 'function') renderDashboard();
     }
-    if(document.getElementById('page-customers')?.classList.contains('active')) {
-      if(typeof filterDB === 'function') filterDB();
+    if(document.getElementById('page-db')?.classList.contains('active')) {
+      if(typeof filterDB === 'function') filterDB(true); // 동기화 시 현재 페이지 유지
+    }
+    // 상세 페이지가 열려 있으면 최신 데이터로 다시 연결 후 메모/히스토리 갱신
+    if(document.getElementById('page-detail')?.classList.contains('active') && typeof currentCustomer !== 'undefined' && currentCustomer) {
+      const fresh = customers.find(c => c.id === currentCustomer.id);
+      if(fresh) {
+        currentCustomer = fresh;
+        if(typeof renderMemos === 'function') renderMemos();
+        if(typeof renderHistory === 'function') renderHistory();
+        const cntEl = document.getElementById('detailMemoCount');
+        if(cntEl) cntEl.textContent = currentCustomer.memos.length+'건';
+      }
     }
     if(document.getElementById('page-funding')?.classList.contains('active') || syncType === 'fundings') {
       if(typeof renderFundingPage === 'function') renderFundingPage();
@@ -6630,7 +6641,7 @@ function initSyncChannel() {
       if(_isSyncReloading) return;
       if(!isSbConfigured()) return;
       if(!document.getElementById('app')?.classList.contains('active')) return;
-      if(window._realtimeConnected) return;
+      if(window._realtimeReceivedData) return; // 실시간 이벤트를 실제로 받고 있을 때만 polling 생략
       _isSyncReloading = true;
       try {
         await loadData();
@@ -6686,7 +6697,8 @@ function initSupabaseRealtime() {
         const msg = JSON.parse(e.data);
         if(msg.event === 'postgres_changes' || (msg.payload && msg.payload.data)) {
           const table = msg.payload?.data?.table || msg.topic?.split(':').pop();
-          if(window._lastLocalChange && Date.now() - window._lastLocalChange < 500) return;
+          window._realtimeReceivedData = true; // 실제 변경 이벤트 수신 확인 → polling 백업 생략 가능
+          if(window._lastLocalChange && Date.now() - window._lastLocalChange < 1500) return;
           if(_isSyncReloading) return;
           _isSyncReloading = true;
           try {
@@ -6700,6 +6712,7 @@ function initSupabaseRealtime() {
     };
     ws.onclose = () => {
       window._realtimeConnected = false;
+      window._realtimeReceivedData = false; // 끊기면 polling 백업 재가동
       if(heartbeatTimer) clearInterval(heartbeatTimer);
       console.log('[Realtime] disconnected, reconnect in 3s...');
       setTimeout(() => {
