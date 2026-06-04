@@ -1005,7 +1005,7 @@
           <div class="tab-content active" id="tab-memo">
             <textarea class="memo-input" id="memoInput" placeholder="상담 내용을 입력하세요..."></textarea>
             <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
-              <button class="btn btn-primary btn-sm" onclick="addMemo()">메모 저장</button>
+              <button class="btn btn-primary btn-sm" id="memoSaveBtn" onclick="addMemo()">메모 저장</button>
             </div>
             <div id="memoList"><div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">저장된 메모가 없습니다.</div></div>
           </div>
@@ -7507,21 +7507,42 @@ async function addMemo() {
   const now = new Date();
   const memoDateISO = now.toISOString().split('T')[0];
   const memoDateDisplay = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  currentCustomer.memos.unshift({
-    text, author:currentUser,
-    date: memoDateDisplay,
-    dateISO: memoDateISO
-  });
-  document.getElementById('memoInput').value='';
+  const newMemo = { text, author:currentUser, date: memoDateDisplay, dateISO: memoDateISO };
+
+  // DB 미설정(로컬 모드): 기존처럼 즉시 반영
+  if(!isSbConfigured()) {
+    currentCustomer.memos.unshift(newMemo);
+    document.getElementById('memoInput').value='';
+    document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
+    renderMemos(); renderHistory(); filterDB(); renderConsult();
+    if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
+    return;
+  }
+
+  // DB 저장 성공을 확인한 뒤 확정(낙관적 반영 + 실패 시 롤백)
+  const btn = document.getElementById('memoSaveBtn');
+  const btnOrig = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '저장 중...'; }
+  currentCustomer.memos.unshift(newMemo); // 낙관적
   document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
   renderMemos();
-  renderHistory();
-  filterDB();
-  renderConsult();
-  if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
-  if(isSbConfigured()) {
-    try { await sbUpdateCustomer(currentCustomer); }
-    catch(e) { showGlobalToast('⚠️ 메모 저장 실패: '+(e.message||e)); }
+  try {
+    await sbUpdateCustomer(currentCustomer);
+    // 성공 시 확정
+    document.getElementById('memoInput').value='';
+    renderHistory(); filterDB(); renderConsult();
+    if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
+    showGlobalToast('✅ 메모가 저장되었습니다.');
+  } catch(e) {
+    // 실패 시 롤백 → 화면과 DB 일치 유지
+    const i = currentCustomer.memos.indexOf(newMemo);
+    if(i > -1) currentCustomer.memos.splice(i, 1);
+    document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
+    renderMemos();
+    document.getElementById('memoInput').value = text; // 입력 복원
+    showGlobalToast('⚠️ 메모 저장 실패(저장되지 않음): '+(e.message||e));
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = btnOrig || '메모 저장'; }
   }
 }
 function renderMemos() {
