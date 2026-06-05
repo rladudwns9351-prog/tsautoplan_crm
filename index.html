@@ -61,8 +61,11 @@
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">고객관리</div>
-      <div class="nav-item" onclick="goPage(&#39;db&#39;,this)">
+      <div class="nav-item" onclick="goDbNormal(this)">
         <span class="nav-icon">👥</span> 고객 DB
+      </div>
+      <div class="nav-item admin-only" onclick="goGudb(this)">
+        <span class="nav-icon">🗂️</span> 구디비
       </div>
       <div class="nav-item" onclick="goPage(&#39;consult&#39;,this)">
         <span class="nav-icon">💬</span> 상담 현황
@@ -831,6 +834,12 @@
         <span style="font-size:13px;color:var(--text2);">메모 일괄 입력:</span>
         <input type="text" id="bulkMemoInput" placeholder="선택된 고객들에게 추가할 메모..." style="flex:1;min-width:300px;padding:6px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;" onkeydown="if(event.key===&#39;Enter&#39;) applyBulkMemo()">
         <button class="btn btn-primary btn-sm" onclick="applyBulkMemo()">적용</button>
+        <span style="color:var(--text3);">|</span>
+        <button id="bulkToGudbBtn" class="btn btn-sm" style="background:rgba(255,153,68,.15);border:1px solid rgba(255,153,68,.4);color:#ff9944;font-weight:600;" onclick="bulkMoveToGudb()">🗂️ 구디비로 이동</button>
+        <span id="bulkReassignWrap" style="display:none;align-items:center;gap:6px;">
+          <select id="bulkReassignSel" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;"></select>
+          <button class="btn btn-primary btn-sm" onclick="bulkReassignFromGudb()">재배분</button>
+        </span>
       </div>
       <!-- 테이블 -->
       <div class="section-card" style="overflow-x:auto;" onwheel="if(event.shiftKey &amp;&amp; event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
@@ -1000,7 +1009,7 @@
           <div class="tabs">
             <div class="tab active" onclick="switchTab(&#39;memo&#39;,this)">상담 메모</div>
             <div class="tab" onclick="switchTab(&#39;files&#39;,this)">고객 서류</div>
-            <div class="tab" onclick="switchTab(&#39;history&#39;,this)">히스토리</div>
+            <div class="tab admin-only" onclick="switchTab(&#39;history&#39;,this)">히스토리</div>
           </div>
           <div class="tab-content active" id="tab-memo">
             <textarea class="memo-input" id="memoInput" placeholder="상담 내용을 입력하세요..."></textarea>
@@ -3622,6 +3631,9 @@ function resetPageFilters(pageId) {
   }
 }
 
+var dbViewMode = 'normal'; // 'normal' | 'gudb'
+function goDbNormal(navEl){ dbViewMode='normal'; goPage('db', navEl); }
+function goGudb(navEl){ dbViewMode='gudb'; goPage('db', navEl); }
 function goPage(id, navEl, keepDbPage) {
   // 동일 페이지 재클릭 감지 → 필터 초기화
   const currentActive = document.querySelector('.page.active');
@@ -4406,7 +4418,7 @@ function openDetail(id) {
   updateSettleBtnUI();
   if(currentRole === 'admin') {
     const assignSel = document.getElementById('detailAssignSel');
-    fillAssignSelect(assignSel, c.assign);
+    fillAssignSelect(assignSel, c.assign, true);
     document.getElementById('detailAssignWrap').style.display = '';
     document.getElementById('detailAssign').style.display = 'none';
   } else {
@@ -4472,14 +4484,16 @@ async function changeAssign(newAssign) {
   currentCustomer.assign = newAssign;
   const now = new Date();
   const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  currentCustomer.memos.unshift({
-    text: `[담당자변경] ${oldAssign} → ${newAssign}`,
-    author: currentUser,
-    date: dateStr,
-    dateISO: now.toISOString().split('T')[0],
-    resetConsult: true,
-    isSystem: true
-  });
+  if(newAssign !== '구디비') {
+    currentCustomer.memos.unshift({
+      text: `[담당자변경] ${oldAssign} → ${newAssign}`,
+      author: currentUser,
+      date: dateStr,
+      dateISO: now.toISOString().split('T')[0],
+      resetConsult: true,
+      isSystem: true
+    });
+  }
   document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
   const toast = document.getElementById('statusToast');
   toast.textContent = `✓ 담당자가 "${newAssign}"으로 변경되었습니다.`;
@@ -4921,7 +4935,12 @@ function filterDB(keepPage) {
   const assign = currentRole==='admin' ? (assignEl?.value||'') : currentUser;
   const source = document.getElementById('dbSourceFilter')?.value||'';
   let list = customers.filter(c=>{
-    if(assign && c.assign !== assign) return false;
+    if(dbViewMode==='gudb'){
+      if(c.assign!=='구디비') return false;
+    } else {
+      if(c.assign==='구디비') return false;
+      if(assign && c.assign !== assign) return false;
+    }
     if(currentRole !== 'admin' && c.retrieved === true) return false;
     if(dbImportantOnly && !c.important) return false;
     if(q && !c.name.toLowerCase().includes(q) && !c.phone.includes(q) && !c.car.toLowerCase().includes(q)) return false;
@@ -4970,6 +4989,36 @@ async function quickChangeStatus(e, id, newStatus) {
   }
   if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
 }
+async function bulkMoveToGudb() {
+  const ids = [...document.querySelectorAll('.db-check:checked')].map(c=>parseInt(c.dataset.id));
+  if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
+  if(!confirm(ids.length+'건을 구디비로 이동하시겠습니까?\n(고객 DB 목록에서 숨겨지고 구디비 탭으로 이동됩니다)')) return;
+  const upd=[];
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ c.assign='구디비'; c.retrieved=false; upd.push(c);} });
+  if(isSbConfigured()) {
+    try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
+    catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
+  }
+  clearCheckboxes(); filterDB(true);
+  showGlobalToast(upd.length+'건 구디비로 이동 완료');
+  if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+}
+async function bulkReassignFromGudb() {
+  const target = document.getElementById('bulkReassignSel')?.value || '';
+  const ids = [...document.querySelectorAll('.db-check:checked')].map(c=>parseInt(c.dataset.id));
+  if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
+  if(!target) { alert('재배분할 담당자를 선택하세요.'); return; }
+  if(!confirm(ids.length+'건을 "'+target+'"에게 재배분하시겠습니까?')) return;
+  const upd=[];
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ c.assign=target; c.retrieved=false; upd.push(c);} });
+  if(isSbConfigured()) {
+    try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
+    catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
+  }
+  clearCheckboxes(); filterDB(true);
+  showGlobalToast(upd.length+'건 "'+target+'"에게 재배분 완료');
+  if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+}
 function onCheckChange() {
   const checks = document.querySelectorAll('.db-check:checked');
   const bar = document.getElementById('bulkActionBar');
@@ -4981,6 +5030,15 @@ function onCheckChange() {
     const sel = document.getElementById('bulkStatusSel');
     if(sel && !sel.options.length) {
       sel.innerHTML = statusOptions.map(o=>'<option value="'+o.label+'">'+o.label+'</option>').join('');
+    }
+    const _toGudbBtn = document.getElementById('bulkToGudbBtn');
+    const _reassignWrap = document.getElementById('bulkReassignWrap');
+    if(dbViewMode==='gudb'){
+      if(_toGudbBtn) _toGudbBtn.style.display='none';
+      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
+    } else {
+      if(_toGudbBtn) _toGudbBtn.style.display='';
+      if(_reassignWrap) _reassignWrap.style.display='none';
     }
   } else {
     bar.style.display = 'none';
@@ -7315,6 +7373,8 @@ function colFilterDB(keepPage) {
   const topStatus = document.getElementById('dbStatusFilter')?.value||'';
   const topSource = document.getElementById('dbSourceFilter')?.value||'';
   let list = customers.filter(c=>{
+    if(dbViewMode==='gudb'){ if(c.assign!=='구디비') return false; }
+    else if(c.assign==='구디비') return false;
     if(currentRole!=='admin' && c.assign!==currentUser) return false;
     if(currentRole!=='admin' && c.retrieved) return false;
     if(dbImportantOnly && !c.important) return false;
@@ -8309,12 +8369,14 @@ function mgrMove(id, dir) {
 function getActiveStaff() {
   return staffList.filter(u => u.active && u.role === 'staff');
 }
-function fillAssignSelect(el, selectedName) {
+function fillAssignSelect(el, selectedName, includeGudb) {
   if(!el) return;
   const list = getActiveStaff();
-  el.innerHTML = list.map(u =>
+  let html = list.map(u =>
     `<option value="${u.name}" ${u.name === selectedName ? 'selected' : ''}>${u.name}</option>`
   ).join('');
+  if(includeGudb) html += `<option value="구디비" ${selectedName==='구디비'?'selected':''}>구디비</option>`;
+  el.innerHTML = html;
 }
 function openAddModal() {
   renderAddModalFields();
