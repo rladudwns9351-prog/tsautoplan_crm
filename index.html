@@ -4810,6 +4810,15 @@ function renderDB(list) {
       if(c !== 0) return c * dir;
       return (b.id||0) - (a.id||0);
     });
+  } else if(currentRole === 'staff') {
+    // 직원: 본인 DB 기본 정렬 = 최근상담일 내림차순 (재배분 건이 상단에 노출)
+    sorted = [...list].sort((a,b) => {
+      const ad = consultDateISO(a) || a.date || '';
+      const bd = consultDateISO(b) || b.date || '';
+      const dc = bd.localeCompare(ad);
+      if(dc !== 0) return dc;
+      return (b.id||0) - (a.id||0);
+    });
   } else {
     sorted = [...list].sort((a,b) => {
       const dc = (b.date||'').localeCompare(a.date||'');
@@ -6111,7 +6120,9 @@ function renderReclaimPage() {
   const now = new Date();
   const thisMonth = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비');
-  const alarms = all.filter(c=>!c.retrieved && calcDaysElapsed(c)>3);
+  const alarms = all.filter(c=>!c.retrieved && calcDaysElapsed(c)>3)
+    .sort((a,b)=> calcDaysElapsed(b)-calcDaysElapsed(a) || (b.id||0)-(a.id||0))
+    .slice(0,30);
   const alarmEl = document.getElementById('reclaimAlarmList');
   const alarmCount = document.getElementById('reclaimAlarmCount');
   if(alarmCount) alarmCount.textContent = alarms.length+'건';
