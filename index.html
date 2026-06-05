@@ -912,7 +912,7 @@
     </div>
     <!-- ===== CUSTOMER DETAIL ===== -->
     <div class="page" id="page-detail">
-      <div class="detail-back" onclick="goPage(&#39;db&#39;,null,true)">← 고객 DB로 돌아가기</div>
+      <div class="detail-back" onclick="goBackFromDetail()">← 돌아가기</div>
       <div class="detail-grid">
         <!-- Left: Info -->
         <div>
@@ -4422,7 +4422,16 @@ function openDetail(id) {
   applyDetailStatusColor(c.status);
   document.getElementById('statusToast').style.display = 'none';
   renderMemos(); renderFiles(); renderHistory();
+  const _curActive = document.querySelector('.page.active');
+  if(_curActive && _curActive.id && _curActive.id !== 'page-detail') {
+    window._detailFromPage = _curActive.id.replace('page-','');
+  }
   goPage('detail', null);
+}
+function goBackFromDetail() {
+  const target = window._detailFromPage || 'db';
+  const navEl = document.querySelector('.nav-item[onclick*="\'' + target + '\'"]');
+  goPage(target, navEl || null, target==='db');
 }
 function applyDetailStatusColor(status) {
   const dSel = document.getElementById('detailStatusSel');
@@ -4787,6 +4796,7 @@ function refreshDBSortHeaders() {
   if(nh) nh.innerHTML = '다음상담일'+sortArrowHtml('nextConsult');
 }
 function renderDB(list) {
+  const _preCheckedIds = new Set(Array.from(document.querySelectorAll('#dbBody .db-check:checked')).map(c=>c.dataset.id));
   let sorted;
   if(dbSortKey) {
     const dir = dbSortDir === 'asc' ? 1 : -1;
@@ -4848,6 +4858,10 @@ function renderDB(list) {
       : '') +
     '</tr>';
   }).join('');
+  if(_preCheckedIds.size) {
+    _preCheckedIds.forEach(id=>{ const cb=body.querySelector('.db-check[data-id="'+id+'"]'); if(cb) cb.checked=true; });
+    if(typeof onCheckChange==='function') onCheckChange();
+  }
   let navEl = document.getElementById('dbPaginationBar');
   if(!navEl) {
     navEl = document.createElement('div');
