@@ -67,6 +67,9 @@
       <div class="nav-item admin-only" onclick="goGudb(this)">
         <span class="nav-icon">🗂️</span> 구디비
       </div>
+      <div class="nav-item admin-only" onclick="goEnded(this)">
+        <span class="nav-icon">⛔</span> 종료디비
+      </div>
       <div class="nav-item" onclick="goPage(&#39;consult&#39;,this)">
         <span class="nav-icon">💬</span> 상담 현황
       </div>
@@ -836,6 +839,7 @@
         <button class="btn btn-primary btn-sm" onclick="applyBulkMemo()">적용</button>
         <span style="color:var(--text3);">|</span>
         <button id="bulkToGudbBtn" class="btn btn-sm" style="background:rgba(255,153,68,.15);border:1px solid rgba(255,153,68,.4);color:#ff9944;font-weight:600;" onclick="bulkMoveToGudb()">🗂️ 구디비로 이동</button>
+        <button id="bulkToEndedBtn" class="btn btn-sm" style="background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.4);color:#ff6b6b;font-weight:600;" onclick="bulkMoveToEnded()">⛔ 종료디비로 이동</button>
         <span id="bulkReassignWrap" style="display:none;align-items:center;gap:6px;">
           <select id="bulkReassignSel" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;"></select>
           <button class="btn btn-primary btn-sm" onclick="bulkReassignFromGudb()">재배분</button>
@@ -3634,6 +3638,7 @@ function resetPageFilters(pageId) {
 var dbViewMode = 'normal'; // 'normal' | 'gudb'
 function goDbNormal(navEl){ dbViewMode='normal'; goPage('db', navEl); }
 function goGudb(navEl){ dbViewMode='gudb'; goPage('db', navEl); }
+function goEnded(navEl){ dbViewMode='ended'; goPage('db', navEl); }
 function goPage(id, navEl, keepDbPage) {
   // 동일 페이지 재클릭 감지 → 필터 초기화
   const currentActive = document.querySelector('.page.active');
@@ -4484,7 +4489,7 @@ async function changeAssign(newAssign) {
   currentCustomer.assign = newAssign;
   const now = new Date();
   const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  if(newAssign !== '구디비') {
+  if(newAssign !== '구디비' && newAssign !== '종료디비') {
     currentCustomer.memos.unshift({
       text: `[담당자변경] ${oldAssign} → ${newAssign}`,
       author: currentUser,
@@ -4506,6 +4511,7 @@ async function changeAssign(newAssign) {
   await syncFundingAssign(currentCustomer.id, newAssign);
   refreshAllViews();
   renderHistory();
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
 }
 async function syncFundingAssign(customerId, newAssign) {
   if(!customerId || typeof fundingList === 'undefined' || !Array.isArray(fundingList)) return;
@@ -4937,8 +4943,10 @@ function filterDB(keepPage) {
   let list = customers.filter(c=>{
     if(dbViewMode==='gudb'){
       if(c.assign!=='구디비') return false;
+    } else if(dbViewMode==='ended'){
+      if(c.assign!=='종료디비') return false;
     } else {
-      if(c.assign==='구디비') return false;
+      if(c.assign==='구디비'||c.assign==='종료디비') return false;
       if(assign && c.assign !== assign) return false;
     }
     if(currentRole !== 'admin' && c.retrieved === true) return false;
@@ -5000,7 +5008,23 @@ async function bulkMoveToGudb() {
     catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
   }
   clearCheckboxes(); filterDB(true);
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
   showGlobalToast(upd.length+'건 구디비로 이동 완료');
+  if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+}
+async function bulkMoveToEnded() {
+  const ids = [...document.querySelectorAll('.db-check:checked')].map(c=>parseInt(c.dataset.id));
+  if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
+  if(!confirm(ids.length+'건을 종료디비로 이동하시겠습니까?\\n(최종 종료된 DB로 분류되어 고객 DB 목록에서 숨겨집니다)')) return;
+  const upd=[];
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ c.assign='종료디비'; c.retrieved=false; upd.push(c);} });
+  if(isSbConfigured()) {
+    try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
+    catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
+  }
+  clearCheckboxes(); filterDB(true);
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
+  showGlobalToast(upd.length+'건 종료디비로 이동 완료');
   if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
 }
 async function bulkReassignFromGudb() {
@@ -5016,6 +5040,7 @@ async function bulkReassignFromGudb() {
     catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
   }
   clearCheckboxes(); filterDB(true);
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
   showGlobalToast(upd.length+'건 "'+target+'"에게 재배분 완료');
   if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
 }
@@ -5032,12 +5057,15 @@ function onCheckChange() {
       sel.innerHTML = statusOptions.map(o=>'<option value="'+o.label+'">'+o.label+'</option>').join('');
     }
     const _toGudbBtn = document.getElementById('bulkToGudbBtn');
+    const _toEndedBtn = document.getElementById('bulkToEndedBtn');
     const _reassignWrap = document.getElementById('bulkReassignWrap');
-    if(dbViewMode==='gudb'){
+    if(dbViewMode==='gudb' || dbViewMode==='ended'){
       if(_toGudbBtn) _toGudbBtn.style.display='none';
+      if(_toEndedBtn) _toEndedBtn.style.display='none';
       if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
     } else {
       if(_toGudbBtn) _toGudbBtn.style.display='';
+      if(_toEndedBtn) _toEndedBtn.style.display='';
       if(_reassignWrap) _reassignWrap.style.display='none';
     }
   } else {
@@ -7374,7 +7402,8 @@ function colFilterDB(keepPage) {
   const topSource = document.getElementById('dbSourceFilter')?.value||'';
   let list = customers.filter(c=>{
     if(dbViewMode==='gudb'){ if(c.assign!=='구디비') return false; }
-    else if(c.assign==='구디비') return false;
+    else if(dbViewMode==='ended'){ if(c.assign!=='종료디비') return false; }
+    else if(c.assign==='구디비'||c.assign==='종료디비') return false;
     if(currentRole!=='admin' && c.assign!==currentUser) return false;
     if(currentRole!=='admin' && c.retrieved) return false;
     if(dbImportantOnly && !c.important) return false;
@@ -8375,7 +8404,10 @@ function fillAssignSelect(el, selectedName, includeGudb) {
   let html = list.map(u =>
     `<option value="${u.name}" ${u.name === selectedName ? 'selected' : ''}>${u.name}</option>`
   ).join('');
-  if(includeGudb) html += `<option value="구디비" ${selectedName==='구디비'?'selected':''}>구디비</option>`;
+  if(includeGudb) {
+    html += `<option value="구디비" ${selectedName==='구디비'?'selected':''}>구디비</option>`;
+    html += `<option value="종료디비" ${selectedName==='종료디비'?'selected':''}>종료디비</option>`;
+  }
   el.innerHTML = html;
 }
 function openAddModal() {
