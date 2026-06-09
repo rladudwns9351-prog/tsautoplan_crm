@@ -942,7 +942,7 @@
             <!-- 담당자 변경 (관리자 전용) -->
             
             <!-- 상태 변경 (관리자 + 직원 모두 드롭다운) -->
-            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val" id="detailCar"></span></div><div class="info-row" data-field="source"><span class="info-key">유입경로</span><span class="info-val" id="detailSource">직영업</span></div><div class="info-row" data-field="division" style="align-items:center;">
+            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val" id="detailCar"></span></div><div class="info-row" data-field="source" style="align-items:center;"><span class="info-key">유입경로</span><span class="info-val"><span id="detailSource">직영업</span><select id="detailSourceSel" class="admin-only" onchange="changeCustomerSource(this.value)" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"></select></span></div><div class="info-row" data-field="division" style="align-items:center;">
               <span class="info-key">구분</span>
               <span class="info-val">
                 <select id="detailDivisionSel" onchange="changeCustomerDivision(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="">선택 안 함</option><option value="개인">개인</option><option value="법인">법인</option><option value="개인사업자">개인사업자</option></select>
@@ -4411,6 +4411,7 @@ function openDetail(id) {
   document.getElementById('detailPhone').value = c.phone || '';
   document.getElementById('detailCar').textContent = c.car;
   document.getElementById('detailSource').textContent = c.source;
+  fillSourceSelect(c.source || '');
   fillDivisionSelect(document.getElementById('detailDivisionSel'), c.division || '');
   fillMemoTagSelect(document.getElementById('detailMemoTagSel'), c.memoTag || '');
   try { refreshDetailFieldOrder(); } catch(e){}
@@ -4522,6 +4523,37 @@ async function syncFundingAssign(customerId, newAssign) {
     try { await Promise.all(targets.map(f => sbUpdateFunding(f))); }
     catch(e) { showGlobalToast('⚠️ 펀딩 담당자 동기화 실패: '+(e.message||e)); }
   }
+}
+// 유입경로 드롭다운 채우기 (관리자만 표시) — 현재값 기본 선택, 기존 데이터의 경로 + 직영업 동적 구성
+function fillSourceSelect(current) {
+  const sel = document.getElementById('detailSourceSel');
+  const txt = document.getElementById('detailSource');
+  if(!sel || !txt) return;
+  if(currentRole !== 'admin') { sel.style.display='none'; txt.style.display=''; return; }
+  txt.style.display='none'; sel.style.display='';
+  const set = new Set();
+  try { (customers||[]).forEach(c=>{ if(c && c.source) set.add(c.source); }); } catch(_){}
+  set.add('직영업');
+  if(current) set.add(current);
+  const opts = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b,'ko'));
+  sel.innerHTML = opts.map(s=>`<option value="${escapeHtml(s)}"${s===current?' selected':''} style="background:#1a1a1a;color:#f0f0f0;">${escapeHtml(s)}</option>`).join('');
+  sel.value = current || '';
+}
+async function changeCustomerSource(newVal) {
+  if(!currentCustomer) return;
+  const prev = currentCustomer.source || '-';
+  if(prev === newVal) return;
+  currentCustomer.source = newVal || '';
+  const now = new Date();
+  const ds = now.toLocaleDateString('ko-KR')+' '+now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  if(!Array.isArray(currentCustomer.memos)) currentCustomer.memos = [];
+  currentCustomer.memos.unshift({text:'[유입경로변경] '+prev+' → '+(newVal||'(없음)')+' (관리자 수정)', author:currentUser, date:ds, isSystem:true});
+  const sp = document.getElementById('detailSource'); if(sp) sp.textContent = currentCustomer.source;
+  if(isSbConfigured()) {
+    try { await sbUpdateCustomer(currentCustomer); showGlobalToast('유입경로가 변경되었습니다.'); }
+    catch(e) { showGlobalToast('⚠️ 저장 실패: ' + (e.message||e)); }
+  }
+  refreshAllViews();
 }
 async function changeCustomerDivision(newVal) {
   if(!currentCustomer) return;
@@ -5678,13 +5710,8 @@ async function saveFunding() {
           memos2.push({text:'[상태변경] '+prevSt+' → 펀딩완료 (펀딩 등록됨)', author:currentUser, date:ds2, isSystem:true});
           changed = true;
         }
-        // 유입경로 → 직영업 (펀딩등록도 포함)
-        if(linkedC.source !== '직영업') {
-          const prevSrc = linkedC.source || '-';
-          linkedC.source = '직영업';
-          memos2.push({text:'[유입경로변경] '+prevSrc+' → 직영업 (펀딩 등록됨)', author:currentUser, date:ds2, isSystem:true});
-          changed = true;
-        }
+        // 유입경로는 그대로 유지 (배분 DB는 펀딩 등록해도 직영업으로 바꾸지 않음)
+        // 직영업 표기는 영업자가 직접 펀딩등록(고객 미연결)한 신규 건에만 부여됨
         if(memos2.length) {
           if(!Array.isArray(linkedC.memos)) linkedC.memos = [];
           linkedC.memos.unshift(...memos2);
@@ -6569,8 +6596,8 @@ function autoSave() {  }
 // 기존 펀딩 등록건 → 고객 유입경로 '직영업' 일괄 적용 (관리자 로그인 시 1회)
 const FUNDING_SRC_MIGRATION_KEY = 'fundingSourceMigratedV2';
 async function migrateFundingSourceToDirect() {
-  if(currentRole !== 'admin') return;
-  if(localStorage.getItem(FUNDING_SRC_MIGRATION_KEY) === 'done') return;
+  // [폐기됨] 펀딩 연결 고객을 일괄로 직영업 처리하던 로직 — 이관 DB까지 직영업으로 둔갑시켜 비활성화함.
+  return;
   if(!Array.isArray(fundingList) || !Array.isArray(customers)) return;
   const targets = [];
   // (1) 펀딩 연결된 고객 중 source가 직영업 아닌 건
@@ -6610,6 +6637,47 @@ async function migrateFundingSourceToDirect() {
   if(typeof refreshAllViews === 'function') refreshAllViews();
 }
 
+// 투데이즈카 이관 DB가 펀딩등록으로 잘못 '직영업' 표기된 건을 원래 '투데이즈카유입디비'로 복원 (관리자 1회)
+const TODAYSCAR_REVERT_KEY = 'todayscarSourceRevertV1';
+async function revertTodayscarDirectMark() {
+  if(currentRole !== 'admin') return;
+  if(localStorage.getItem(TODAYSCAR_REVERT_KEY) === 'done') return;
+  if(!Array.isArray(customers)) return;
+  const isTodayscarBatch = (c) => {
+    if(!c || c.source !== '직영업') return false;
+    const memos = Array.isArray(c.memos) ? c.memos : [];
+    return memos.some(m => {
+      const t = (m && m.text) ? String(m.text) : '';
+      return t.includes('투데이즈카유입디비 → 직영업') || t.includes('투데이즈카 디비 이관처리');
+    });
+  };
+  const targets = customers.filter(isTodayscarBatch);
+  if(targets.length === 0) {
+    try { localStorage.setItem(TODAYSCAR_REVERT_KEY, 'done'); } catch(_){}
+    return;
+  }
+  const ok = confirm(`📋 데이터 정정 안내 (관리자 1회)\n\n엑셀로 일괄 이관된 '투데이즈카' DB ${targets.length}건이 펀딩등록 과정에서 '직영업'으로 잘못 표기되어 있습니다.\n\n→ 이 ${targets.length}건의 유입경로를 '투데이즈카유입디비'(일반 배분 DB)로 되돌릴까요?\n(다른 직영업 건은 그대로 유지됩니다)\n\n* 취소 시 다시 묻지 않습니다.`);
+  if(!ok) {
+    try { localStorage.setItem(TODAYSCAR_REVERT_KEY, 'done'); } catch(_){}
+    return;
+  }
+  const now = new Date();
+  const ds = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  let success = 0, fail = 0;
+  for(const c of targets) {
+    c.source = '투데이즈카유입디비';
+    if(!Array.isArray(c.memos)) c.memos = [];
+    c.memos.unshift({text:'[유입경로변경] 직영업 → 투데이즈카유입디비 (이관DB 직영업 오표기 정정)', author:currentUser, date:ds, isSystem:true});
+    if(isSbConfigured()) {
+      try { await sbUpdateCustomer(c); success++; }
+      catch(e) { console.warn('정정 실패:', c.name, e); fail++; }
+    } else success++;
+  }
+  try { localStorage.setItem(TODAYSCAR_REVERT_KEY, 'done'); } catch(_){}
+  showGlobalToast(`✅ 이관DB 직영업 표기 정정 완료 (성공 ${success}건${fail?' / 실패 '+fail+'건':''})`);
+  if(typeof refreshAllViews === 'function') refreshAllViews();
+}
+
 async function loadData() {
   if(!isSbConfigured()) {
     try { localStorage.removeItem('crm_customers'); } catch(e){}
@@ -6630,8 +6698,8 @@ async function loadData() {
     dbStaff.forEach(s => staffList.push(s));
     try { await loadAppSettings(); } catch(e) { console.warn('settings 로드 실패:', e); }
     syncAllAssignSelects();
-    // 기존 펀딩 등록건 → 유입경로 '직영업' 일괄 마이그레이션 (관리자 1회)
-    try { await migrateFundingSourceToDirect(); } catch(e) { console.warn('직영업 마이그레이션 실패:', e); }
+    // 투데이즈카 이관 DB 직영업 오표기 정정 (관리자 1회)
+    try { await revertTodayscarDirectMark(); } catch(e) { console.warn('이관DB 정정 실패:', e); }
   } catch(e) {
     console.error('loadData error', e);
     showGlobalToast('⚠️ 데이터 로드 실패: ' + (e.message||e));
