@@ -9052,6 +9052,12 @@ async function saveCustomer() {
   const name = document.getElementById('f_name').value.trim();
   const phone = formatPhone(document.getElementById('f_phone').value.trim());
   if(!name||!phone) { alert('고객명과 연락처는 필수입니다.'); return; }
+  const _normPhone = phone.replace(/[^0-9]/g,'');
+  const _dup = customers.find(c => (c.phone||'').replace(/[^0-9]/g,'') === _normPhone);
+  if(_dup) {
+    alert('⚠️ 기존 등록된 디비가 있습니다.\n\n고객명: '+(_dup.name||'-')+'\n담당자: '+(_dup.assign||'-')+'\n상태: '+(_dup.status||'-'));
+    return;
+  }
   const memo = document.getElementById('f_memo').value.trim();
   const c = {
     name, phone,
