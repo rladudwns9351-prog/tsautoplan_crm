@@ -2708,7 +2708,11 @@
       </div>
       <div class="form-field">
         <label>대리점수당 (원)</label>
-        <input type="text" id="fm_agency" placeholder="0" oninput="fmFormatNumber(this);calcAll()">
+        <input type="text" id="fm_agency" placeholder="0" oninput="fmFormatNumber(this);calcAll();syncAgencyPendingBtn()">
+      </div>
+      <div class="form-field">
+        <label>&nbsp;</label>
+        <button type="button" id="fm_agencyPendingBtn" onclick="toggleAgencyPending()" style="width:100%;padding:9px 12px;border-radius:6px;border:1px dashed rgba(255,153,68,.5);background:transparent;color:#ff9944;font-size:12px;font-weight:600;cursor:pointer;">대리점출고시 클릭하세요!</button>
       </div>
     </div>
     <!-- 품의 (실매출액 직전) -->
@@ -3252,6 +3256,7 @@ function fundingToRow(f) {
     promo_rate:     f.promoRate     || 0,
     promo_amt:      f.promoAmt      || 0,
     agency:         f.agency        || 0,
+    agency_pending: f.agencyPending ?? false,
     buui_total:     f.buuiTotal     || 0,
     net_revenue:    f.netRevenue    || 0,
     status:         f.status        || '최종심사진행',
@@ -3297,6 +3302,7 @@ function rowToFunding(r) {
     promoRate:     r.promo_rate,
     promoAmt:      r.promo_amt,
     agency:        r.agency,
+    agencyPending: r.agency_pending ?? false,
     buuiTotal:     r.buui_total,
     netRevenue:    r.net_revenue,
     status:        r.status,
@@ -5233,6 +5239,35 @@ function calcAll() {
   }
 }
 function calcFunding() { calcAll(); }
+/* 대리점출고(수당확인필요) 토글 */
+let fmAgencyPending = false;
+function toggleAgencyPending() {
+  if(fmParseNumber(document.getElementById('fm_agency')?.value) > 0) {
+    alert('대리점수당이 이미 입력되어 있어 표시할 수 없습니다.');
+    return;
+  }
+  fmAgencyPending = !fmAgencyPending;
+  renderAgencyPendingBtn();
+}
+function renderAgencyPendingBtn() {
+  const btn = document.getElementById('fm_agencyPendingBtn');
+  if(!btn) return;
+  if(fmAgencyPending) {
+    btn.textContent = '✓ 수당확인필요 표시됨 (해제하려면 클릭)';
+    btn.style.background = 'rgba(255,153,68,.15)';
+    btn.style.border = '1px solid #ff9944';
+  } else {
+    btn.textContent = '대리점출고시 클릭하세요!';
+    btn.style.background = 'transparent';
+    btn.style.border = '1px dashed rgba(255,153,68,.5)';
+  }
+}
+function syncAgencyPendingBtn() {
+  if(fmAgencyPending && fmParseNumber(document.getElementById('fm_agency')?.value) > 0) {
+    fmAgencyPending = false;
+    renderAgencyPendingBtn();
+  }
+}
 function onBankSelChange() {
   const sel = document.getElementById('fm_bank_sel').value;
   const inp = document.getElementById('fm_bank_input');
@@ -5461,6 +5496,8 @@ function resetFundingModal() {
   ['fm_carPrice','fm_revenue','fm_promo','fm_agency'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
+  fmAgencyPending = false;
+  renderAgencyPendingBtn();
   document.getElementById('fm_type').value='렌트';
   document.getElementById('fm_bank_sel').value='';
   document.getElementById('fm_bank_input').style.display='none';
@@ -5621,6 +5658,7 @@ async function saveFunding() {
     promoRate: parseFloat(document.getElementById('fm_promo')?.value)||0,
     promoAmt: Math.round(fmParseNumber(document.getElementById('fm_carPrice')?.value) * (parseFloat(document.getElementById('fm_promo')?.value)||0) / 100),
     agency: fmParseNumber(document.getElementById('fm_agency')?.value),
+    agencyPending: fmParseNumber(document.getElementById('fm_agency')?.value) > 0 ? false : fmAgencyPending,
     buuiTotal: Array.from(document.querySelectorAll('#fm_buuiRows > div')).reduce((s,r)=>s+fmParseNumber(r.querySelectorAll('input')[1]?.value),0),
     netRevenue: revenue + Math.round(fmParseNumber(document.getElementById('fm_carPrice')?.value)*(parseFloat(document.getElementById('fm_promo')?.value)||0)/100) + fmParseNumber(document.getElementById('fm_agency')?.value) - Array.from(document.querySelectorAll('#fm_buuiRows > div')).reduce((s,r)=>s+fmParseNumber(r.querySelectorAll('input')[1]?.value),0),
     status: document.getElementById('fm_status').value,
@@ -5793,6 +5831,8 @@ function editFunding(id) {
   setValNum('fm_revenue', f.revenue);
   setVal('fm_promo', f.promoRate);
   setValNum('fm_agency', f.agency);
+  fmAgencyPending = !!(f.agencyPending && !f.agency);
+  renderAgencyPendingBtn();
   document.getElementById('fm_netRevDisplay').textContent = (f.netRevenue||0).toLocaleString('ko-KR')+' 원';
   setVal('fm_contractDate', f.contractDate);
   setVal('fm_expectedDeliveryDate', f.expectedDeliveryDate);
@@ -6132,7 +6172,7 @@ function renderFundingPage() {
       '<td style="text-align:center;font-size:12px;color:var(--text2);">'+(f.commRate?f.commRate+'%':'-')+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">'+(f.revenue?f.revenue.toLocaleString('ko-KR')+'원':'-')+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">'+(f.promoAmt?'+'+f.promoAmt.toLocaleString('ko-KR')+'('+f.promoRate+'%)':'-')+'</td>'+
-      '<td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">'+(f.agency?'+'+f.agency.toLocaleString('ko-KR'):'-')+'</td>'+
+      '<td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">'+(f.agency?'+'+f.agency.toLocaleString('ko-KR'):(f.agencyPending?'<span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid rgba(255,153,68,.4);white-space:nowrap;">수당확인필요</span>':'-'))+'</td>'+
       (()=>{ const nr=f.netRevenue||0; const col=nr<0?'#ff6666':nr===0?'var(--text2)':'var(--green)'; return '<td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;font-weight:700;color:'+col+';">'+nr.toLocaleString('ko-KR')+'원</td>'; })()+
       '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:'+stColor+'22;color:'+stColor+';">'+f.status+'</span></td>'+
       '<td style="font-size:11px;color:var(--text2);">'+(f.expectedDeliveryDate||'-')+'</td>'+
