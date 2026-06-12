@@ -5049,11 +5049,18 @@ function renderDB(list) {
 }
 function isNewDB(c) {
   const today = new Date(); today.setHours(0,0,0,0);
-  const baseDate = c.reassignDate || c.date;
-  if(!baseDate) return '';
-  const rd = new Date(baseDate); rd.setHours(0,0,0,0);
-  const diff = Math.round((today - rd) / 86400000);
-  if(diff <= 2) return ' <span style="font-size:9px;font-weight:700;background:var(--blue);color:#fff;border-radius:3px;padding:1px 5px;margin-left:4px;">NEW</span>';
+  // 재배분 건: reassignDate 기준 1일 → 주황 NEW
+  if(c.reassignDate){
+    const rd = new Date(c.reassignDate); rd.setHours(0,0,0,0);
+    if(Math.round((today - rd) / 86400000) <= 1)
+      return ' <span style="font-size:9px;font-weight:700;background:#ff9944;color:#fff;border-radius:3px;padding:1px 5px;margin-left:4px;">NEW</span>';
+    return '';
+  }
+  // 신규 배분: date 기준 1일 → 파란 NEW
+  if(!c.date) return '';
+  const rd = new Date(c.date); rd.setHours(0,0,0,0);
+  if(Math.round((today - rd) / 86400000) <= 1)
+    return ' <span style="font-size:9px;font-weight:700;background:var(--blue);color:#fff;border-radius:3px;padding:1px 5px;margin-left:4px;">NEW</span>';
   return '';
 }
 function directBadge(c) {
@@ -5180,8 +5187,17 @@ async function bulkReassignFromGudb() {
   if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
   if(!target) { alert('재배분할 담당자를 선택하세요.'); return; }
   if(!confirm(ids.length+'건을 "'+target+'"에게 재배분하시겠습니까?')) return;
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const timeStr = now.toLocaleDateString('ko-KR')+' '+now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
   const upd=[];
-  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ c.assign=target; c.retrieved=false; upd.push(c);} });
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){
+    c.assign=target; c.retrieved=false;
+    c.reassignDate=today; c.date=today;          // 재배분 기준일 → 상단 정렬 + 주황 NEW
+    if(!Array.isArray(c.memos)) c.memos=[];
+    c.memos.unshift({ text:'[재배분] '+target+'으로 재배분', author:'관리자', date:timeStr, dateISO:today, resetConsult:true, isSystem:true });
+    upd.push(c);
+  } });
   if(isSbConfigured()) {
     try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
     catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
@@ -5209,12 +5225,11 @@ function onCheckChange() {
     if(dbViewMode==='gudb' || dbViewMode==='ended'){
       if(_toGudbBtn) _toGudbBtn.style.display='none';
       if(_toEndedBtn) _toEndedBtn.style.display='none';
-      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
     } else {
       if(_toGudbBtn) _toGudbBtn.style.display='';
       if(_toEndedBtn) _toEndedBtn.style.display='';
-      if(_reassignWrap) _reassignWrap.style.display='none';
     }
+    if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
   } else {
     bar.style.display = 'none';
   }
