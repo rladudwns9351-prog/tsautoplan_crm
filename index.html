@@ -5193,7 +5193,7 @@ async function bulkReassignFromGudb() {
   const upd=[];
   ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){
     c.assign=target; c.retrieved=false;
-    c.reassignDate=today; c.date=today;          // 재배분 기준일 → 상단 정렬 + 주황 NEW
+    c.reassignDate=today;                         // 재배분 기준일(주황 NEW). 등록일(c.date)은 최초값 보존
     if(!Array.isArray(c.memos)) c.memos=[];
     c.memos.unshift({ text:'[재배분] '+target+'으로 재배분', author:'관리자', date:timeStr, dateISO:today, resetConsult:true, isSystem:true });
     upd.push(c);
@@ -6591,8 +6591,7 @@ async function confirmReassign() {
     }
     c.assign        = newAssign;
     c.retrieved     = false;
-    c.reassignDate  = now.toISOString().split('T')[0]; // 구DB 기준일 (담당자 변경일)
-    c.date          = now.toISOString().split('T')[0];
+    c.reassignDate  = now.toISOString().split('T')[0]; // 구DB 기준일 (담당자 변경일). 등록일(c.date)은 보존
     // 고객진행미희망 → 재배분 시 상담중으로 복귀 + 다음상담일 카운팅 재개
     if(c.status === '고객진행미희망') {
       c.status = '상담중';
