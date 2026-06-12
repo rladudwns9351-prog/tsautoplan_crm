@@ -10499,29 +10499,41 @@ function renderVehicleStockList() {
   if(!list.length) { wrap.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">요청 내역이 없습니다.</div>'; return; }
   const pg = paginate(list, 'vehiclestock');
   wrap.innerHTML = `
-    <table class="tbl" style="width:100%;">
+    <div style="overflow-x:auto;">
+    <table class="tbl" style="width:100%;min-width:1100px;font-size:12px;">
       <thead><tr>
-        <th style="width:150px;">요청일시</th>
-        <th style="width:110px;">고객명</th>
-        <th>차량명</th>
-        <th style="width:120px;">등급</th>
-        ${isAdmin?'<th style="width:100px;">요청자</th>':''}
-        <th style="width:90px;">상태</th>
+        <th style="width:130px;">요청일시</th>
+        <th style="width:80px;">고객명</th>
+        <th style="width:120px;">차량명</th>
+        <th style="width:90px;">등급</th>
+        <th>옵션</th>
+        <th style="width:80px;">외장</th>
+        <th style="width:80px;">내장</th>
+        <th style="width:110px;">필요시기</th>
+        <th>기타메모</th>
+        ${isAdmin?'<th style="width:80px;">요청자</th>':''}
+        <th style="width:74px;">상태</th>
       </tr></thead>
       <tbody>
         ${pg.items.map(v=>{
           const done = (v.status||'미완료')==='완료';
           return `<tr class="${done?'vstock-done':''}" style="cursor:pointer;" onclick="openVehicleStockDetail(${v.id})">
-            <td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);">${formatFeedbackDate(v.created_at)}</td>
+            <td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);white-space:nowrap;">${formatFeedbackDate(v.created_at)}</td>
             <td style="font-weight:600;">${escapeHtml(v.customer_name||'-')}</td>
             <td>${escapeHtml(v.car_name||'-')}</td>
             <td>${escapeHtml(v.grade||'-')}</td>
+            <td style="color:var(--text2);">${escapeHtml(v.options||'-')}</td>
+            <td>${escapeHtml(v.color_ext||'-')}</td>
+            <td>${escapeHtml(v.color_int||'-')}</td>
+            <td>${escapeHtml(v.need_time||'-')}</td>
+            <td style="color:var(--text2);">${escapeHtml(v.memo||'-')}</td>
             ${isAdmin?`<td>${escapeHtml(v.author||'-')}</td>`:''}
             <td>${done?'<span class="badge badge-complete">완료</span>':'<span class="badge badge-consult">미완료</span>'}</td>
           </tr>`;
         }).join('')}
       </tbody>
     </table>
+    </div>
     ${buildPaginationHtml('vehiclestock', pg.page, pg.totalPages, pg.total)}
   `;
 }
