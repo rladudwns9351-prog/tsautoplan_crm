@@ -115,6 +115,9 @@
       <div class="nav-item" onclick="goPage(&#39;localsearch&#39;,this)">
         <span class="nav-icon">🏢</span> 업체 검색
       </div>
+      <div class="nav-item" onclick="goPage(&#39;vehiclestock&#39;,this)">
+        <span class="nav-icon">🚗</span> 차량재고
+      </div>
       <div class="nav-item" onclick="goPage(&#39;calc33&#39;,this)">
         <span class="nav-icon">🧮</span> 3.3% 계산기
       </div>
@@ -1014,6 +1017,7 @@
             <div class="tab active" onclick="switchTab(&#39;memo&#39;,this)">상담 메모</div>
             <div class="tab" onclick="switchTab(&#39;files&#39;,this)">고객 서류</div>
             <div class="tab admin-only" onclick="switchTab(&#39;history&#39;,this)">히스토리</div>
+            <button class="btn btn-primary btn-sm" style="margin-left:auto;margin-bottom:6px;align-self:center;display:flex;align-items:center;gap:6px;" onclick="openVehicleStockForm()">🚗 차량재고 요청</button>
           </div>
           <div class="tab-content active" id="tab-memo">
             <textarea class="memo-input" id="memoInput" placeholder="상담 내용을 입력하세요..."></textarea>
@@ -2498,6 +2502,35 @@
       </div>
     </div>
 
+    <!-- ===== 차량재고 ===== -->
+    <style>.vstock-fbtn.active{background:var(--accent)!important;color:#000!important;border-color:var(--accent)!important;font-weight:700;}.vstock-done td{text-decoration:line-through;color:var(--text3)!important;}</style>
+    <div class="page" id="page-vehiclestock">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🚗 차량재고</div>
+          <div class="page-sub" id="vstockPageSub">고객 상세에서 요청한 차량재고 확인 건을 관리합니다</div>
+        </div>
+      </div>
+      <div class="section-card" style="padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <div class="search-wrap" style="flex:1;min-width:200px;">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="vstockSearch" placeholder="고객명 / 연락처 / 차량명 / 요청자 검색" oninput="renderVehicleStockList()">
+          </div>
+          <select id="vstockSort" class="select-filter" onchange="renderVehicleStockList()">
+            <option value="desc">요청일시 최신순</option>
+            <option value="asc">요청일시 오래된순</option>
+          </select>
+          <div id="vstockStatusBtns" style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm vstock-fbtn active" data-f="all" onclick="setVstockFilter('all',this)">전체</button>
+            <button class="btn btn-ghost btn-sm vstock-fbtn" data-f="미완료" onclick="setVstockFilter('미완료',this)">미완료</button>
+            <button class="btn btn-ghost btn-sm vstock-fbtn" data-f="완료" onclick="setVstockFilter('완료',this)">완료</button>
+          </div>
+        </div>
+        <div id="vstockListWrap"></div>
+      </div>
+    </div>
+
     <!-- ===== 법인 재무분석 ===== -->
     <div class="page" id="page-corp-analysis">
       <style>
@@ -3006,6 +3039,79 @@
     </div>
   </div>
 </div>
+<!-- ===== 차량재고 입력 모달 ===== -->
+<div class="modal-bg" id="vehicleStockModal">
+  <div class="modal" style="width:560px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div class="modal-title" style="margin-bottom:0;">🚗 차량재고 요청 <span id="vs_custName" style="color:var(--text3);font-weight:400;font-size:14px;margin-left:8px;"></span></div>
+      <button onclick="closeModal(&#39;vehicleStockModal&#39;)" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>차량명 <span style="color:var(--red);">*</span></label>
+        <input type="text" id="vs_carName" placeholder="예: 그랜저 하이브리드" maxlength="80">
+      </div>
+      <div class="form-field">
+        <label>등급</label>
+        <input type="text" id="vs_grade" placeholder="예: 익스클루시브" maxlength="60">
+      </div>
+      <div class="form-field">
+        <label>필요시기</label>
+        <input type="text" id="vs_needTime" placeholder="예: 1개월 이내 / 즉시" maxlength="60">
+      </div>
+      <div class="form-field">
+        <label>외장컬러</label>
+        <input type="text" id="vs_colorExt" placeholder="예: 쉬머링 실버" maxlength="60">
+      </div>
+      <div class="form-field">
+        <label>내장컬러</label>
+        <input type="text" id="vs_colorInt" placeholder="예: 블랙" maxlength="60">
+      </div>
+      <div class="form-field full">
+        <label>옵션</label>
+        <textarea id="vs_options" rows="2" placeholder="예: 파노라마선루프, 빌트인캠 등"></textarea>
+      </div>
+      <div class="form-field full">
+        <label>기타메모</label>
+        <textarea id="vs_memo" rows="2" placeholder="추가 요청사항"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal(&#39;vehicleStockModal&#39;)">취소</button>
+      <button class="btn btn-primary" onclick="submitVehicleStock()">📤 요청</button>
+    </div>
+  </div>
+</div>
+<!-- ===== 차량재고 상세 모달 ===== -->
+<div class="modal-bg" id="vehicleStockDetailModal">
+  <div class="modal" style="width:560px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div class="modal-title" style="margin-bottom:0;">🚗 차량재고 요청 상세</div>
+      <button onclick="closeModal(&#39;vehicleStockDetailModal&#39;)" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;font-size:12px;">
+      <div><span style="color:var(--text3);">고객:</span> <span id="vsd_cust" style="font-weight:600;"></span></div>
+      <div><span style="color:var(--text3);">연락처:</span> <span id="vsd_phone" style="font-family:JetBrains Mono,monospace;"></span></div>
+      <div><span style="color:var(--text3);">요청자:</span> <span id="vsd_author" style="font-weight:600;"></span></div>
+      <div><span style="color:var(--text3);">요청일시:</span> <span id="vsd_date" style="font-family:JetBrains Mono,monospace;"></span></div>
+      <div style="grid-column:1/-1;"><span style="color:var(--text3);">상태:</span> <span id="vsd_status"></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">차량명</div><div id="vsd_carName" class="vsd-v"></div></div>
+      <div class="vsd-cell"><div class="vsd-k">등급</div><div id="vsd_grade" class="vsd-v"></div></div>
+      <div class="vsd-cell"><div class="vsd-k">필요시기</div><div id="vsd_needTime" class="vsd-v"></div></div>
+      <div class="vsd-cell"><div class="vsd-k">외장컬러</div><div id="vsd_colorExt" class="vsd-v"></div></div>
+      <div class="vsd-cell"><div class="vsd-k">내장컬러</div><div id="vsd_colorInt" class="vsd-v"></div></div>
+      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">옵션</div><div id="vsd_options" class="vsd-v" style="white-space:pre-wrap;"></div></div>
+      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">기타메모</div><div id="vsd_memo" class="vsd-v" style="white-space:pre-wrap;"></div></div>
+    </div>
+    <style>.vsd-cell{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:9px 11px;}.vsd-k{font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;}.vsd-v{font-size:13px;color:var(--text);min-height:16px;}</style>
+    <div class="modal-actions">
+      <button id="vsd_delBtn" class="btn btn-ghost" style="margin-right:auto;color:var(--red);display:none;" onclick="deleteVehicleStock()">🗑️ 삭제</button>
+      <button id="vsd_completeBtn" class="btn btn-primary" onclick="toggleVehicleStockDone()">✅ 완료</button>
+    </div>
+  </div>
+</div>
 <!-- ===== 펀딩 서류 목록 모달 ===== -->
 <div class="modal-bg" id="fundingFilesModal">
   <div class="modal" style="width:600px;max-height:88vh;overflow-y:auto;padding:24px;">
@@ -3197,6 +3303,7 @@ function customerToRow(c) {
     retrieved_date:   c.retrievedDate || null,
     retrieved_reason: c.retrievedReason || null,
     prev_assign:      c.prevAssign    || null,
+    archive_prev_assign: c.archivePrevAssign || null,
     reassign_date:    c.reassignDate  || null,
     memos:            c.memos  || [],
     files:            c.files  || [],
@@ -3226,6 +3333,7 @@ function rowToCustomer(r) {
     retrievedDate:   r.retrieved_date || null,
     retrievedReason: r.retrieved_reason || null,
     prevAssign:                 r.prev_assign                   || null,
+    archivePrevAssign:          r.archive_prev_assign            || null,
     reassignDate:               r.reassign_date                  || null,
     originalAssignedManager:    r.original_assigned_manager      || null,
     originalAssignedManagerId:  r.original_assigned_manager_id   || null,
@@ -3674,6 +3782,7 @@ function goPage(id, navEl, keepDbPage) {
   if(id==='calcage')       { initCalcAge(); }
   if(id==='tracking')      {  }
   if(id==='feedback')      { renderFeedbackPage(); }
+  if(id==='vehiclestock')  { renderVehicleStockPage(); }
   if(id==='dbstats') {
     setStatsPeriod(30);
     if(currentRole==='admin') {
@@ -5040,7 +5149,7 @@ async function bulkMoveToGudb() {
   if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
   if(!confirm(ids.length+'건을 구디비로 이동하시겠습니까?\n(고객 DB 목록에서 숨겨지고 구디비 탭으로 이동됩니다)')) return;
   const upd=[];
-  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ c.assign='구디비'; c.retrieved=false; upd.push(c);} });
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ if(c.assign!=='구디비'&&c.assign!=='종료디비') c.archivePrevAssign=c.assign; c.assign='구디비'; c.retrieved=false; upd.push(c);} });
   if(isSbConfigured()) {
     try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
     catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
@@ -5055,7 +5164,7 @@ async function bulkMoveToEnded() {
   if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
   if(!confirm(ids.length+'건을 종료디비로 이동하시겠습니까?\\n(최종 종료된 DB로 분류되어 고객 DB 목록에서 숨겨집니다)')) return;
   const upd=[];
-  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ c.assign='종료디비'; c.retrieved=false; upd.push(c);} });
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ if(c.assign!=='구디비'&&c.assign!=='종료디비') c.archivePrevAssign=c.assign; c.assign='종료디비'; c.retrieved=false; upd.push(c);} });
   if(isSbConfigured()) {
     try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
     catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
@@ -6572,6 +6681,7 @@ function goPaginate(key, n) {
       if(typeof renderReclaimPage === 'function') renderReclaimPage();
     } catch(e){} break;
     case 'feedback': try { renderFeedbackAdmin(); } catch(e){} break;
+    case 'vehiclestock': try { renderVehicleStockList(); } catch(e){} break;
   }
   try {
     const main = document.querySelector('.main') || document.body;
@@ -9055,7 +9165,18 @@ async function saveCustomer() {
   const _normPhone = phone.replace(/[^0-9]/g,'');
   const _dup = customers.find(c => (c.phone||'').replace(/[^0-9]/g,'') === _normPhone);
   if(_dup) {
-    alert('⚠️ 기존 등록된 디비가 있습니다.\n\n고객명: '+(_dup.name||'-')+'\n담당자: '+(_dup.assign||'-')+'\n상태: '+(_dup.status||'-'));
+    let _loc, _who;
+    if(_dup.assign === '구디비') {
+      _loc = '🗂️ 구디비';
+      _who = '직전담당자: ' + (_dup.archivePrevAssign || _dup.prevAssign || _dup.originalAssignedManager || '-');
+    } else if(_dup.assign === '종료디비') {
+      _loc = '⛔ 종료디비';
+      _who = '직전담당자: ' + (_dup.archivePrevAssign || _dup.prevAssign || _dup.originalAssignedManager || '-');
+    } else {
+      _loc = '📋 고객DB (진행중)';
+      _who = '담당자: ' + (_dup.assign || '-');
+    }
+    alert('⚠️ 동일한 연락처가 이미 등록되어 있습니다.\n\n위치: ' + _loc + '\n고객명: ' + (_dup.name||'-') + '\n' + _who + '\n상태: ' + (_dup.status||'-'));
     return;
   }
   const memo = document.getElementById('f_memo').value.trim();
@@ -10269,6 +10390,190 @@ async function deleteFeedback() {
   } catch(e) {
     alert('삭제 실패: ' + e.message);
   }
+}
+/* ===== 차량재고 기능 ===== */
+const VSTOCK_TABLE = 'vehicle_stock';
+let _vstockCache = [];
+let _vstockFilter = 'all';
+let _currentVstock = null;
+async function sbLoadVehicleStock() {
+  if(!isSbConfigured()) return [];
+  try {
+    const rows = await sbFetch(`${VSTOCK_TABLE}?order=created_at.desc&select=*`);
+    return rows || [];
+  } catch(e) { console.warn('vehicle_stock 로드 실패:', e); return []; }
+}
+async function sbSaveVehicleStock(item) {
+  const row = {
+    customer_id: item.customer_id ?? null,
+    customer_name: item.customer_name || '',
+    customer_phone: item.customer_phone || '',
+    car_name: item.car_name || '',
+    grade: item.grade || '',
+    options: item.options || '',
+    color_ext: item.color_ext || '',
+    color_int: item.color_int || '',
+    need_time: item.need_time || '',
+    memo: item.memo || '',
+    author: item.author || '',
+    author_id: item.author_id || '',
+    status: item.status || '미완료',
+    created_at: new Date().toISOString()
+  };
+  const r = await sbFetch(`${VSTOCK_TABLE}`, 'POST', [row]);
+  return Array.isArray(r) ? r[0] : r;
+}
+async function sbUpdateVehicleStock(id, patch) {
+  return await sbFetch(`${VSTOCK_TABLE}?id=eq.${id}`, 'PATCH', patch);
+}
+async function sbDeleteVehicleStock(id) {
+  return await sbFetch(`${VSTOCK_TABLE}?id=eq.${id}`, 'DELETE');
+}
+function openVehicleStockForm() {
+  if(!currentCustomer) { alert('고객 정보가 없습니다.'); return; }
+  document.getElementById('vs_custName').textContent = currentCustomer.name || '';
+  ['vs_carName','vs_grade','vs_needTime','vs_colorExt','vs_colorInt','vs_options','vs_memo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  // 관심차량 기본 채움
+  const carEl = document.getElementById('vs_carName');
+  if(carEl && currentCustomer.car) carEl.value = currentCustomer.car;
+  document.getElementById('vehicleStockModal').classList.add('open');
+}
+async function submitVehicleStock() {
+  const carName = (document.getElementById('vs_carName').value||'').trim();
+  if(!carName) { alert('차량명을 입력해주세요.'); return; }
+  if(!isSbConfigured()) { alert('Supabase가 설정되지 않아 요청할 수 없습니다.'); return; }
+  if(!currentCustomer) { alert('고객 정보가 없습니다.'); return; }
+  try {
+    await sbSaveVehicleStock({
+      customer_id: currentCustomer.id,
+      customer_name: currentCustomer.name || '',
+      customer_phone: currentCustomer.phone || '',
+      car_name: carName,
+      grade: (document.getElementById('vs_grade').value||'').trim(),
+      options: (document.getElementById('vs_options').value||'').trim(),
+      color_ext: (document.getElementById('vs_colorExt').value||'').trim(),
+      color_int: (document.getElementById('vs_colorInt').value||'').trim(),
+      need_time: (document.getElementById('vs_needTime').value||'').trim(),
+      memo: (document.getElementById('vs_memo').value||'').trim(),
+      author: currentUser || '',
+      author_id: currentUserId || '',
+      status: '미완료'
+    });
+    closeModal('vehicleStockModal');
+    showGlobalToast('차량재고 요청이 등록되었습니다.');
+  } catch(e) { alert('요청 실패: ' + e.message); }
+}
+async function renderVehicleStockPage() {
+  const sub = document.getElementById('vstockPageSub');
+  if(sub) sub.textContent = (currentRole==='admin')
+    ? '영업자들이 요청한 차량재고 확인 건을 관리합니다'
+    : '내가 요청한 차량재고 확인 건입니다';
+  _vstockCache = await sbLoadVehicleStock();
+  renderVehicleStockList();
+}
+function setVstockFilter(f, btn) {
+  _vstockFilter = f;
+  document.querySelectorAll('.vstock-fbtn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  setPage('vehiclestock', 1);
+  renderVehicleStockList();
+}
+function renderVehicleStockList() {
+  const wrap = document.getElementById('vstockListWrap');
+  if(!wrap) return;
+  const isAdmin = currentRole === 'admin';
+  let list = _vstockCache.slice();
+  // 권한: 관리자 전체, 영업자 본인것만
+  if(!isAdmin) list = list.filter(v => v.author_id === currentUserId || v.author === currentUser);
+  // 상태 필터
+  if(_vstockFilter !== 'all') list = list.filter(v => (v.status||'미완료') === _vstockFilter);
+  // 검색
+  const q = (document.getElementById('vstockSearch')?.value||'').trim().toLowerCase();
+  if(q) list = list.filter(v => [v.customer_name,v.customer_phone,v.car_name,v.author,v.grade].some(x=>String(x||'').toLowerCase().includes(q)));
+  // 정렬
+  const sort = document.getElementById('vstockSort')?.value || 'desc';
+  list.sort((a,b)=>{
+    const c = String(a.created_at||'').localeCompare(String(b.created_at||''));
+    return sort==='asc' ? c : -c;
+  });
+  if(!list.length) { wrap.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">요청 내역이 없습니다.</div>'; return; }
+  const pg = paginate(list, 'vehiclestock');
+  wrap.innerHTML = `
+    <table class="tbl" style="width:100%;">
+      <thead><tr>
+        <th style="width:150px;">요청일시</th>
+        <th style="width:110px;">고객명</th>
+        <th>차량명</th>
+        <th style="width:120px;">등급</th>
+        ${isAdmin?'<th style="width:100px;">요청자</th>':''}
+        <th style="width:90px;">상태</th>
+      </tr></thead>
+      <tbody>
+        ${pg.items.map(v=>{
+          const done = (v.status||'미완료')==='완료';
+          return `<tr class="${done?'vstock-done':''}" style="cursor:pointer;" onclick="openVehicleStockDetail(${v.id})">
+            <td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);">${formatFeedbackDate(v.created_at)}</td>
+            <td style="font-weight:600;">${escapeHtml(v.customer_name||'-')}</td>
+            <td>${escapeHtml(v.car_name||'-')}</td>
+            <td>${escapeHtml(v.grade||'-')}</td>
+            ${isAdmin?`<td>${escapeHtml(v.author||'-')}</td>`:''}
+            <td>${done?'<span class="badge badge-complete">완료</span>':'<span class="badge badge-consult">미완료</span>'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    ${buildPaginationHtml('vehiclestock', pg.page, pg.totalPages, pg.total)}
+  `;
+}
+function openVehicleStockDetail(id) {
+  const v = _vstockCache.find(x => x.id === id);
+  if(!v) return;
+  _currentVstock = v;
+  const done = (v.status||'미완료')==='완료';
+  document.getElementById('vsd_cust').textContent = v.customer_name || '-';
+  document.getElementById('vsd_phone').textContent = v.customer_phone || '-';
+  document.getElementById('vsd_author').textContent = v.author || '-';
+  document.getElementById('vsd_date').textContent = formatFeedbackDate(v.created_at);
+  document.getElementById('vsd_status').innerHTML = done?'<span class="badge badge-complete">완료</span>':'<span class="badge badge-consult">미완료</span>';
+  document.getElementById('vsd_carName').textContent = v.car_name || '-';
+  document.getElementById('vsd_grade').textContent = v.grade || '-';
+  document.getElementById('vsd_needTime').textContent = v.need_time || '-';
+  document.getElementById('vsd_colorExt').textContent = v.color_ext || '-';
+  document.getElementById('vsd_colorInt').textContent = v.color_int || '-';
+  document.getElementById('vsd_options').textContent = v.options || '-';
+  document.getElementById('vsd_memo').textContent = v.memo || '-';
+  const isOwner = v.author_id === currentUserId || v.author === currentUser;
+  const canAct = currentRole === 'admin' || isOwner;
+  const cBtn = document.getElementById('vsd_completeBtn');
+  cBtn.style.display = canAct ? '' : 'none';
+  cBtn.textContent = done ? '↩️ 완료 취소' : '✅ 완료';
+  cBtn.className = done ? 'btn btn-ghost' : 'btn btn-primary';
+  document.getElementById('vsd_delBtn').style.display = canAct ? '' : 'none';
+  document.getElementById('vehicleStockDetailModal').classList.add('open');
+}
+async function toggleVehicleStockDone() {
+  if(!_currentVstock) return;
+  const done = (_currentVstock.status||'미완료')==='완료';
+  const newStatus = done ? '미완료' : '완료';
+  try {
+    await sbUpdateVehicleStock(_currentVstock.id, { status: newStatus, completed_at: done ? null : new Date().toISOString() });
+    _currentVstock.status = newStatus;
+    const c = _vstockCache.find(x=>x.id===_currentVstock.id); if(c) c.status = newStatus;
+    showGlobalToast(done ? '미완료로 변경되었습니다.' : '완료 처리되었습니다.');
+    closeModal('vehicleStockDetailModal');
+    renderVehicleStockList();
+  } catch(e) { alert('처리 실패: ' + e.message); }
+}
+async function deleteVehicleStock() {
+  if(!_currentVstock) return;
+  if(!confirm('이 차량재고 요청을 삭제하시겠습니까?')) return;
+  try {
+    await sbDeleteVehicleStock(_currentVstock.id);
+    _vstockCache = _vstockCache.filter(x=>x.id!==_currentVstock.id);
+    showGlobalToast('삭제되었습니다.');
+    closeModal('vehicleStockDetailModal');
+    renderVehicleStockList();
+  } catch(e) { alert('삭제 실패: ' + e.message); }
 }
 function setEmojiMode(useEmoji, silent) {
   const onBtn  = document.getElementById('scr_emojiOn');
