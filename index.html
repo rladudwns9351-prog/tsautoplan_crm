@@ -6555,6 +6555,7 @@ async function processReclaim() {
   ).join('');
   document.getElementById('reassignModal').classList.add('open');
   showGlobalToast(reclaimPendingIds.length+'건 회수 처리 완료');
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
   refreshAllViews();
   renderReclaimPage();
 }
@@ -6600,6 +6601,7 @@ async function confirmReassign() {
   const cnt = reclaimPendingIds.length;
   closeModal('reassignModal');
   reclaimPendingIds = [];
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
   refreshAllViews();
   renderReclaimPage();
   showGlobalToast('"'+newAssign+'"에게 '+cnt+'건 재배분 완료');
