@@ -6396,7 +6396,7 @@ function renderReclaimPage() {
   if(currentRole !== 'admin') return;
   const now = new Date();
   const thisMonth = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비');
+  const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비' && c.assign !== '종료디비');
   const alarms = all.filter(c=>!c.retrieved && calcDaysElapsed(c)>3)
     .sort((a,b)=> calcDaysElapsed(b)-calcDaysElapsed(a) || (b.id||0)-(a.id||0))
     .slice(0,30);
