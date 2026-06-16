@@ -4620,6 +4620,7 @@ async function changeAssign(newAssign) {
       author: currentUser,
       date: dateStr,
       dateISO: now.toISOString().split('T')[0],
+      dateTS: now.toISOString(),
       resetConsult: true,
       isSystem: true
     });
@@ -4989,15 +4990,18 @@ function renderDB(list) {
   } else if(currentRole === 'staff') {
     // 직원: 본인 DB 기본 정렬 = 최근상담일 내림차순 (재배분 건이 상단에 노출)
     sorted = [...list].sort((a,b) => {
-      const ad = consultDateISO(a) || a.date || '';
-      const bd = consultDateISO(b) || b.date || '';
+      const ad = consultSortKey(a);
+      const bd = consultSortKey(b);
       const dc = bd.localeCompare(ad);
       if(dc !== 0) return dc;
       return (b.id||0) - (a.id||0);
     });
   } else {
+    // 관리자: 최근 작업 시각 내림차순 (재배분/상담 최신 건이 상단 / 영업자 뷰와 동일)
     sorted = [...list].sort((a,b) => {
-      const dc = (b.date||'').localeCompare(a.date||'');
+      const ad = consultSortKey(a);
+      const bd = consultSortKey(b);
+      const dc = bd.localeCompare(ad);
       if(dc !== 0) return dc;
       return (b.id||0) - (a.id||0);
     });
@@ -5204,7 +5208,7 @@ async function bulkReassignFromGudb() {
     c.assign=target; c.retrieved=false;
     c.reassignDate=today;                         // 재배분 기준일(주황 NEW). 등록일(c.date)은 최초값 보존
     if(!Array.isArray(c.memos)) c.memos=[];
-    c.memos.unshift({ text:'[재배분] '+target+'으로 재배분', author:'관리자', date:timeStr, dateISO:today, resetConsult:true, isSystem:true });
+    c.memos.unshift({ text:'[재배분] '+target+'으로 재배분', author:'관리자', date:timeStr, dateISO:today, dateTS:now.toISOString(), resetConsult:true, isSystem:true });
     upd.push(c);
   } });
   if(isSbConfigured()) {
@@ -6392,6 +6396,40 @@ function consultDateISO(c) {
   }
   return '';
 }
+// 정렬용 타임스탬프(시:분까지). dateTS 우선, 없으면 메모 date 시각 파싱, 없으면 00:00
+function _memoSortTS(m){
+  if(!m) return '';
+  if(m.dateTS){
+    const d=new Date(m.dateTS);
+    if(!isNaN(d)){
+      const p=n=>String(n).padStart(2,'0');
+      return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+    }
+  }
+  const iso=_memoISO(m); if(!iso) return '';
+  let hh=0, mi=0;
+  if(m.date){
+    const ss=String(m.date);
+    const tm=ss.match(/(\d{1,2}):(\d{2})/);
+    if(tm){
+      hh=parseInt(tm[1],10); mi=parseInt(tm[2],10);
+      if(/오후|PM/i.test(ss) && hh<12) hh+=12;
+      if(/오전|AM/i.test(ss) && hh===12) hh=0;
+    }
+  }
+  const p=n=>String(n).padStart(2,'0');
+  return iso+'T'+p(hh)+':'+p(mi)+':00';
+}
+function consultSortKey(c){
+  const list=(c&&c.memos)?c.memos:[];
+  for(const m of list){
+    if(!m.isSystem || m.resetConsult){
+      const ts=_memoSortTS(m);
+      if(ts) return ts;
+    }
+  }
+  return (c&&c.date)? c.date+'T00:00:00' : '';
+}
 function reclaimLastConsultISO(c) {
   return consultDateISO(c) || c.date;
 }
@@ -6405,7 +6443,7 @@ function renderReclaimPage() {
   if(currentRole !== 'admin') return;
   const now = new Date();
   const thisMonth = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비');
+  const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비' && c.assign !== '종료디비');
   const alarms = all.filter(c=>!c.retrieved && calcDaysElapsed(c)>3)
     .sort((a,b)=> calcDaysElapsed(b)-calcDaysElapsed(a) || (b.id||0)-(a.id||0))
     .slice(0,30);
@@ -6562,7 +6600,7 @@ async function processReclaim() {
     c.retrieved = true;
     c.retrievedDate = dateStr;
     c.retrievedReason = reason;
-    c.memos.unshift({text:'[회수] '+reason+' - 관리자 회수처리', author:'관리자', date:timeStr, dateISO:dateStr, resetConsult:true, isSystem:true});
+    c.memos.unshift({text:'[회수] '+reason+' - 관리자 회수처리', author:'관리자', date:timeStr, dateISO:dateStr, dateTS:now.toISOString(), resetConsult:true, isSystem:true});
     toUpdate.push(c);
   });
   if(isSbConfigured()) {
@@ -6612,7 +6650,7 @@ async function confirmReassign() {
     }
     c.memos.unshift({
       text:'[재배분] '+newAssign+'으로 재배분'+(memo?' - '+memo:''),
-      author:'관리자', date:timeStr, dateISO:now.toISOString().split('T')[0], resetConsult:true, isSystem:true
+      author:'관리자', date:timeStr, dateISO:now.toISOString().split('T')[0], dateTS:now.toISOString(), resetConsult:true, isSystem:true
     });
     toUpdate.push(c);
   });
@@ -9519,8 +9557,8 @@ window.addEventListener('keydown', e => {
   const tag = t && t.tagName ? t.tagName : '';
   if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || (t && t.isContentEditable)) return;
   const app = document.getElementById('app');
-  if(!app || !app.classList.contains('active')) return;   // 로그인 화면
-  if(document.querySelector('.modal-bg.open')) return;     // 모달 열림 시
+  if(!app || !app.classList.contains('active')) return;
+  if(document.querySelector('.modal-bg.open')) return;
   e.preventDefault();
   const cur = document.querySelector('.page.active');
   const curId = cur && cur.id ? cur.id.replace('page-','') : '';
