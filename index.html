@@ -4987,8 +4987,11 @@ function renderDB(list) {
       return (b.id||0) - (a.id||0);
     });
   } else {
+    // 관리자: 최근상담일 내림차순 (재배분 건이 상단에 노출 / 영업자 뷰와 동일)
     sorted = [...list].sort((a,b) => {
-      const dc = (b.date||'').localeCompare(a.date||'');
+      const ad = consultDateISO(a) || a.date || '';
+      const bd = consultDateISO(b) || b.date || '';
+      const dc = bd.localeCompare(ad);
       if(dc !== 0) return dc;
       return (b.id||0) - (a.id||0);
     });
@@ -6396,7 +6399,7 @@ function renderReclaimPage() {
   if(currentRole !== 'admin') return;
   const now = new Date();
   const thisMonth = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비' && c.assign !== '종료디비');
+  const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비');
   const alarms = all.filter(c=>!c.retrieved && calcDaysElapsed(c)>3)
     .sort((a,b)=> calcDaysElapsed(b)-calcDaysElapsed(a) || (b.id||0)-(a.id||0))
     .slice(0,30);
