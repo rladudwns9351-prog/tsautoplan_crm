@@ -5086,17 +5086,14 @@ function directBadge(c) {
 function getNextConsult(c) {
   // 펀딩완료/고객진행미희망 상태는 다음상담일 카운팅 제외
   if(c && (c.status === '펀딩완료' || c.status === '고객진행미희망')) return '';
-  // 가장 최근 상담메모(비시스템) 기준 +3일로 재계산 → 상담 남기면 D-3부터 재카운팅
-  const real = (c.memos||[]).filter(m=>!m.isSystem);
-  if(real.length){
-    const lastDate = real[0].dateISO || (real[0].date||'').slice(0,10);
-    if(lastDate){
-      const d = new Date(lastDate);
-      d.setDate(d.getDate() + 3);
-      return d.toISOString().split('T')[0];
-    }
+  // 최근상담일 컬럼과 동일 기준(consultDateISO: 상담메모 + 회수/재배분 등 resetConsult 액션) +3일 → 갱신 즉시 D-3부터 재카운팅
+  const base = consultDateISO(c);
+  if(base){
+    const d = new Date(base.slice(0,10));
+    d.setDate(d.getDate() + 3);
+    return d.toISOString().split('T')[0];
   }
-  // 상담메모가 없을 때만 기존 지정값 폴백
+  // 기준일 없을 때만 기존 지정값 폴백
   if(c.nextConsult) return c.nextConsult;
   return '';
 }
