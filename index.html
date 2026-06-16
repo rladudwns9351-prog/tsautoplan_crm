@@ -5086,14 +5086,19 @@ function directBadge(c) {
 function getNextConsult(c) {
   // 펀딩완료/고객진행미희망 상태는 다음상담일 카운팅 제외
   if(c && (c.status === '펀딩완료' || c.status === '고객진행미희망')) return '';
-  if(c.nextConsult) return c.nextConsult;
+  // 가장 최근 상담메모(비시스템) 기준 +3일로 재계산 → 상담 남기면 D-3부터 재카운팅
   const real = (c.memos||[]).filter(m=>!m.isSystem);
-  if(!real.length) return '';
-  const lastDate = real[0].dateISO || real[0].date.slice(0,10);
-  if(!lastDate) return '';
-  const d = new Date(lastDate);
-  d.setDate(d.getDate() + 3);
-  return d.toISOString().split('T')[0];
+  if(real.length){
+    const lastDate = real[0].dateISO || (real[0].date||'').slice(0,10);
+    if(lastDate){
+      const d = new Date(lastDate);
+      d.setDate(d.getDate() + 3);
+      return d.toISOString().split('T')[0];
+    }
+  }
+  // 상담메모가 없을 때만 기존 지정값 폴백
+  if(c.nextConsult) return c.nextConsult;
+  return '';
 }
 function filterDB(keepPage) {
   if(!keepPage) resetPage('db');
@@ -6396,7 +6401,6 @@ function consultDateISO(c) {
   }
   return '';
 }
-// 정렬용 타임스탬프(시:분까지). dateTS 우선, 없으면 메모 date 시각 파싱, 없으면 00:00
 function _memoSortTS(m){
   if(!m) return '';
   if(m.dateTS){
