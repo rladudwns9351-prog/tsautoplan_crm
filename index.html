@@ -6734,6 +6734,7 @@ async function deleteCustomerDB(id) {
   const c = customers.find(c=>c.id===id);
   if(!c) return;
   if(!confirm('"'+c.name+'" 고객을 완전 삭제하시겠습니까?\n\n⚠️ 담당자/영업자 DB에서도 즉시 삭제되며 복구할 수 없습니다.')) return;
+  window._lastLocalChange = Date.now();
   try {
     if(isSbConfigured()) await sbDeleteCustomer(id);
     const idx = customers.findIndex(c=>c.id===id);
@@ -6741,6 +6742,7 @@ async function deleteCustomerDB(id) {
     fundingList.forEach(f=>{ if(f.customerId===id) f.customerId=null; });
     filterDB(true);
     refreshAllViews();
+    if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
     showGlobalToast('"'+c.name+'" 완전 삭제 완료');
   } catch(e) {
     showGlobalToast('⚠️ 삭제 실패: '+(e.message||e));
