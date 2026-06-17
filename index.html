@@ -840,10 +840,10 @@
         <span style="font-size:13px;color:var(--text2);">메모 일괄 입력:</span>
         <input type="text" id="bulkMemoInput" placeholder="선택된 고객들에게 추가할 메모..." style="flex:1;min-width:300px;padding:6px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;" onkeydown="if(event.key===&#39;Enter&#39;) applyBulkMemo()">
         <button class="btn btn-primary btn-sm" onclick="applyBulkMemo()">적용</button>
-        <span style="color:var(--text3);">|</span>
-        <button id="bulkToGudbBtn" class="btn btn-sm" style="background:rgba(255,153,68,.15);border:1px solid rgba(255,153,68,.4);color:#ff9944;font-weight:600;" onclick="bulkMoveToGudb()">🗂️ 구디비로 이동</button>
-        <button id="bulkToEndedBtn" class="btn btn-sm" style="background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.4);color:#ff6b6b;font-weight:600;" onclick="bulkMoveToEnded()">⛔ 종료디비로 이동</button>
-        <span id="bulkReassignWrap" style="display:none;align-items:center;gap:6px;">
+        <span class="admin-only" style="color:var(--text3);">|</span>
+        <button id="bulkToGudbBtn" class="btn btn-sm admin-only" style="background:rgba(255,153,68,.15);border:1px solid rgba(255,153,68,.4);color:#ff9944;font-weight:600;" onclick="bulkMoveToGudb()">🗂️ 구디비로 이동</button>
+        <button id="bulkToEndedBtn" class="btn btn-sm admin-only" style="background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.4);color:#ff6b6b;font-weight:600;" onclick="bulkMoveToEnded()">⛔ 종료디비로 이동</button>
+        <span id="bulkReassignWrap" class="admin-only" style="display:none;align-items:center;gap:6px;">
           <select id="bulkReassignSel" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;"></select>
           <button class="btn btn-primary btn-sm" onclick="bulkReassignFromGudb()">재배분</button>
         </span>
@@ -2025,7 +2025,10 @@
           <div class="section-card" style="padding:0;overflow:hidden;">
             <div class="section-head">
               <div class="section-head-title">전체 배분 DB</div>
-              <div style="font-size:11px;color:var(--text3);">체크박스 → 회수 선택 · 행 클릭 → 상세보기</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:11px;color:var(--text3);">체크박스 → 회수 선택 · 행 클릭 → 상세보기</span>
+                <button class="btn btn-ghost btn-sm" onclick="exportReclaimExcel()" style="font-size:12px;">📊 엑셀</button>
+              </div>
             </div>
             <div style="overflow-x:auto;" onwheel="if(event.shiftKey &amp;&amp; event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY*1.5;}">
             <table class="tbl">
@@ -5017,6 +5020,7 @@ function refreshDBSortHeaders() {
   if(nh) nh.innerHTML = '다음상담일'+sortArrowHtml('nextConsult');
 }
 function renderDB(list) {
+  window._dbRendered = list;
   const _preCheckedIds = new Set(Array.from(document.querySelectorAll('#dbBody .db-check:checked')).map(c=>c.dataset.id));
   let sorted;
   if(dbSortKey) {
@@ -5211,6 +5215,7 @@ async function quickChangeStatus(e, id, newStatus) {
   if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
 }
 async function bulkMoveToGudb() {
+  if(currentRole!=='admin'){ alert('권한이 없습니다.'); return; }
   window._lastLocalChange = Date.now();
   const ids = [...document.querySelectorAll('.db-check:checked')].map(c=>parseInt(c.dataset.id));
   if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
@@ -5227,6 +5232,7 @@ async function bulkMoveToGudb() {
   if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
 }
 async function bulkMoveToEnded() {
+  if(currentRole!=='admin'){ alert('권한이 없습니다.'); return; }
   window._lastLocalChange = Date.now();
   const ids = [...document.querySelectorAll('.db-check:checked')].map(c=>parseInt(c.dataset.id));
   if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
@@ -5243,6 +5249,7 @@ async function bulkMoveToEnded() {
   if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
 }
 async function bulkReassignFromGudb() {
+  if(currentRole!=='admin'){ alert('권한이 없습니다.'); return; }
   window._lastLocalChange = Date.now();
   const target = document.getElementById('bulkReassignSel')?.value || '';
   const ids = [...document.querySelectorAll('.db-check:checked')].map(c=>parseInt(c.dataset.id));
@@ -5284,14 +5291,19 @@ function onCheckChange() {
     const _toGudbBtn = document.getElementById('bulkToGudbBtn');
     const _toEndedBtn = document.getElementById('bulkToEndedBtn');
     const _reassignWrap = document.getElementById('bulkReassignWrap');
-    if(dbViewMode==='gudb' || dbViewMode==='ended'){
+    if(currentRole!=='admin'){
       if(_toGudbBtn) _toGudbBtn.style.display='none';
       if(_toEndedBtn) _toEndedBtn.style.display='none';
+      if(_reassignWrap) _reassignWrap.style.display='none';
+    } else if(dbViewMode==='gudb' || dbViewMode==='ended'){
+      if(_toGudbBtn) _toGudbBtn.style.display='none';
+      if(_toEndedBtn) _toEndedBtn.style.display='none';
+      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
     } else {
       if(_toGudbBtn) _toGudbBtn.style.display='';
       if(_toEndedBtn) _toEndedBtn.style.display='';
+      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
     }
-    if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
   } else {
     bar.style.display = 'none';
   }
@@ -6948,7 +6960,11 @@ async function loadData() {
     return;
   }
   try {
+    const _loadStartTs = Date.now();
     const dbCustomers = await sbLoadCustomers();
+    // 데이터 fetch 도중 로컬 저장(메모/서류 등)이 발생했다면, 저장 직전의 stale 스냅샷으로 덮어쓰지 않음.
+    // 저장은 이미 정상 반영되었으므로 이번 동기화 사이클만 건너뛰고 다음 사이클에서 서버 최신본을 반영.
+    if(window._lastLocalChange && window._lastLocalChange >= _loadStartTs) return;
     customers.length = 0;
     dbCustomers.forEach(c => customers.push(c));
     if(customers.length) nextId = Math.max(...customers.map(c=>c.id)) + 1;
@@ -7106,6 +7122,7 @@ function initSyncChannel() {
       if(!isSbConfigured()) return;
       if(!document.getElementById('app')?.classList.contains('active')) return;
       if(window._realtimeReceivedData) return; // 실시간 이벤트를 실제로 받고 있을 때만 polling 생략
+      if(window._lastLocalChange && Date.now() - window._lastLocalChange < 2500) return; // 로컬 저장 직후엔 DB 반영 대기(stale 덮어쓰기 방지)
       _isSyncReloading = true;
       try {
         await loadData();
@@ -7270,9 +7287,11 @@ function exportFundingExcel() {
 }
 function exportCustomerExcel() {
   const checks = Array.from(document.querySelectorAll('.db-check:checked')).map(c=>parseInt(c.dataset.id));
-  const myList = currentRole==='admin' ? customers : customers.filter(c=>c.assign===currentUser&&!c.retrieved);
-  const list = checks.length ? myList.filter(c=>checks.includes(c.id)) : myList;
+  // 현재 화면(탭/검색/필터)에 렌더된 리스트 기준
+  const baseList = Array.isArray(window._dbRendered) ? window._dbRendered : (currentRole==='admin' ? customers : customers.filter(c=>c.assign===currentUser&&!c.retrieved));
+  const list = checks.length ? baseList.filter(c=>checks.includes(c.id)) : baseList;
   if(!list.length) { showGlobalToast('출력할 데이터가 없습니다.'); return; }
+  const tabName = dbViewMode==='gudb' ? '구디비' : dbViewMode==='ended' ? '종료디비' : '고객DB';
   const headers = ['NO','고객명','연락처','차량','유입경로','담당자','상태','등록일','최근상담일','중요','다음상담'];
   const rows = list.map((c,i)=>[
     i+1, c.name, c.phone, c.car, c.source, c.assign, c.status, c.date,
@@ -7283,7 +7302,37 @@ function exportCustomerExcel() {
   const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url;
-  a.download = 'TS_고객DB_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.download = 'TS_'+tabName+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showGlobalToast(list.length+'건 엑셀 다운로드');
+}
+function exportReclaimExcel() {
+  if(currentRole !== 'admin') { showGlobalToast('권한이 없습니다.'); return; }
+  const all = customers.filter(c=>c.assign && !c._deleted && c.status !== '펀딩완료' && c.assign !== '구디비' && c.assign !== '종료디비');
+  const sortedAll = [...all].sort((a,b) => {
+    const ea = calcDaysElapsed(a), eb = calcDaysElapsed(b);
+    if(eb !== ea) return eb - ea;
+    return (b.id||0) - (a.id||0);
+  });
+  const sel = Array.isArray(reclaimSelected) ? reclaimSelected : [];
+  const list = sel.length ? sortedAll.filter(c=>sel.includes(c.id)) : sortedAll;
+  if(!list.length) { showGlobalToast('출력할 데이터가 없습니다.'); return; }
+  const headers = ['NO','고객명','연락처','담당자','상태','등록일','최근상담','경과일','회수상태'];
+  const rows = list.map((c,i)=>{
+    const days = calcDaysElapsed(c);
+    const real = c.memos.filter(m=>!m.isSystem);
+    const lastConsult = real.length ? reclaimLastConsultISO(c) : '-';
+    return [
+      i+1, c.name, c.phone, c.assign, c.status, c.date||'', lastConsult,
+      (c.retrieved ? '회수됨' : 'D+'+(days-1 < 0 ? 0 : days-1)),
+      (c.retrieved ? '회수됨' : '배분중')
+    ];
+  });
+  const csv = [headers,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url;
+  a.download = 'TS_회수DB_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click(); URL.revokeObjectURL(url);
   showGlobalToast(list.length+'건 엑셀 다운로드');
 }
@@ -8012,6 +8061,7 @@ async function addMemo() {
     document.getElementById('memoInput').value='';
     renderHistory(); filterDB(true); renderConsult();
     if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
+    if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
     showGlobalToast('✅ 메모가 저장되었습니다.');
   } catch(e) {
     // 실패 시 롤백 → 화면과 DB 일치 유지
@@ -8221,6 +8271,7 @@ async function uploadCustomerFiles(files) {
   }
   renderFiles();
   try { await sbUpdateCustomer(currentCustomer); } catch(e){ console.warn(e); }
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
   showGlobalToast('업로드 완료');
 }
 function formatSize(b) { return b>1024*1024?(b/1024/1024).toFixed(1)+'MB':(b/1024).toFixed(0)+'KB'; }
@@ -8240,13 +8291,14 @@ function renderFiles() {
       <div class="file-actions">
         ${canPreview?`<button class="btn btn-ghost btn-sm" onclick="previewFile(${i})">👁️ 보기</button>`:''}
         ${canPreview?`<button class="btn btn-ghost btn-sm" onclick="downloadFile(${i})">⬇️</button>`:''}
-        <button class="btn btn-ghost btn-sm" onclick="deleteFile(${i})">삭제</button>
+        ${currentRole==='admin'?`<button class="btn btn-ghost btn-sm" onclick="deleteFile(${i})">삭제</button>`:''}
       </div>
     </div>`;
   }).join('');
 }
 function escapeHtml(s) { return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function deleteFile(i) {
+  if(currentRole!=='admin'){ alert('서류 삭제는 관리자만 가능합니다.'); return; }
   const f = currentCustomer.files[i];
   if(!f) return;
   if(!confirm(`"${f.name}" 파일을 삭제하시겠습니까?`)) return;
@@ -8256,6 +8308,7 @@ async function deleteFile(i) {
   currentCustomer.files.splice(i,1);
   renderFiles();
   if(isSbConfigured()) try{ await sbUpdateCustomer(currentCustomer); }catch(e){}
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
 }
 let _currentPreview = null;
 async function previewFile(i) {
