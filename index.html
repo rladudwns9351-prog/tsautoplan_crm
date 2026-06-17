@@ -945,7 +945,7 @@
             <!-- 담당자 변경 (관리자 전용) -->
             
             <!-- 상태 변경 (관리자 + 직원 모두 드롭다운) -->
-            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val" id="detailCar"></span></div><div class="info-row" data-field="source" style="align-items:center;"><span class="info-key">유입경로</span><span class="info-val"><span id="detailSource">직영업</span><select id="detailSourceSel" class="admin-only" onchange="changeCustomerSource(this.value)" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"></select></span></div><div class="info-row" data-field="division" style="align-items:center;">
+            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val"><input type="text" id="detailCar" onblur="saveCustomerCar(this.value)" onkeydown="if(event.key===&#39;Enter&#39;) this.blur();" placeholder="관심차량 입력" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;text-align:right;max-width:170px;" onfocus="this.style.borderColor=&#39;var(--accent)&#39;" onblur_extra=""></span></div><div class="info-row" data-field="source" style="align-items:center;"><span class="info-key">유입경로</span><span class="info-val"><span id="detailSource">직영업</span><select id="detailSourceSel" class="admin-only" onchange="changeCustomerSource(this.value)" style="display:none;max-width:170px;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;text-overflow:ellipsis;"></select></span></div><div class="info-row" data-field="division" style="align-items:center;">
               <span class="info-key">구분</span>
               <span class="info-val">
                 <select id="detailDivisionSel" onchange="changeCustomerDivision(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="">선택 안 함</option><option value="개인">개인</option><option value="법인">법인</option><option value="개인사업자">개인사업자</option></select>
@@ -4547,7 +4547,7 @@ function openDetail(id) {
   document.getElementById('detailAvatar').textContent = c.name[0];
   document.getElementById('detailName').textContent = c.name;
   document.getElementById('detailPhone').value = c.phone || '';
-  document.getElementById('detailCar').textContent = c.car;
+  document.getElementById('detailCar').value = c.car || '';
   document.getElementById('detailSource').textContent = c.source;
   fillSourceSelect(c.source || '');
   fillDivisionSelect(document.getElementById('detailDivisionSel'), c.division || '');
@@ -4794,6 +4794,35 @@ async function saveCustomerPhone(newPhone) {
     }
   }
   refreshAllViews();
+}
+async function saveCustomerCar(newVal) {
+  if(!currentCustomer) return;
+  window._lastLocalChange = Date.now();
+  const cleaned = (newVal||'').trim();
+  if(cleaned === (currentCustomer.car||'')) return; // 변경 없음
+  const oldCar = currentCustomer.car || '';
+  currentCustomer.car = cleaned;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  if(!Array.isArray(currentCustomer.memos)) currentCustomer.memos = [];
+  currentCustomer.memos.unshift({
+    text: `[관심차량변경] ${oldCar||'(없음)'} → ${cleaned||'(없음)'}`,
+    author: currentUser,
+    date: dateStr,
+    isSystem: true
+  });
+  if(isSbConfigured()) {
+    try { await sbUpdateCustomer(currentCustomer); showGlobalToast('✓ 관심차량이 변경되었습니다.'); }
+    catch(e) {
+      showGlobalToast('⚠️ 저장 실패: ' + (e.message||e));
+      currentCustomer.car = oldCar; // 롤백
+      document.getElementById('detailCar').value = oldCar;
+      return;
+    }
+  }
+  document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
+  refreshAllViews();
+  renderMemos();
 }
 async function changeCustomerMemoTag(newVal) {
   if(!currentCustomer) return;
