@@ -210,12 +210,21 @@
           <div class="section-head" style="padding:14px 18px;">
             <div class="section-head-title">📨 단체문자 발송 집계</div>
             <div style="display:flex;gap:6px;align-items:center;">
-              <select id="smsStatsPeriod" onchange="renderSmsStats()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
+              <select id="smsStatsPeriod" onchange="onSmsPeriodChange()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
                 <option value="today">오늘</option>
                 <option value="7">최근 7일</option>
                 <option value="30" selected="">최근 30일</option>
                 <option value="month">이번달</option>
+                <option value="ym">년/월 선택</option>
                 <option value="all">전체</option>
+              </select>
+              <select id="smsStatsYear" onchange="renderSmsStats()" style="display:none;padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"></select>
+              <select id="smsStatsMonth" onchange="renderSmsStats()" style="display:none;padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
+                <option value="0">전체월</option>
+                <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+                <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+                <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+                <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
               </select>
               <span id="smsStatsBadge" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">발송 0회 / 총 0건</span>
             </div>
@@ -3436,6 +3445,8 @@ function fundingToRow(f) {
     monthly_fee:     f.monthlyFee     || 0,
     expiry_date:     f.expiryDate     || null,
     memo:           f.memo          || '',
+    check_viewed:    f.checkViewed    ?? false,
+    check_dismissed: f.checkDismissed ?? false,
     files:          f.files   || [],
     options:        f.options || [],
     buui:           f.buui    || [],
@@ -3482,6 +3493,8 @@ function rowToFunding(r) {
     monthlyFee:      r.monthly_fee     || 0,
     expiryDate:      r.expiry_date     || null,
     memo:          r.memo,
+    checkViewed:    r.check_viewed    ?? false,
+    checkDismissed: r.check_dismissed ?? false,
     files:         parseJ(r.files),
     options:       parseJ(r.options),
     buui:          parseJ(r.buui),
@@ -3532,10 +3545,13 @@ async function sbSaveFunding(f) {
     if(typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
     return saved ? rowToFunding(saved) : null;
   } catch(e) {
-    // expected_delivery_date 컬럼이 DB에 없으면 제거 후 재시도
-    if(String(e?.message||e).includes('expected_delivery_date')) {
-      delete row.expected_delivery_date;
-      console.warn('expected_delivery_date 컬럼이 Supabase에 없습니다. 해당 필드 제외하고 저장합니다.');
+    // 일부 선택적 컬럼이 DB에 아직 없으면 제거 후 재시도 (스키마 호환)
+    const msg = String(e?.message||e);
+    const optionalCols = ['expected_delivery_date','check_viewed','check_dismissed'];
+    const missing = optionalCols.filter(col => msg.includes(col));
+    if(missing.length){
+      missing.forEach(col => { delete row[col]; });
+      console.warn('Supabase에 없는 컬럼 제외 후 저장:', missing.join(', '));
       const result = await sbFetch('fundings?on_conflict=id', 'POST', [row]);
       const saved = Array.isArray(result) ? result[0] : result;
       if(typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
@@ -5368,8 +5384,12 @@ function filterDB(keepPage) {
     } else if(dbViewMode==='ended'){
       if(c.assign!=='종료디비') return false;
     } else {
-      if(c.assign==='구디비'||c.assign==='종료디비') return false;
-      if(assign && c.assign !== assign) return false;
+      // 검색어 입력 중(관리자)에는 구디비/종료디비까지 통합 조회 + 담당자 필터 미적용
+      const _searchAll = q && currentRole==='admin';
+      if(!_searchAll){
+        if(c.assign==='구디비'||c.assign==='종료디비') return false;
+        if(assign && c.assign !== assign) return false;
+      }
     }
     if(currentRole !== 'admin' && c.retrieved === true) return false;
     if(dbImportantOnly && !c.important) return false;
@@ -7990,7 +8010,7 @@ function colFilterDB(keepPage) {
   let list = customers.filter(c=>{
     if(dbViewMode==='gudb'){ if(c.assign!=='구디비') return false; }
     else if(dbViewMode==='ended'){ if(c.assign!=='종료디비') return false; }
-    else if(c.assign==='구디비'||c.assign==='종료디비') return false;
+    else if(!(q && currentRole==='admin') && (c.assign==='구디비'||c.assign==='종료디비')) return false;
     if(currentRole!=='admin' && c.assign!==currentUser) return false;
     if(currentRole!=='admin' && c.retrieved) return false;
     if(dbImportantOnly && !c.important) return false;
@@ -8001,7 +8021,7 @@ function colFilterDB(keepPage) {
     if(source && c.source!==source) return false;
     if(division && (c.division||'')!==division) return false;
     if(memoTag && (c.memoTag||'')!==memoTag) return false;
-    if(assign && c.assign!==assign) return false;
+    if(assign && c.assign!==assign && !(q && currentRole==='admin')) return false;
     if(status && c.status!==status) return false;
     if(q && !c.name.toLowerCase().includes(q) && !c.phone.includes(q) && !c.car.toLowerCase().includes(q)) return false;
     if(topStatus && c.status!==topStatus) return false;
@@ -9370,94 +9390,187 @@ function deleteSmsTemplate() {
 }
 
 // === 단체문자 대시보드 집계 ===
-function renderSmsStats() {
+function onSmsPeriodChange(){
+  const p = document.getElementById('smsStatsPeriod')?.value || '30';
+  const yEl = document.getElementById('smsStatsYear');
+  const mEl = document.getElementById('smsStatsMonth');
+  const show = (p === 'ym');
+  if(yEl) yEl.style.display = show ? '' : 'none';
+  if(mEl) mEl.style.display = show ? '' : 'none';
+  if(show) ensureSmsStatsYear();
+  renderSmsStats();
+}
+function ensureSmsStatsYear(){
+  const sel = document.getElementById('smsStatsYear');
+  if(!sel || sel.options.length) return;
+  const thisY = new Date().getFullYear();
+  let html = '';
+  for(let y=thisY; y>=thisY-4; y--) html += '<option value="'+y+'"'+(y===thisY?' selected':'')+'>'+y+'년</option>';
+  sel.innerHTML = html;
+}
+function _smsResultOf(l){
+  // 로그의 결과 집계 → {success, reject, fail, pending}
+  const rs = l.resultSummary || {};
+  if(rs && (rs.success!=null || rs.reject!=null || rs.fail!=null || rs.pending!=null)){
+    return { success:rs.success||0, reject:rs.reject||0, fail:rs.fail||0, pending:rs.pending||0 };
+  }
+  // 폴백: recipients[].result 로 집계, 없으면 전부 대기
+  const out = { success:0, reject:0, fail:0, pending:0 };
+  const rcs = Array.isArray(l.recipients) ? l.recipients : [];
+  if(rcs.length){
+    rcs.forEach(r=>{
+      const v = (r.result||'').toString();
+      if(v==='success'||v==='성공'||v==='발송완료') out.success++;
+      else if(v==='reject'||v==='수신거부') out.reject++;
+      else if(v==='fail'||v==='실패'||v==='미수신'||v==='가입자없음') out.fail++;
+      else out.pending++;
+    });
+  } else {
+    out.pending = l.recipientCount || 0;
+  }
+  return out;
+}
+async function renderSmsStats() {
   const body = document.getElementById('smsStatsBody');
   if (!body) return;
   const period = document.getElementById('smsStatsPeriod')?.value || '30';
-  const logs = getSmsLogs();
+  body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">불러오는 중…</div>';
+  let logs = [];
+  try { logs = await getSmsLogs(); } catch(_){ logs = []; }
   const now = new Date();
   const today = now.toISOString().slice(0,10);
-  let filtered = logs;
-  if (period === 'today') {
-    filtered = logs.filter(l => l.dateISO === today);
-  } else if (period === '7' || period === '30') {
+  let filtered = logs, label = '';
+  if (period === 'today') { filtered = logs.filter(l => (l.dateISO||'') === today); label = '오늘'; }
+  else if (period === '7' || period === '30') {
     const days = parseInt(period);
     const cutoff = new Date(now.getTime() - days*86400000).toISOString().slice(0,10);
-    filtered = logs.filter(l => l.dateISO >= cutoff);
+    filtered = logs.filter(l => (l.dateISO||'') >= cutoff); label = '최근 '+days+'일';
   } else if (period === 'month') {
     const ym = today.slice(0,7);
-    filtered = logs.filter(l => (l.dateISO||'').slice(0,7) === ym);
-  }
+    filtered = logs.filter(l => (l.dateISO||'').slice(0,7) === ym); label = ym;
+  } else if (period === 'ym') {
+    const Y = document.getElementById('smsStatsYear')?.value || String(now.getFullYear());
+    const M = parseInt(document.getElementById('smsStatsMonth')?.value || '0');
+    if (M > 0) { const key = Y+'-'+String(M).padStart(2,'0'); filtered = logs.filter(l => (l.dateISO||'').slice(0,7) === key); label = Y+'년 '+M+'월'; }
+    else { filtered = logs.filter(l => (l.dateISO||'').slice(0,4) === Y); label = Y+'년 전체'; }
+  } else { label = '전체'; }
+
   const totalCount = filtered.reduce((s,l) => s + (l.recipientCount||0), 0);
   const totalSend = filtered.length;
+  // 결과 합계
+  const res = { success:0, reject:0, fail:0, pending:0 };
+  filtered.forEach(l => { const r = _smsResultOf(l); res.success+=r.success; res.reject+=r.reject; res.fail+=r.fail; res.pending+=r.pending; });
   // 영업자별 집계
   const bySender = {};
   filtered.forEach(l => {
     const k = l.sender || '미상';
-    if (!bySender[k]) bySender[k] = { sender: k, sendTimes: 0, recipientCount: 0 };
+    if (!bySender[k]) bySender[k] = { sender:k, sendTimes:0, recipientCount:0, success:0, reject:0, fail:0, pending:0 };
+    const r = _smsResultOf(l);
     bySender[k].sendTimes += 1;
     bySender[k].recipientCount += (l.recipientCount || 0);
+    bySender[k].success+=r.success; bySender[k].reject+=r.reject; bySender[k].fail+=r.fail; bySender[k].pending+=r.pending;
   });
   const senders = Object.values(bySender).sort((a,b) => b.recipientCount - a.recipientCount);
 
-  document.getElementById('smsStatsBadge').textContent =
-    `발송 ${totalSend.toLocaleString()}회 / 총 ${totalCount.toLocaleString()}건`;
+  const badge = document.getElementById('smsStatsBadge');
+  if (badge) badge.textContent = '발송 '+totalSend.toLocaleString()+'회 / 총 '+totalCount.toLocaleString()+'건';
 
   if (filtered.length === 0) {
-    body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">해당 기간 발송 내역 없음</div>';
+    body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">'+label+' 발송 내역 없음</div>';
     return;
   }
-  // 요약 카드 3개
   const totalCost = filtered.reduce((s,l) => s + (l.msgType==='LMS' ? 25 : 8.4) * (l.recipientCount||0), 0);
-  const summaryHTML = `
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
-      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:12px 14px;">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">발송 횟수</div>
-        <div style="font-size:18px;font-weight:700;font-family:JetBrains Mono,monospace;">${totalSend.toLocaleString()}회</div>
-      </div>
-      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:12px 14px;">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">총 발송 건수</div>
-        <div style="font-size:18px;font-weight:700;font-family:JetBrains Mono,monospace;color:var(--green);">${totalCount.toLocaleString()}건</div>
-      </div>
-      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:12px 14px;">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">예상 비용</div>
-        <div style="font-size:18px;font-weight:700;font-family:JetBrains Mono,monospace;color:var(--yellow);">${Math.round(totalCost).toLocaleString()}원</div>
-      </div>
-    </div>`;
+  const card = (lbl,val,color)=>'<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;">'+
+    '<div style="font-size:10px;color:var(--text3);margin-bottom:5px;">'+lbl+'</div>'+
+    '<div style="font-size:16px;font-weight:700;font-family:JetBrains Mono,monospace;'+(color?'color:'+color+';':'')+'">'+val+'</div></div>';
+  const summaryHTML =
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">'+
+      card('발송 횟수', totalSend.toLocaleString()+'회')+
+      card('총 발송 건수', totalCount.toLocaleString()+'건', 'var(--green)')+
+      card('결과(성공/거부/실패/대기)', res.success+' / '+res.reject+' / '+res.fail+' / '+res.pending)+
+      card('예상 비용', Math.round(totalCost).toLocaleString()+'원', 'var(--yellow)')+
+    '</div>';
   // 영업자별 테이블
   const max = senders[0]?.recipientCount || 1;
-  const tableHTML = `
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;">📊 영업자별 발송 현황</div>
-    <div style="display:grid;grid-template-columns:1fr 80px 100px 1fr;gap:0;padding:8px 12px;background:var(--bg4);border:1px solid var(--border);border-radius:6px 6px 0 0;font-size:11px;color:var(--text3);font-weight:600;">
-      <div>영업자</div><div style="text-align:right;">발송 횟수</div><div style="text-align:right;">총 건수</div><div style="padding-left:14px;">비중</div>
-    </div>
-    <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">
-    ${senders.map(s => {
-      const pct = max ? Math.round(s.recipientCount/max*100) : 0;
-      return `<div style="display:grid;grid-template-columns:1fr 80px 100px 1fr;gap:0;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;">
-        <div style="font-weight:600;">${escapeHtml(s.sender)}</div>
-        <div style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--text2);">${s.sendTimes}회</div>
-        <div style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--green);font-weight:700;">${s.recipientCount.toLocaleString()}건</div>
-        <div style="padding-left:14px;display:flex;align-items:center;gap:8px;">
-          <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--green);transition:.4s;"></div></div>
-          <span style="font-size:10px;color:var(--text3);font-family:JetBrains Mono,monospace;width:32px;text-align:right;">${pct}%</span>
-        </div>
-      </div>`;
-    }).join('')}
-    </div>`;
-  body.innerHTML = summaryHTML + tableHTML;
+  const senderHTML =
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;">📊 영업자별 발송 현황</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 70px 80px 1.2fr;gap:0;padding:8px 12px;background:var(--bg4);border:1px solid var(--border);border-radius:6px 6px 0 0;font-size:11px;color:var(--text3);font-weight:600;">'+
+      '<div>영업자</div><div style="text-align:right;">발송</div><div style="text-align:right;">총건수</div><div style="padding-left:14px;">성공/거부/실패/대기</div></div>'+
+    '<div style="border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">'+
+    senders.map(s =>
+      '<div style="display:grid;grid-template-columns:1fr 70px 80px 1.2fr;gap:0;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;">'+
+        '<div style="font-weight:600;">'+escapeHtml(s.sender)+'</div>'+
+        '<div style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--text2);">'+s.sendTimes+'회</div>'+
+        '<div style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--green);font-weight:700;">'+s.recipientCount.toLocaleString()+'</div>'+
+        '<div style="padding-left:14px;font-family:JetBrains Mono,monospace;font-size:11px;">'+
+          '<span style="color:var(--green);">'+s.success+'</span> / <span style="color:#ff9944;">'+s.reject+'</span> / <span style="color:var(--red);">'+s.fail+'</span> / <span style="color:var(--text3);">'+s.pending+'</span></div>'+
+      '</div>').join('')+
+    '</div>';
+  // 발송 건별 상세
+  const fmtDT = l => { const t = l.sentAt ? new Date(l.sentAt) : null; if(!t||isNaN(t)) return l.dateISO||''; const p=n=>String(n).padStart(2,'0'); return (l.dateISO||t.toISOString().slice(0,10))+' '+p(t.getHours())+':'+p(t.getMinutes()); };
+  const detailRows = filtered.slice(0,200).map(l => {
+    const r = _smsResultOf(l);
+    const names = (Array.isArray(l.recipients)?l.recipients:[]).map(x=>escapeHtml(x.name||'')+(x.result?' <span style=\"color:var(--text3);\">('+escapeHtml(x.result)+')</span>':'')).join(', ');
+    const preview = (l.content||'').length>40 ? escapeHtml(l.content.slice(0,40))+'…' : escapeHtml(l.content||'');
+    return '<details style="border-bottom:1px solid var(--border);">'+
+      '<summary style="cursor:pointer;padding:8px 12px;font-size:12px;display:grid;grid-template-columns:130px 70px 1fr 130px;gap:8px;align-items:center;list-style:none;">'+
+        '<span style="font-family:JetBrains Mono,monospace;color:var(--text3);font-size:11px;">'+fmtDT(l)+'</span>'+
+        '<span style="font-weight:600;">'+escapeHtml(l.sender||'미상')+'</span>'+
+        '<span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+preview+'</span>'+
+        '<span style="font-family:JetBrains Mono,monospace;font-size:11px;text-align:right;"><b>'+(l.recipientCount||0)+'명</b> <span style="color:var(--green);">'+r.success+'</span>/<span style="color:#ff9944;">'+r.reject+'</span>/<span style="color:var(--red);">'+r.fail+'</span>/<span style="color:var(--text3);">'+r.pending+'</span></span>'+
+      '</summary>'+
+      '<div style="padding:8px 14px 12px;background:var(--bg2);font-size:12px;">'+
+        '<div style="margin-bottom:6px;color:var(--text3);">유형 '+escapeHtml(l.msgType||'SMS')+' · '+(l.bytes||0)+'byte</div>'+
+        '<div style="margin-bottom:6px;white-space:pre-wrap;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;">'+escapeHtml(l.content||'')+'</div>'+
+        '<div style="color:var(--text2);"><b>수신자</b>: '+(names||'-')+'</div>'+
+      '</div></details>';
+  }).join('');
+  const detailHTML =
+    '<div style="font-size:11px;color:var(--text3);margin:16px 0 8px;font-weight:600;">🧾 발송 건별 상세 ('+label+')</div>'+
+    '<div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;">'+detailRows+'</div>';
+
+  body.innerHTML = summaryHTML + senderHTML + detailHTML;
 }
 
-// 발송 내역 저장 (대시보드 집계용)
+// 발송 내역 저장 (대시보드 집계용) — Supabase 우선, 로컬 폴백
 const SMS_LOGS_KEY = 'smsSendLogs_v1';
-function getSmsLogs() {
+function getSmsLogsLocal() {
   try { return JSON.parse(localStorage.getItem(SMS_LOGS_KEY) || '[]'); }
   catch { return []; }
 }
-function appendSmsLog(entry) {
-  const logs = getSmsLogs();
+function _smsRowToLog(r){
+  return {
+    id: r.id, sentAt: r.sent_at, dateISO: r.date_iso, sender: r.sender, senderId: r.sender_id,
+    company: r.company, msgType: r.msg_type, bytes: r.bytes, content: r.content,
+    recipientCount: r.recipient_count, recipients: r.recipients||[],
+    resultSummary: r.result_summary||{}, aligoGroupId: r.aligo_group_id
+  };
+}
+async function getSmsLogs() {
+  if (typeof isSbConfigured==='function' && isSbConfigured()) {
+    try {
+      const rows = await sbFetch('sms_logs?order=sent_at.desc&select=*');
+      return (rows||[]).map(_smsRowToLog);
+    } catch(e) { console.warn('SMS 로그 조회 실패(로컬 폴백):', e); }
+  }
+  return getSmsLogsLocal();
+}
+async function appendSmsLog(entry) {
+  if (typeof isSbConfigured==='function' && isSbConfigured()) {
+    try {
+      await sbFetch('sms_logs', 'POST', [{
+        sent_at: entry.sentAt, date_iso: entry.dateISO,
+        sender: entry.sender, sender_id: entry.senderId, company: entry.company,
+        msg_type: entry.msgType, bytes: entry.bytes, content: entry.content,
+        recipient_count: entry.recipientCount, recipients: entry.recipients||[],
+        result_summary: entry.resultSummary||{}, aligo_group_id: entry.aligoGroupId||null
+      }]);
+      if (typeof notifyDataChanged === 'function') notifyDataChanged('sms_logs');
+      return;
+    } catch(e) { console.warn('SMS 로그 저장 실패(로컬 폴백):', e); }
+  }
+  const logs = getSmsLogsLocal();
   logs.unshift(entry);
-  // 최근 1000건만 유지
   if (logs.length > 1000) logs.length = 1000;
   try { localStorage.setItem(SMS_LOGS_KEY, JSON.stringify(logs)); } catch {}
 }
@@ -9509,7 +9622,7 @@ async function sendSmsBulk() {
   }
 
   // 2) 발송 로그 저장 (대시보드 집계용)
-  appendSmsLog({
+  await appendSmsLog({
     sentAt: now.toISOString(),
     dateISO: dateISO,
     sender: currentUser,
@@ -9518,6 +9631,9 @@ async function sendSmsBulk() {
     recipientCount: smsRecipients.length,
     msgType: msgType,
     bytes: bytes,
+    content: msg,
+    recipients: smsRecipients.map(r => ({ name: r.name, phone: r.phone, customerId: r.customerId || null, result: 'pending' })),
+    resultSummary: { success: 0, reject: 0, fail: 0, pending: smsRecipients.length },
     customerIds: smsRecipients.map(r => r.customerId).filter(Boolean),
   });
 
@@ -11545,10 +11661,22 @@ let fundingCheckPageSize = 10;
 let fundingCheckShowCount = 10;
 
 function getFundingCheckViewed() {
+  // DB 연동 시: 펀딩 레코드의 공유 플래그 기준 (모든 PC 공유)
+  if (typeof isSbConfigured==='function' && isSbConfigured() && typeof fundingList!=='undefined') {
+    return fundingList.filter(f=>f.checkViewed).map(f=>f.id);
+  }
   try { return JSON.parse(localStorage.getItem(FUNDING_CHECK_VIEWED_KEY) || '[]'); }
   catch { return []; }
 }
 function setFundingCheckViewed(id) {
+  if (typeof isSbConfigured==='function' && isSbConfigured() && typeof fundingList!=='undefined') {
+    const f = fundingList.find(x=>x.id===id);
+    if (f && !f.checkViewed) {
+      f.checkViewed = true;
+      if (typeof sbSaveFunding==='function') sbSaveFunding(f).catch(e=>console.warn('펀딩체크(확인) 저장 실패:', e));
+    }
+    return;
+  }
   const arr = getFundingCheckViewed();
   if (!arr.includes(id)) {
     arr.push(id);
@@ -11648,14 +11776,25 @@ function loadMoreFundingCheck() {
 // 목록에서 제거 (펀딩 데이터 자체는 보존, 알람 목록에서만 숨김)
 const FUNDING_CHECK_DISMISSED_KEY = 'fundingCheckDismissed_v1';
 function getFundingCheckDismissed() {
+  if (typeof isSbConfigured==='function' && isSbConfigured() && typeof fundingList!=='undefined') {
+    return fundingList.filter(f=>f.checkDismissed).map(f=>f.id);
+  }
   try { return JSON.parse(localStorage.getItem(FUNDING_CHECK_DISMISSED_KEY) || '[]'); }
   catch { return []; }
 }
 function dismissFundingCheck(fid, ev) {
   if(ev) { ev.stopPropagation(); ev.preventDefault(); }
-  const arr = getFundingCheckDismissed();
-  if(!arr.includes(fid)) arr.push(fid);
-  try { localStorage.setItem(FUNDING_CHECK_DISMISSED_KEY, JSON.stringify(arr)); } catch(_){}
+  if (typeof isSbConfigured==='function' && isSbConfigured() && typeof fundingList!=='undefined') {
+    const f = fundingList.find(x=>x.id===fid);
+    if (f && !f.checkDismissed) {
+      f.checkDismissed = true;
+      if (typeof sbSaveFunding==='function') sbSaveFunding(f).catch(e=>console.warn('펀딩체크(제거) 저장 실패:', e));
+    }
+  } else {
+    const arr = getFundingCheckDismissed();
+    if(!arr.includes(fid)) arr.push(fid);
+    try { localStorage.setItem(FUNDING_CHECK_DISMISSED_KEY, JSON.stringify(arr)); } catch(_){}
+  }
   renderFundingCheckDropdown();
   refreshFundingCheckBadge();
 }
