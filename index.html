@@ -7278,6 +7278,7 @@ function _rerenderCurrentPage(syncType) {
       else if(typeof renderDBStats === 'function') renderDBStats();
     }
     if(typeof refreshAlarmBadge === 'function') refreshAlarmBadge(); if(typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
+    if(document.getElementById('fundingCheckDropdown')?.style.display === 'flex' && typeof renderFundingCheckDropdown === 'function') renderFundingCheckDropdown();
   } catch(e) {
     console.warn('rerender skipped', e);
   }
@@ -7311,6 +7312,12 @@ function _dataSignature() {
   if(Array.isArray(customers)) {
     for(const c of customers) {
       s += '|' + c.id + ':' + (c.memos ? c.memos.length : 0) + ':' + (c.status||'') + ':' + (c.assign||'') + ':' + (c.grade||'') + ':' + (c.important?1:0) + ':' + (c.retrieved?1:0);
+    }
+  }
+  // 펀딩체크 공유상태 변화 감지 (다른 PC에서 확인/제거/확정 시 배지·목록 갱신)
+  if(typeof fundingList !== 'undefined' && Array.isArray(fundingList)) {
+    for(const f of fundingList) {
+      s += '#' + f.id + ':' + (f.checkViewed?1:0) + ':' + (f.checkDismissed?1:0) + ':' + (f.confirmed?1:0);
     }
   }
   return s;
