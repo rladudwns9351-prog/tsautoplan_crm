@@ -5288,10 +5288,10 @@ function renderDB(list) {
       '<td style="text-align:center;" onclick="event.stopPropagation()">'+gradeSelectHtml(c)+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:12px;">'+c.phone+'</td>'+
       '<td style="font-size:13px;">'+c.car+'</td>'+
-      '<td><span style="font-size:12px;color:var(--text2);">'+c.source+'</span></td>'+
-      '<td><span style="font-size:12px;color:var(--text2);">'+(c.division||'-')+'</span></td>'+
-      '<td><span style="font-size:12px;color:var(--text2);">'+(c.memoTag||'-')+'</span></td>'+
-      '<td style="font-size:13px;">'+c.assign+'</td>'+
+      '<td onclick="event.stopPropagation();toggleRowCheck('+c.id+')" style="cursor:pointer;"><span style="font-size:12px;color:var(--text2);">'+c.source+'</span></td>'+
+      '<td onclick="event.stopPropagation();toggleRowCheck('+c.id+')" style="cursor:pointer;"><span style="font-size:12px;color:var(--text2);">'+(c.division||'-')+'</span></td>'+
+      '<td onclick="event.stopPropagation();toggleRowCheck('+c.id+')" style="cursor:pointer;"><span style="font-size:12px;color:var(--text2);">'+(c.memoTag||'-')+'</span></td>'+
+      '<td onclick="event.stopPropagation();toggleRowCheck('+c.id+')" style="font-size:13px;cursor:pointer;">'+c.assign+'</td>'+
       '<td onclick="event.stopPropagation()">'+buildStatusCell(c)+'</td>'+
       '<td>'+latestMemoPreview(c)+'</td>'+
       '<td style="text-align:right;font-size:11px;color:var(--text2);font-family:JetBrains Mono,monospace;">'+c.date.slice(5)+'</td>'+
@@ -5500,6 +5500,12 @@ async function bulkReassignFromGudb() {
   if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
   showGlobalToast(upd.length+'건 "'+target+'"에게 재배분 완료');
   if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+}
+function toggleRowCheck(id) {
+  const cb = document.querySelector('.db-check[data-id="'+id+'"]');
+  if(!cb) return;
+  cb.checked = !cb.checked;
+  onCheckChange();
 }
 function onCheckChange() {
   const checks = document.querySelectorAll('.db-check:checked');
