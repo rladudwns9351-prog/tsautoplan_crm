@@ -9454,13 +9454,23 @@ function _smsResultOf(l){
   }
   return out;
 }
+let _smsStatsSig = '';        // 마지막 렌더 시그니처(깜빡임/리셋 방지)
+let _smsStatsRendered = false; // 최초 렌더 여부
 async function renderSmsStats() {
   const body = document.getElementById('smsStatsBody');
   if (!body) return;
   const period = document.getElementById('smsStatsPeriod')?.value || '30';
-  body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">불러오는 중…</div>';
+  // 최초 1회만 로딩 표시 (폴링 재렌더 시 깜빡임 방지)
+  if (!_smsStatsRendered || !body.innerHTML.trim()) {
+    body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">불러오는 중…</div>';
+  }
   let logs = [];
   try { logs = await getSmsLogs(); } catch(_){ logs = []; }
+  // 변화 없으면 재렌더 skip → 깜빡임 제거
+  const _sig = period + '|' + logs.length + '|' + (logs[0]?.sentAt||'') + '|' +
+    logs.reduce((s,l)=>s+(l.recipientCount||0),0);
+  if (_smsStatsRendered && _sig === _smsStatsSig && body.innerHTML.indexOf('불러오는 중') === -1) return;
+  _smsStatsSig = _sig;
   const now = new Date();
   const today = now.toISOString().slice(0,10);
   let filtered = logs, label = '';
@@ -9501,6 +9511,7 @@ async function renderSmsStats() {
 
   if (filtered.length === 0) {
     body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">'+label+' 발송 내역 없음</div>';
+    _smsStatsRendered = true;
     return;
   }
   const totalCost = filtered.reduce((s,l) => s + (l.msgType==='LMS' ? 25 : 8.4) * (l.recipientCount||0), 0);
@@ -9530,30 +9541,31 @@ async function renderSmsStats() {
           '<span style="color:var(--green);">'+s.success+'</span> / <span style="color:#ff9944;">'+s.reject+'</span> / <span style="color:var(--red);">'+s.fail+'</span> / <span style="color:var(--text3);">'+s.pending+'</span></div>'+
       '</div>').join('')+
     '</div>';
-  // 발송 건별 상세
-  const fmtDT = l => { const t = l.sentAt ? new Date(l.sentAt) : null; if(!t||isNaN(t)) return l.dateISO||''; const p=n=>String(n).padStart(2,'0'); return (l.dateISO||t.toISOString().slice(0,10))+' '+p(t.getHours())+':'+p(t.getMinutes()); };
-  const detailRows = filtered.slice(0,200).map(l => {
-    const r = _smsResultOf(l);
-    const names = (Array.isArray(l.recipients)?l.recipients:[]).map(x=>escapeHtml(x.name||'')+(x.result?' <span style=\"color:var(--text3);\">('+escapeHtml(x.result)+')</span>':'')).join(', ');
-    const preview = (l.content||'').length>40 ? escapeHtml(l.content.slice(0,40))+'…' : escapeHtml(l.content||'');
-    return '<details style="border-bottom:1px solid var(--border);">'+
-      '<summary style="cursor:pointer;padding:8px 12px;font-size:12px;display:grid;grid-template-columns:130px 70px 1fr 130px;gap:8px;align-items:center;list-style:none;">'+
-        '<span style="font-family:JetBrains Mono,monospace;color:var(--text3);font-size:11px;">'+fmtDT(l)+'</span>'+
-        '<span style="font-weight:600;">'+escapeHtml(l.sender||'미상')+'</span>'+
-        '<span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+preview+'</span>'+
-        '<span style="font-family:JetBrains Mono,monospace;font-size:11px;text-align:right;"><b>'+(l.recipientCount||0)+'명</b> <span style="color:var(--green);">'+r.success+'</span>/<span style="color:#ff9944;">'+r.reject+'</span>/<span style="color:var(--red);">'+r.fail+'</span>/<span style="color:var(--text3);">'+r.pending+'</span></span>'+
-      '</summary>'+
-      '<div style="padding:8px 14px 12px;background:var(--bg2);font-size:12px;">'+
-        '<div style="margin-bottom:6px;color:var(--text3);">유형 '+escapeHtml(l.msgType||'SMS')+' · '+(l.bytes||0)+'byte</div>'+
-        '<div style="margin-bottom:6px;white-space:pre-wrap;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;">'+escapeHtml(l.content||'')+'</div>'+
-        '<div style="color:var(--text2);"><b>수신자</b>: '+(names||'-')+'</div>'+
-      '</div></details>';
-  }).join('');
+  // 담당자별 발송일자·건수 집계 (담당자 + 발송일자 단위)
+  const bySenderDate = {};
+  filtered.forEach(l => {
+    const sndr = l.sender || '미상';
+    const d = l.dateISO || (l.sentAt ? l.sentAt.slice(0,10) : '');
+    const key = sndr + '|' + d;
+    if (!bySenderDate[key]) bySenderDate[key] = { sender:sndr, date:d, count:0 };
+    bySenderDate[key].count += (l.recipientCount || 0);
+  });
+  const sdRows = Object.values(bySenderDate)
+    .sort((a,b) => a.date === b.date ? a.sender.localeCompare(b.sender) : (a.date < b.date ? 1 : -1));
+  const detailRows = sdRows.map(s =>
+    '<div style="display:grid;grid-template-columns:1fr 130px 90px;gap:0;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;">'+
+      '<div style="font-weight:600;">'+escapeHtml(s.sender)+'</div>'+
+      '<div style="font-family:JetBrains Mono,monospace;color:var(--text2);">'+escapeHtml(s.date||'-')+'</div>'+
+      '<div style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--green);font-weight:700;">'+s.count.toLocaleString()+'건</div>'+
+    '</div>').join('');
   const detailHTML =
-    '<div style="font-size:11px;color:var(--text3);margin:16px 0 8px;font-weight:600;">🧾 발송 건별 상세 ('+label+')</div>'+
-    '<div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;">'+detailRows+'</div>';
+    '<div style="font-size:11px;color:var(--text3);margin:16px 0 8px;font-weight:600;">🧾 담당자별 발송 집계 ('+label+')</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 130px 90px;gap:0;padding:8px 12px;background:var(--bg4);border:1px solid var(--border);border-radius:6px 6px 0 0;font-size:11px;color:var(--text3);font-weight:600;">'+
+      '<div>담당자</div><div>발송일자</div><div style="text-align:right;">건수</div></div>'+
+    '<div style="border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">'+detailRows+'</div>';
 
   body.innerHTML = summaryHTML + senderHTML + detailHTML;
+  _smsStatsRendered = true;
 }
 
 // 발송 내역 저장 (대시보드 집계용) — Supabase 우선, 로컬 폴백
@@ -9661,13 +9673,16 @@ async function sendSmsBulk() {
     customerIds: smsRecipients.map(r => r.customerId).filter(Boolean),
   });
 
-  alert(`✅ 발송 처리 완료 (시뮬레이션)\n\n• 수신자: ${smsRecipients.length}명\n• 유형: ${msgType} (${bytes}byte)\n• 각 고객 메모에 발송 이력이 기록되었습니다.\n• 최근상담일이 오늘로 갱신되었습니다.\n\n⚠ 실제 문자 발송은 아직 백엔드 미연결 상태입니다.\n알리고 + Vercel 연동 후 실제 발송됩니다.`);
+  if (typeof showGlobalToast === 'function') showGlobalToast('단체문자발송 반영중입니다');
+  else alert('단체문자발송 반영중입니다');
   console.log('[SMS 발송]', { company, message: msg, recipients: smsRecipients });
 
   closeModal('smsBulkModal');
   // 화면 새로고침
   if (typeof refreshAllViews === 'function') refreshAllViews();
   else if (typeof filterDB === 'function') filterDB();
+  // 집계 즉시 갱신
+  if (typeof renderSmsStats === 'function') { try { renderSmsStats(); } catch(_){} }
 }
 function openEditModal() {  }
 let nextId = customers.length+1;
