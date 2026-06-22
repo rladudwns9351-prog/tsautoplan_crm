@@ -37,6 +37,10 @@
   <div class="topbar">
     <div class="topbar-logo" onclick="(function(){var n=document.querySelector(&#39;.nav-item[onclick*=\&#39;dashboard\&#39;]&#39;);goPage(&#39;dashboard&#39;,n);})()" style="cursor:pointer;" title="대시보드로 이동">TS AUTO PLAN <span style="font-weight:400;font-size:12px;color:var(--text2);letter-spacing:1px;">/ 타소</span></div>
     <div class="topbar-right">
+      <button id="topBackupBtn" onclick="exportAllData()" title="전체 데이터 백업 (JSON 다운로드)" class="admin-only" style="align-items:center;gap:6px;padding:6px 12px;background:transparent;border:1px solid var(--border2);border-radius:18px;cursor:pointer;font-size:12px;color:var(--text2);font-family:inherit;transition:.2s;display:inline-flex;" onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)';this.style.color='var(--accent)';" onmouseout="this.style.background='transparent';this.style.borderColor='var(--border2)';this.style.color='var(--text2)';">
+        <span style="font-size:14px;">💾</span>
+        <span>데이터 저장</span>
+      </button>
       <button id="topFundingCheckBtn" onclick="openFundingCheckDropdown()" title="펀딩 체크" class="admin-only" style="align-items: center; gap: 6px; padding: 6px 12px; background: transparent; border: 1px solid var(--border2); border-radius: 18px; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; transition: 0.2s; display: inline-flex;" onmouseover="this.style.background=&#39;var(--bg3)&#39;;this.style.borderColor=&#39;var(--green)&#39;;this.style.color=&#39;var(--green)&#39;;" onmouseout="this.style.background=&#39;transparent&#39;;this.style.borderColor=&#39;var(--border2)&#39;;this.style.color=&#39;var(--text2)&#39;;">
         <span style="font-size:14px;">💰</span>
         <span>펀딩체크</span>
@@ -878,7 +882,7 @@
               <th style="min-width:90px;text-align:right;">등록일</th>
               <th id="sortHead_lastConsult" onclick="sortDB('lastConsult')" style="min-width:90px;text-align:right;cursor:pointer;user-select:none;">최근상담일<span style="color:var(--text3);font-size:9px;margin-left:3px;">⇅</span></th>
               <th id="sortHead_nextConsult" onclick="sortDB('nextConsult')" style="min-width:90px;text-align:right;cursor:pointer;user-select:none;">다음상담일<span style="color:var(--text3);font-size:9px;margin-left:3px;">⇅</span></th>
-              <th style="width:40px;text-align:center;">⭐</th>
+              <th style="width:40px;text-align:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--yellow)" stroke="var(--yellow)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle;"><path d="M12 2.4l2.95 6.18 6.8.62-5.13 4.5 1.53 6.65L12 17.05 5.85 20.35l1.53-6.65L2.25 9.2l6.8-.62z"/></svg></th>
               <th id="reclaimColHead" style="width: 52px; text-align: center;">회수</th>
             </tr>
             <!-- 컬럼별 인라인 필터 행 -->
@@ -5252,6 +5256,42 @@ function refreshDBSortHeaders() {
   if(lh) lh.innerHTML = '최근상담일'+sortArrowHtml('lastConsult');
   if(nh) nh.innerHTML = '다음상담일'+sortArrowHtml('nextConsult');
 }
+async function exportAllData(){
+  if(typeof currentRole!=='undefined' && currentRole!=='admin'){ alert('관리자 전용 기능입니다.'); return; }
+  const btn=document.getElementById('topBackupBtn');
+  const orig = btn ? btn.querySelector('span:last-child').textContent : '';
+  try{
+    if(btn){ btn.style.opacity='.6'; btn.style.pointerEvents='none'; btn.querySelector('span:last-child').textContent='저장 중...'; }
+    const [customers,fundings,staff,sms_logs]=await Promise.all([
+      sbFetch('customers?select=*&order=id.asc&limit=1000000'),
+      sbFetch('fundings?select=*&order=id.asc&limit=1000000'),
+      sbFetch('staff?select=*&order=id.asc&limit=1000000'),
+      sbFetch('sms_logs?select=*&limit=1000000')
+    ]);
+    const ts=new Date(), pad=n=>String(n).padStart(2,'0');
+    const stamp=ts.getFullYear()+pad(ts.getMonth()+1)+pad(ts.getDate())+'_'+pad(ts.getHours())+pad(ts.getMinutes());
+    const backup={
+      _meta:{ app:'TS AUTO PLAN', supabase_ref:'enlwenuqztgpflmbicdf', exported_at:ts.toISOString(), version:1,
+        counts:{ customers:customers.length, fundings:fundings.length, staff:staff.length, sms_logs:sms_logs.length } },
+      customers, fundings, staff, sms_logs
+    };
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='tsauto_backup_'+stamp+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    if(typeof showGlobalToast==='function') showGlobalToast('💾 백업 완료 · 고객 '+customers.length+'명 / 펀딩 '+fundings.length+'건');
+  }catch(e){
+    alert('백업 실패: '+(e&&e.message?e.message:e));
+  }finally{
+    if(btn){ btn.style.opacity=''; btn.style.pointerEvents=''; btn.querySelector('span:last-child').textContent=orig||'데이터 저장'; }
+  }
+}
+function starSvg(filled, size){
+  size = size || 18;
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="'+(filled?'var(--yellow)':'none')+'" stroke="var(--yellow)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle;"><path d="M12 2.4l2.95 6.18 6.8.62-5.13 4.5 1.53 6.65L12 17.05 5.85 20.35l1.53-6.65L2.25 9.2l6.8-.62z"/></svg>';
+}
 function renderDB(list) {
   window._dbRendered = list;
   const _preCheckedIds = new Set(Array.from(document.querySelectorAll('#dbBody .db-check:checked')).map(c=>c.dataset.id));
@@ -5310,8 +5350,8 @@ function renderDB(list) {
       '<td style="text-align:right;">'+latestConsultDate(c)+'</td>'+
       '<td style="text-align:right;">'+dDayLabel(getNextConsult(c))+'</td>'+
       '<td style="text-align:center;" onclick="event.stopPropagation()">'+
-        '<button onclick="toggleImportant('+c.id+')" style="background:none;border:none;cursor:pointer;font-size:16px;line-height:1;color:var(--yellow);" title="중요고객">'+
-          (c.important?'⭐':'☆')+
+        '<button onclick="toggleImportant('+c.id+')" style="background:none;border:none;cursor:pointer;padding:0;line-height:0;" title="중요고객">'+
+          starSvg(c.important)+
         '</button>'+
       '</td>'+
       (currentRole==='admin' && !c.retrieved ?
