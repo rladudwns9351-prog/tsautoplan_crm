@@ -227,6 +227,7 @@
                 <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
               </select>
               <span id="smsStatsBadge" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">발송 0회 / 총 0건</span>
+              <button class="admin-only" onclick="resetSmsLogs()" title="발송 이력(집계) 전체 초기화" style="padding:4px 10px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.35);border-radius:5px;color:var(--red);font-size:11px;font-family:inherit;cursor:pointer;">🗑 집계 초기화</button>
             </div>
           </div>
           <div id="smsStatsBody" style="padding:16px 18px;"><div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">해당 기간 발송 내역 없음</div></div>
@@ -9601,20 +9602,26 @@ async function getSmsLogs() {
   }
   return getSmsLogsLocal();
 }
-async function appendSmsLog(entry) {
-  if (typeof isSbConfigured==='function' && isSbConfigured()) {
-    try {
-      await sbFetch('sms_logs', 'POST', [{
-        sent_at: entry.sentAt, date_iso: entry.dateISO,
-        sender: entry.sender, sender_id: entry.senderId, company: entry.company,
-        msg_type: entry.msgType, bytes: entry.bytes, content: entry.content,
-        recipient_count: entry.recipientCount, recipients: entry.recipients||[],
-        result_summary: entry.resultSummary||{}, aligo_group_id: entry.aligoGroupId||null
-      }]);
-      if (typeof notifyDataChanged === 'function') notifyDataChanged('sms_logs');
-      return;
-    } catch(e) { console.warn('SMS 로그 저장 실패(로컬 폴백):', e); }
+// 발송 집계(이력) 전체 초기화 — 관리자 전용
+async function resetSmsLogs() {
+  if (currentRole !== 'admin') { showGlobalToast('관리자만 사용할 수 있습니다.'); return; }
+  if (!confirm('단체문자 발송 집계를 전부 초기화합니다.\n\n⚠️ 발송 이력(sms_logs)이 모두 삭제되며 복구할 수 없습니다.\n(고객 메모에 남은 발송 기록은 유지됩니다)\n\n계속할까요?')) return;
+  try {
+    if (typeof isSbConfigured === 'function' && isSbConfigured()) {
+      await sbFetch('sms_logs?sent_at=not.is.null', 'DELETE');
+    }
+    try { localStorage.removeItem(SMS_LOGS_KEY); } catch(_){}
+    _smsStatsRendered = false; _smsStatsSig = '';
+    const badge = document.getElementById('smsStatsBadge');
+    if (badge) badge.textContent = '발송 0회 / 총 0건';
+    await renderSmsStats();
+    if (typeof notifyDataChanged === 'function') notifyDataChanged('sms_logs');
+    showGlobalToast('✅ 발송 집계가 초기화되었습니다.');
+  } catch(e) {
+    showGlobalToast('⚠️ 초기화 실패: ' + (e.message||e));
   }
+}
+async function appendSmsLog(entry) {
   const logs = getSmsLogsLocal();
   logs.unshift(entry);
   if (logs.length > 1000) logs.length = 1000;
