@@ -3312,7 +3312,10 @@
 <div id="fundingCheckDropdown" style="display:none;position:fixed;top:54px;right:130px;width:480px;max-height:560px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:9999;overflow:hidden;display:none;flex-direction:column;">
   <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);">
     <span style="font-size:13px;font-weight:700;">💰 펀딩 체크</span>
-    <span id="fundingCheckCount" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">0건</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="markAllFundingCheckViewed(event)" title="목록 전체를 확인 처리" style="background:rgba(68,255,136,.12);border:1px solid rgba(68,255,136,.35);color:var(--green);font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;cursor:pointer;font-family:inherit;">✓ 모두 확인</button>
+      <span id="fundingCheckCount" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">0건</span>
+    </div>
   </div>
   <div id="fundingCheckList" style="flex:1;overflow-y:auto;max-height:500px;"></div>
 </div>
@@ -3559,6 +3562,14 @@ async function sbSaveFunding(f) {
     }
     throw e;
   }
+}
+// 펀딩체크 '확인/제거' 플래그만 대상 행에 PATCH (확정 저장과 동일한 신뢰 경로)
+// → POST upsert + 조용한 컬럼 제거 fallback을 거치지 않아 상태가 확실히 영구 저장됨
+async function sbSaveFundingCheckFlags(f) {
+  const patch = { check_viewed: f.checkViewed === true, check_dismissed: f.checkDismissed === true };
+  const r = await sbFetch(`fundings?id=eq.${f.id}`, 'PATCH', patch);
+  if (typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
+  return r;
 }
 async function sbUpdateFunding(f) {
   const row = fundingToRow(f);
@@ -11685,8 +11696,16 @@ function setFundingCheckViewed(id) {
   if (typeof isSbConfigured==='function' && isSbConfigured() && typeof fundingList!=='undefined') {
     const f = fundingList.find(x=>x.id===id);
     if (f && !f.checkViewed) {
-      f.checkViewed = true;
-      if (typeof sbSaveFunding==='function') sbSaveFunding(f).catch(e=>console.warn('펀딩체크(확인) 저장 실패:', e));
+      f.checkViewed = true; // 낙관적 반영
+      if (typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
+      if (typeof sbSaveFundingCheckFlags==='function') {
+        sbSaveFundingCheckFlags(f).catch(e=>{
+          f.checkViewed = false; // 실패 시 롤백 → 화면/DB 불일치 방지
+          if (typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
+          if (typeof renderFundingCheckDropdown === 'function') renderFundingCheckDropdown();
+          alert('확인 상태 저장 실패: '+(e.message||e)+'\n\nSupabase fundings 테이블에 check_viewed / check_dismissed 컬럼이 있는지 확인이 필요합니다.');
+        });
+      }
     }
     return;
   }
@@ -11786,6 +11805,36 @@ function loadMoreFundingCheck() {
   fundingCheckShowCount += fundingCheckPageSize;
   renderFundingCheckDropdown();
 }
+// 목록 전체를 한 번에 확인 처리 (DB 영구 저장)
+async function markAllFundingCheckViewed(ev) {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  if (typeof fundingList === 'undefined' || !Array.isArray(fundingList)) return;
+  const dismissed = (typeof getFundingCheckDismissed === 'function') ? getFundingCheckDismissed() : [];
+  const targets = fundingList.filter(f => !f.checkViewed && !dismissed.includes(f.id));
+  if (!targets.length) { renderFundingCheckDropdown(); refreshFundingCheckBadge(); return; }
+  if (!confirm(targets.length + '건을 모두 확인 처리할까요?')) return;
+  // 낙관적 반영
+  targets.forEach(f => { f.checkViewed = true; });
+  renderFundingCheckDropdown();
+  refreshFundingCheckBadge();
+  if (typeof isSbConfigured==='function' && isSbConfigured() && typeof sbSaveFundingCheckFlags==='function') {
+    try {
+      await Promise.all(targets.map(f => sbSaveFundingCheckFlags(f)));
+      if (typeof _dataSignature==='function') window._lastDataSig = _dataSignature();
+      if (typeof showGlobalToast==='function') showGlobalToast('✅ '+targets.length+'건 확인 처리 완료');
+    } catch(e) {
+      targets.forEach(f => { f.checkViewed = false; }); // 실패 시 롤백
+      renderFundingCheckDropdown();
+      refreshFundingCheckBadge();
+      alert('일괄 확인 저장 실패: '+(e.message||e)+'\n\nSupabase fundings 테이블에 check_viewed / check_dismissed 컬럼이 있는지 확인이 필요합니다.');
+    }
+  } else {
+    // 로컬 모드
+    targets.forEach(f => { if (typeof setFundingCheckViewed==='function') setFundingCheckViewed(f.id); });
+    renderFundingCheckDropdown();
+    refreshFundingCheckBadge();
+  }
+}
 // 목록에서 제거 (펀딩 데이터 자체는 보존, 알람 목록에서만 숨김)
 const FUNDING_CHECK_DISMISSED_KEY = 'fundingCheckDismissed_v1';
 function getFundingCheckDismissed() {
@@ -11800,8 +11849,15 @@ function dismissFundingCheck(fid, ev) {
   if (typeof isSbConfigured==='function' && isSbConfigured() && typeof fundingList!=='undefined') {
     const f = fundingList.find(x=>x.id===fid);
     if (f && !f.checkDismissed) {
-      f.checkDismissed = true;
-      if (typeof sbSaveFunding==='function') sbSaveFunding(f).catch(e=>console.warn('펀딩체크(제거) 저장 실패:', e));
+      f.checkDismissed = true; // 낙관적 반영
+      if (typeof sbSaveFundingCheckFlags==='function') {
+        sbSaveFundingCheckFlags(f).catch(e=>{
+          f.checkDismissed = false; // 실패 시 롤백
+          renderFundingCheckDropdown();
+          refreshFundingCheckBadge();
+          alert('제거 상태 저장 실패: '+(e.message||e)+'\n\nSupabase fundings 테이블에 check_viewed / check_dismissed 컬럼이 있는지 확인이 필요합니다.');
+        });
+      }
     }
   } else {
     const arr = getFundingCheckDismissed();
