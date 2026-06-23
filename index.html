@@ -3835,7 +3835,7 @@ function resetPageFilters(pageId) {
 }
 
 var dbViewMode = 'normal'; // 'normal' | 'gudb'
-function goDbNormal(navEl){ dbViewMode='normal'; goPage('db', navEl); }
+function goDbNormal(navEl){ dbViewMode='normal'; dbSortKey='lastConsult'; dbSortDir='desc'; goPage('db', navEl); }
 function goGudb(navEl){ dbViewMode='gudb'; goPage('db', navEl); }
 function goEnded(navEl){ dbViewMode='ended'; goPage('db', navEl); }
 function goPage(id, navEl, keepDbPage) {
