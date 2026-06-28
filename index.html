@@ -7832,6 +7832,14 @@ function syncSourceSelects() {
     dbSrc.innerHTML = '<option value="">전체 유입경로</option>'+
       sourceOptions.map(s=>'<option value="'+s+'"'+(s===prev?' selected':'')+'>'+s+'</option>').join('');
   }
+  // 유입경로 컬럼 필터도 즉시 동기화 (삭제/추가 후 새로고침 없이 반영)
+  const colSrc = document.getElementById('colF_source');
+  if(colSrc) {
+    const prev = colSrc.value;
+    const keep = sourceOptions.includes(prev) ? prev : '';
+    colSrc.innerHTML = '<option value="">전체</option>'+
+      sourceOptions.map(s=>'<option value="'+s+'"'+(s===keep?' selected':'')+'>'+s+'</option>').join('');
+  }
 }
 function fillSourceSelect(el, selected) {
   if(!el) return;
