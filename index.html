@@ -7779,13 +7779,24 @@ async function saveSourceOptions() {
     return;
   }
   try {
-    // 누락 방지: merge-duplicates 업서트로 확실히 반영 (삭제/추가/순서 모두)
-    const row = { key:'sourceOptions', value:[...sourceOptions], updated_at:new Date().toISOString() };
-    await sbFetch(APP_SETTINGS_TABLE, 'POST', [row], 'resolution=merge-duplicates,return=representation');
-    // 저장 검증
-    const check = await sbLoadSetting('sourceOptions');
-    if(!Array.isArray(check) || check.length !== sourceOptions.length) {
-      alert('저장 확인 실패: 서버 반영이 정상적이지 않습니다. 새로고침 후 재시도해주세요.');
+    const val = [...sourceOptions];
+    const nowIso = new Date().toISOString();
+    // 중복 행 대비: 동일 key 의 '모든' 행을 새 값으로 덮어쓰기
+    const patched = await sbFetch(
+      `${APP_SETTINGS_TABLE}?key=eq.sourceOptions`,
+      'PATCH',
+      { value: val, updated_at: nowIso }
+    );
+    if(!Array.isArray(patched) || patched.length === 0) {
+      // 행이 하나도 없을 때만 신규 삽입
+      await sbFetch(APP_SETTINGS_TABLE, 'POST', [{ key:'sourceOptions', value: val, updated_at: nowIso }]);
+    }
+    // 검증: 모든 행이 새 값으로 반영됐는지 확인
+    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.sourceOptions&select=value`);
+    const ok = Array.isArray(rows) && rows.length > 0 &&
+               rows.every(r => Array.isArray(r.value) && r.value.length === val.length);
+    if(!ok) {
+      alert('저장 확인 실패: 서버에 일부 행이 반영되지 않았습니다.\n(중복/권한 문제 가능 — 새로고침 후 재확인 필요)');
       return;
     }
     showGlobalToast('💾 유입경로가 영구 저장되었습니다.');
