@@ -9700,82 +9700,105 @@ async function appendSmsLog(entry) {
   try { localStorage.setItem(SMS_LOGS_KEY, JSON.stringify(logs)); } catch {}
 }
 
-// 발송 (현재는 검증만, 실제 발송은 백엔드 연동 후)
+// ============================================================================
+// [알리고 중계 설정] — Edge Function 배포 후 URL 입력
+// ============================================================================
+const ALIGO_RELAY_URL = 'https://enlwenuqztgpflmbicdf.supabase.co/functions/v1/aligo-relay';
+const SMS_TEST_MODE   = true;  // true=테스트발송(과금·실발송 없음) / 실발송 전환 시 false
+
+// 회사 → 발신번호 매핑 (알리고에 등록된 번호만)
+const SMS_SENDER_MAP = {
+  'TS AUTO PLAN / 타소': '15883621',
+  // '투데이즈카': '15775485',   // ← 알리고 발신번호 등록 후 주석 해제
+};
+
+// 단체문자 발송 (테스트 버전: 중계서버 호출 + 응답확인. 메모/로그 기록은 실발송 전환 시 추가)
 async function sendSmsBulk() {
-  // === 임시 차단: 실제 발송 막음 (기능 완성 후 이 2줄만 제거) ===
-  alert('단체문자발송 반영중입니다');
-  return;
-  // ----------------------------------------------------------------
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value;
   if (!company) { alert('발송 회사를 선택해주세요.'); return; }
+
+  const sender = SMS_SENDER_MAP[company] || '';
+  if (!sender) { alert(`'${company}'는 발신번호가 등록되어 있지 않습니다.\n현재는 TS AUTO PLAN(1588-3621)만 발송 가능합니다.`); return; }
+
   const body = document.getElementById('smsBody').value.trim();
   if (!body) { alert('메시지 본문을 입력해주세요.'); return; }
   if (smsRecipients.length === 0) { alert('수신자를 1명 이상 추가해주세요.'); return; }
-  // 야간 발송 차단
-  const h = new Date().getHours();
-  if (h >= 21 || h < 8) {
-    if (!confirm('현재 야간 시간대(21시~08시)입니다.\n광고문자 발송은 법적으로 제한됩니다.\n그래도 계속하시겠습니까?')) return;
-  }
-  const msg = composeSmsMessage();
-  const ok = confirm(`총 ${smsRecipients.length}명에게 발송합니다.\n\n계속할까요?`);
-  if (!ok) return;
+  if (smsRecipients.length > 1000) { alert(`수신자가 ${smsRecipients.length}명입니다.\n1회 최대 1,000명까지 가능합니다. 나눠서 발송해주세요.`); return; }
 
-  // === 발송 처리 (현재 백엔드 미연결 → 시뮬레이션) ===
-  // TODO: 실제 알리고 API 호출은 Vercel 서버리스 함수 연동 후
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  const dateISO = now.toISOString().slice(0,10);
-  const bytes = new Blob([msg]).size;
-  const msgType = bytes > 90 ? 'LMS' : 'SMS';
-
-  // 1) 각 고객(customerId 있는 건) 메모에 단체문자 발송 기록 추가
-  for (const r of smsRecipients) {
-    if (!r.customerId) continue;
-    const c = (typeof customers !== 'undefined') ? customers.find(x => x.id === r.customerId) : null;
-    if (!c) continue;
-    if (!Array.isArray(c.memos)) c.memos = [];
-    // 누적 횟수 계산: 기존 단체문자발송 메모 카운트 + 1
-    const prevCount = c.memos.filter(m => m.text && m.text.includes('단체문자발송')).length;
-    const newCount = prevCount + 1;
-    c.memos.unshift({
-      text: `[단체문자발송 #${newCount}] ${company} / ${msgType} / ${bytes}byte`,
-      author: currentUser,
-      date: dateStr,
-      dateISO: dateISO,
-      isSystem: false  // 일반 상담메모처럼 처리 → 최근상담일 갱신됨
-    });
-    // Supabase 저장
-    if (typeof isSbConfigured === 'function' && isSbConfigured()) {
-      try { await sbUpdateCustomer(c); } catch(e) { console.warn('메모 저장 실패:', e); }
+  // 야간 발송 차단 (실발송 시에만)
+  if (!SMS_TEST_MODE) {
+    const h = new Date().getHours();
+    if (h >= 21 || h < 8) {
+      if (!confirm('현재 야간 시간대(21시~08시)입니다.\n광고문자 발송은 법적으로 제한됩니다.\n그래도 계속하시겠습니까?')) return;
     }
   }
 
-  // 2) 발송 로그 저장 (대시보드 집계용)
-  await appendSmsLog({
-    sentAt: now.toISOString(),
-    dateISO: dateISO,
-    sender: currentUser,
-    senderId: currentUserId,
-    company: company,
-    recipientCount: smsRecipients.length,
-    msgType: msgType,
-    bytes: bytes,
-    content: msg,
-    recipients: smsRecipients.map(r => ({ name: r.name, phone: r.phone, customerId: r.customerId || null, result: 'pending' })),
-    resultSummary: { success: 0, reject: 0, fail: 0, pending: smsRecipients.length },
-    customerIds: smsRecipients.map(r => r.customerId).filter(Boolean),
-  });
+  if (!ALIGO_RELAY_URL) {
+    alert('중계서버 URL(ALIGO_RELAY_URL)이 설정되지 않았습니다.\nEdge Function 배포 후 코드 상단의 ALIGO_RELAY_URL에 입력하세요.');
+    return;
+  }
 
-  if (typeof showGlobalToast === 'function') showGlobalToast('단체문자발송 반영중입니다');
-  else alert('단체문자발송 반영중입니다');
-  console.log('[SMS 발송]', { company, message: msg, recipients: smsRecipients });
+  const msg = composeSmsMessage();
+  const bytes = new Blob([msg]).size;
+  const msgType = bytes > 90 ? 'LMS' : 'SMS';
 
-  closeModal('smsBulkModal');
-  // 화면 새로고침
-  if (typeof refreshAllViews === 'function') refreshAllViews();
-  else if (typeof filterDB === 'function') filterDB();
-  // 집계 즉시 갱신
-  if (typeof renderSmsStats === 'function') { try { renderSmsStats(); } catch(_){} }
+  const modeLabel = SMS_TEST_MODE ? '🧪 테스트 발송 (실제 발송·과금 없음)' : '⚠️ 실제 발송';
+  if (!confirm(`${modeLabel}\n\n회사: ${company}\n발신번호: ${sender}\n수신자: ${smsRecipients.length}명\n유형: ${msgType} (${bytes}byte)\n\n계속할까요?`)) return;
+
+  // 중계서버(Edge Function) 호출
+  let resp;
+  try {
+    const res = await fetch(ALIGO_RELAY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+      },
+      body: JSON.stringify({
+        action: 'send',
+        company: company,
+        sender: sender,
+        receivers: smsRecipients.map(r => r.phone),
+        msg: msg,
+        msg_type: msgType,
+        title: msgType === 'SMS' ? '' : company,
+        testmode: SMS_TEST_MODE ? true : false,
+      }),
+    });
+    resp = await res.json();
+  } catch (e) {
+    alert('중계서버 호출 실패:\n' + (e.message || e) + '\n\n(Edge Function 배포/URL/CORS를 확인하세요)');
+    return;
+  }
+
+  // 알리고 응답 처리
+  const success = String(resp.result_code ?? '') === '1';
+  if (success) {
+    alert(`✅ ${SMS_TEST_MODE ? '[테스트] ' : ''}발송 성공\n\n` +
+          `result_code: ${resp.result_code}\n` +
+          `success_cnt: ${resp.success_cnt ?? '-'}\n` +
+          `error_cnt: ${resp.error_cnt ?? '-'}\n` +
+          `msg_id: ${resp.msg_id ?? '-'}\n` +
+          `msg_type: ${resp.msg_type ?? '-'}` +
+          (SMS_TEST_MODE ? '\n\n※ 테스트모드: 실제 문자는 발송되지 않았습니다.' : ''));
+  } else {
+    alert(`❌ 발송 실패\n\n` +
+          `result_code: ${resp.result_code ?? resp.error ?? '-'}\n` +
+          `message: ${resp.message ?? resp.hint ?? '-'}\n\n` +
+          `(원본: ${JSON.stringify(resp).slice(0, 300)})`);
+  }
+  console.log('[SMS 발송결과]', { request: { company, sender, count: smsRecipients.length, msgType, testmode: SMS_TEST_MODE }, response: resp });
+
+  // ※ 테스트 단계: 고객메모/Supabase 로그는 기록하지 않음 (실데이터 오염 방지)
+  //    실발송(LIVE) 전환 시 → 메모 기록 + sms_logs(Supabase) 저장 로직을 이 위치에 추가합니다.
+
+  if (!SMS_TEST_MODE && success) {
+    closeModal('smsBulkModal');
+    if (typeof refreshAllViews === 'function') refreshAllViews();
+    else if (typeof filterDB === 'function') filterDB();
+    if (typeof renderSmsStats === 'function') { try { renderSmsStats(); } catch(_){} }
+  }
 }
 function openEditModal() {  }
 let nextId = customers.length+1;
