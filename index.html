@@ -3335,14 +3335,14 @@
 <script>
 const SB_URL  = 'https://enlwenuqztgpflmbicdf.supabase.co';
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVubHdlbnVxenRncGZsbWJpY2RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODk3MDEsImV4cCI6MjA5NDI2NTcwMX0.710F4DvgMZDjWVE2HJeCP40P-s8uZhTaOE0wgPSXaVM';
-async function sbFetch(path, method='GET', body=null) {
+async function sbFetch(path, method='GET', body=null, prefer=null) {
   const opts = {
     method,
     headers: {
       'apikey': SB_KEY,
       'Authorization': 'Bearer ' + SB_KEY,
       'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
+      'Prefer': prefer || 'return=representation',
     }
   };
   if(body) opts.body = JSON.stringify(body);
@@ -7135,6 +7135,7 @@ async function loadAppSettings() {
   if(Array.isArray(srcs) && srcs.length > 0) {
     sourceOptions.length = 0;
     srcs.forEach(s => sourceOptions.push(s));
+    sortSourceOptions();
     syncSourceSelects();
   }
   const stats = await sbLoadSetting('statusOptions');
@@ -7734,15 +7735,17 @@ function openSourceMgrModal() {
   renderSourceMgrList();
   document.getElementById('sourceMgrModal').classList.add('open');
 }
+function sortSourceOptions() {
+  sourceOptions.sort((a,b)=>String(a).localeCompare(String(b),'ko'));
+}
 function renderSourceMgrList() {
   const list = document.getElementById('sourceMgrList');
   if(!list) return;
+  sortSourceOptions();
   list.innerHTML = sourceOptions.map((s,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;">
       <span style="flex:1;font-size:13px;">${s}</span>
       <div style="display:flex;gap:4px;">
-        <button onclick="moveSource(${i},-1)" ${i===0?'disabled':''} style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:2px 7px;cursor:pointer;font-size:11px;">▲</button>
-        <button onclick="moveSource(${i},1)" ${i===sourceOptions.length-1?'disabled':''} style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:2px 7px;cursor:pointer;font-size:11px;">▼</button>
         <button onclick="deleteSource(${i})" style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:var(--red);border-radius:4px;padding:4px 9px;cursor:pointer;font-size:12px;">삭제</button>
       </div>
     </div>`).join('');
@@ -7754,6 +7757,7 @@ function addSourceOption() {
   if(!val) { inp.focus(); return; }
   if(sourceOptions.includes(val)) { showGlobalToast('이미 존재하는 유입경로입니다.'); return; }
   sourceOptions.push(val);
+  sortSourceOptions();
   inp.value = '';
   renderSourceMgrList();
   showGlobalToast('"'+val+'" 추가 완료');
@@ -7775,7 +7779,15 @@ async function saveSourceOptions() {
     return;
   }
   try {
-    await sbSaveSetting('sourceOptions', [...sourceOptions]);
+    // 누락 방지: merge-duplicates 업서트로 확실히 반영 (삭제/추가/순서 모두)
+    const row = { key:'sourceOptions', value:[...sourceOptions], updated_at:new Date().toISOString() };
+    await sbFetch(APP_SETTINGS_TABLE, 'POST', [row], 'resolution=merge-duplicates,return=representation');
+    // 저장 검증
+    const check = await sbLoadSetting('sourceOptions');
+    if(!Array.isArray(check) || check.length !== sourceOptions.length) {
+      alert('저장 확인 실패: 서버 반영이 정상적이지 않습니다. 새로고침 후 재시도해주세요.');
+      return;
+    }
     showGlobalToast('💾 유입경로가 영구 저장되었습니다.');
     closeModal('sourceMgrModal');
     if(typeof renderSourceCharts === 'function') renderSourceCharts();
@@ -7797,6 +7809,7 @@ async function saveStatusOptionsToServer() {
   }
 }
 function syncSourceSelects() {
+  sortSourceOptions();
   const fSrc = document.getElementById('f_source');
   if(fSrc) {
     const prev = fSrc.value;
