@@ -3227,11 +3227,7 @@
           <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;">발송 회사 <span style="color:var(--red);">*</span></div>
           <div style="display:flex;gap:10px;">
             <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:13px;">
-              <input type="radio" name="smsCompany" value="투데이즈카" onchange="updateSmsPreview()" style="accent-color:var(--accent);">
-              <span>투데이즈카</span>
-            </label>
-            <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:13px;">
-              <input type="radio" name="smsCompany" value="TS AUTO PLAN / 타소" onchange="updateSmsPreview()" style="accent-color:var(--accent);">
+              <input type="radio" name="smsCompany" value="TS AUTO PLAN / 타소" checked onchange="updateSmsPreview()" style="accent-color:var(--accent);">
               <span>TS AUTO PLAN / 타소</span>
             </label>
           </div>
@@ -9346,7 +9342,7 @@ function openSmsModal() {
   // 템플릿 옵션 로드
   loadSmsTemplateOptions();
   // 발송 회사 초기화
-  document.querySelectorAll('input[name="smsCompany"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="smsCompany"]').forEach(r => r.checked = (r.value === 'TS AUTO PLAN / 타소'));
   document.getElementById('smsBody').value = '';
   renderSmsRecipients();
   updateSmsPreview();
