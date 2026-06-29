@@ -11847,9 +11847,10 @@ function setFundingCheckViewed(id) {
     const f = fundingList.find(x=>x.id===id);
     if (f && !f.checkViewed) {
       f.checkViewed = true; // 낙관적 반영
+      window._lastLocalChange = Date.now(); // 폴링 stale 덮어쓰기 방지
       if (typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
       if (typeof sbSaveFundingCheckFlags==='function') {
-        sbSaveFundingCheckFlags(f).catch(e=>{
+        sbSaveFundingCheckFlags(f).then(()=>{ window._lastLocalChange = Date.now(); }).catch(e=>{
           f.checkViewed = false; // 실패 시 롤백 → 화면/DB 불일치 방지
           if (typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
           if (typeof renderFundingCheckDropdown === 'function') renderFundingCheckDropdown();
@@ -11964,12 +11965,14 @@ async function markAllFundingCheckViewed(ev) {
   if (!targets.length) { renderFundingCheckDropdown(); refreshFundingCheckBadge(); return; }
   if (!confirm(targets.length + '건을 모두 확인 처리할까요?')) return;
   // 낙관적 반영
+  window._lastLocalChange = Date.now(); // 폴링 stale 덮어쓰기 방지
   targets.forEach(f => { f.checkViewed = true; });
   renderFundingCheckDropdown();
   refreshFundingCheckBadge();
   if (typeof isSbConfigured==='function' && isSbConfigured() && typeof sbSaveFundingCheckFlags==='function') {
     try {
       await Promise.all(targets.map(f => sbSaveFundingCheckFlags(f)));
+      window._lastLocalChange = Date.now(); // 저장 완료 후 재설정
       if (typeof _dataSignature==='function') window._lastDataSig = _dataSignature();
       if (typeof showGlobalToast==='function') showGlobalToast('✅ '+targets.length+'건 확인 처리 완료');
     } catch(e) {
@@ -12000,8 +12003,9 @@ function dismissFundingCheck(fid, ev) {
     const f = fundingList.find(x=>x.id===fid);
     if (f && !f.checkDismissed) {
       f.checkDismissed = true; // 낙관적 반영
+      window._lastLocalChange = Date.now(); // 폴링 stale 덮어쓰기 방지
       if (typeof sbSaveFundingCheckFlags==='function') {
-        sbSaveFundingCheckFlags(f).catch(e=>{
+        sbSaveFundingCheckFlags(f).then(()=>{ window._lastLocalChange = Date.now(); }).catch(e=>{
           f.checkDismissed = false; // 실패 시 롤백
           renderFundingCheckDropdown();
           refreshFundingCheckBadge();
