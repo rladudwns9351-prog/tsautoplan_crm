@@ -119,9 +119,9 @@
       <div class="nav-item" onclick="goPage(&#39;localsearch&#39;,this)">
         업체 검색
       </div>
-      <div class="nav-item" onclick="goPage(&#39;vehiclestock&#39;,this)">
-        <span style="flex:1;">차량재고</span>
-        <span id="vstockNavBadge" style="display:none;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;line-height:18px;text-align:center;font-family:'JetBrains Mono',monospace;"></span>
+      <div class="nav-item" onclick="goPage(&#39;vehiclestock&#39;,this)" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>차량재고</span>
+        <span id="vstockNavBadge" style="display:none;align-items:center;gap:0;min-width:18px;height:18px;padding:0 7px;border-radius:9px;background:var(--green);color:#000;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;justify-content:center;"></span>
       </div>
       <div class="nav-item" onclick="goPage(&#39;calc33&#39;,this)">
         3.3% 계산기
@@ -157,6 +157,21 @@
             <div class="page-title">대시보드</div>
             <div class="page-sub" id="dateDisplay">2026년 5월 28일 목요일</div>
           </div>
+        </div>
+        <!-- ===== 영업자 상담 활동 집계 (관리자) ===== -->
+        <div class="admin-only" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <div style="font-size:15px;font-weight:700;">📊 영업자 상담 활동 집계</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <select id="actAggMode" onchange="onActivityPeriodChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;">
+                <option value="month">월간</option><option value="year">연간</option>
+              </select>
+              <select id="actAggYear" onchange="renderActivityDashboardTable()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+              <select id="actAggMonth" onchange="renderActivityDashboardTable()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+              <button onclick="exportActivityExcel()" class="btn btn-primary btn-sm" style="font-size:11px;">📥 엑셀</button>
+            </div>
+          </div>
+          <div id="actAggTable" style="overflow-x:auto;"></div>
         </div>
         <!-- ===== 관리자 기간 필터 (펀딩진행일자 기준) ===== -->
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
@@ -960,7 +975,7 @@
             <!-- 담당자 변경 (관리자 전용) -->
             
             <!-- 상태 변경 (관리자 + 직원 모두 드롭다운) -->
-            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val"><input type="text" id="detailCar" onblur="saveCustomerCar(this.value)" onkeydown="if(event.key===&#39;Enter&#39;) this.blur();" placeholder="관심차량 입력" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;text-align:right;max-width:170px;" onfocus="this.style.borderColor=&#39;var(--accent)&#39;" onblur_extra=""></span></div><div class="info-row" data-field="source" style="align-items:center;"><span class="info-key">유입경로</span><span class="info-val"><span id="detailSource">직영업</span><select id="detailSourceSel" class="admin-only" onchange="changeCustomerSource(this.value)" style="display:none;max-width:170px;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;text-overflow:ellipsis;"></select></span></div><div class="info-row" data-field="division" style="align-items:center;">
+            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val"><input type="text" id="detailCar" onblur="saveCustomerCar(this.value)" onkeydown="if(event.key===&#39;Enter&#39;) this.blur();" placeholder="관심차량 입력" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;text-align:right;max-width:170px;" onfocus="this.style.borderColor=&#39;var(--accent)&#39;" onblur_extra=""></span></div><div class="info-row" data-field="wishCar"><span class="info-key">희망차종</span><span class="info-val"><input type="text" id="detailWishCar" onblur="saveCustomerWishCar(this.value)" onkeydown="if(event.key==='Enter') this.blur();" placeholder="희망차종 입력" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;text-align:right;max-width:170px;" onfocus="this.style.borderColor='var(--accent)'"></span></div><div class="info-row" data-field="source" style="align-items:center;"><span class="info-key">유입경로</span><span class="info-val"><span id="detailSource">직영업</span><select id="detailSourceSel" class="admin-only" onchange="changeCustomerSource(this.value)" style="display:none;max-width:170px;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;text-overflow:ellipsis;"></select></span></div><div class="info-row" data-field="division" style="align-items:center;">
               <span class="info-key">구분</span>
               <span class="info-val">
                 <select id="detailDivisionSel" onchange="changeCustomerDivision(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="">선택 안 함</option><option value="개인">개인</option><option value="법인">법인</option><option value="개인사업자">개인사업자</option></select>
@@ -1028,6 +1043,13 @@
         </div>
         <!-- Right: Tabs -->
         <div>
+          <div id="activityCounterPanel" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">📞 상담 활동 체크 <span id="activityOwner" style="font-size:11px;font-weight:500;color:var(--text3);margin-left:4px;"></span></div>
+              <div style="font-size:11px;color:var(--text3);">버튼 = +1 · ✕ = 취소</div>
+            </div>
+            <div id="activityCounterBtns" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
+          </div>
           <div class="tabs">
             <div class="tab active" onclick="switchTab(&#39;memo&#39;,this)">상담 메모</div>
             <div class="tab" onclick="switchTab(&#39;files&#39;,this)">고객 서류</div>
@@ -3228,7 +3250,7 @@
           <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;">발송 회사 <span style="color:var(--red);">*</span></div>
           <div style="display:flex;gap:10px;">
             <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:13px;">
-              <input type="radio" name="smsCompany" value="TS AUTO PLAN / 타소" checked onchange="updateSmsPreview()" style="accent-color:var(--accent);">
+              <input type="radio" name="smsCompany" value="TS AUTO PLAN / 타소" onchange="updateSmsPreview()" style="accent-color:var(--accent);">
               <span>TS AUTO PLAN / 타소</span>
             </label>
           </div>
@@ -3254,10 +3276,6 @@
             <textarea id="smsBody" oninput="updateSmsPreview()" placeholder="(광고) 다음 줄부터 내용을 입력하세요..." style="width:100%;padding:12px 14px 12px 70px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:140px;line-height:1.6;"></textarea>
           </div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px;">💡 (광고) 표기는 법적 의무로 자동 추가됩니다 (수정불가)</div>
-          <label class="admin-only" style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--text2);cursor:pointer;background:rgba(255,153,68,.08);border:1px solid rgba(255,153,68,.3);border-radius:5px;padding:6px 10px;">
-            <input type="checkbox" id="smsSkipAdTag" onchange="updateSmsPreview()" style="accent-color:var(--accent);">
-            <span>🧪 [테스트용] 알리고 자동삽입 사용 — 본문에서 (광고)·080 제외 (실발송 테스트 후 제거 예정)</span>
-          </label>
         </div>
         <!-- 미리보기 -->
         <div>
@@ -3361,6 +3379,7 @@ function customerToRow(c) {
     name:             c.name,
     phone:            c.phone,
     car:              c.car,
+    wish_car:         c.wishCar || null,
     source:           c.source,
     division:         c.division   || null,
     memo_tag:         c.memoTag    || null,
@@ -3391,6 +3410,7 @@ function rowToCustomer(r) {
     name:            r.name,
     phone:           r.phone,
     car:             r.car,
+    wishCar:         r.wish_car || '',
     source:          r.source,
     division:        r.division  || '',
     memoTag:         r.memo_tag  || '',
@@ -3515,18 +3535,40 @@ async function sbLoadCustomers() {
 }
 async function sbSaveCustomer(c) {
   const row = customerToRow(c);
-  const result = await sbFetch('customers?on_conflict=id', 'POST', [row]);
-  const saved = Array.isArray(result) ? result[0] : result;
-  if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
-  return saved ? rowToCustomer(saved) : null;
+  try {
+    const result = await sbFetch('customers?on_conflict=id', 'POST', [row]);
+    const saved = Array.isArray(result) ? result[0] : result;
+    if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+    return saved ? rowToCustomer(saved) : null;
+  } catch(e) {
+    if(String(e?.message||e).includes('wish_car')) {
+      delete row.wish_car; // DB에 컬럼 아직 없으면 제외 후 재시도
+      const result = await sbFetch('customers?on_conflict=id', 'POST', [row]);
+      const saved = Array.isArray(result) ? result[0] : result;
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      return saved ? rowToCustomer(saved) : null;
+    }
+    throw e;
+  }
 }
 async function sbUpdateCustomer(c) {
   const row = customerToRow(c);
   delete row.id; // PATCH 시 id는 URL에 포함, body에서 제거
-  const result = await sbFetch(`customers?id=eq.${c.id}`, 'PATCH', row);
-  const saved = Array.isArray(result) ? result[0] : result;
-  if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
-  return saved ? rowToCustomer(saved) : null;
+  try {
+    const result = await sbFetch(`customers?id=eq.${c.id}`, 'PATCH', row);
+    const saved = Array.isArray(result) ? result[0] : result;
+    if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+    return saved ? rowToCustomer(saved) : null;
+  } catch(e) {
+    if(String(e?.message||e).includes('wish_car')) {
+      delete row.wish_car; // DB에 컬럼 아직 없으면 제외 후 재시도
+      const result = await sbFetch(`customers?id=eq.${c.id}`, 'PATCH', row);
+      const saved = Array.isArray(result) ? result[0] : result;
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      return saved ? rowToCustomer(saved) : null;
+    }
+    throw e;
+  }
 }
 async function sbDeleteCustomer(id) {
   const r = await sbFetch(`customers?id=eq.${id}`, 'DELETE');
@@ -3904,6 +3946,7 @@ function initApp(restorePage) {
   initDBFilters();
   initColFilters();
   filterDB();
+  if(typeof updateVstockBadge === 'function') updateVstockBadge();
   const targetPage = restorePage || 'dashboard';
   const adminOnlyPages = ['users','settings','reclaim'];
   const safePage = (currentRole !== 'admin' && adminOnlyPages.includes(targetPage)) ? 'dashboard' : targetPage;
@@ -3955,6 +3998,7 @@ function renderDashboard() {
     document.getElementById('adminDashboard').style.display = '';
     document.getElementById('staffDashboard').style.display = 'none';
     renderAdminDashboard();
+    if(typeof initActivityDashboard === 'function') initActivityDashboard();
   } else {
     document.getElementById('adminDashboard').style.display = 'none';
     document.getElementById('staffDashboard').style.display = '';
@@ -4789,6 +4833,8 @@ function openDetail(id) {
   document.getElementById('detailName').textContent = c.name;
   document.getElementById('detailPhone').value = c.phone || '';
   document.getElementById('detailCar').value = c.car || '';
+  { const _wc = document.getElementById('detailWishCar'); if(_wc) _wc.value = c.wishCar || ''; }
+  if(typeof loadActivityForCustomer === 'function') loadActivityForCustomer(c.id);
   document.getElementById('detailSource').textContent = c.source;
   fillSourceSelect(c.source || '');
   fillDivisionSelect(document.getElementById('detailDivisionSel'), c.division || '');
@@ -5064,6 +5110,216 @@ async function saveCustomerCar(newVal) {
   document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
   refreshAllViews();
   renderMemos();
+}
+// 희망차종 자동저장 (관리목적 · 메모 히스토리 남기지 않음 · 빈값=삭제 허용)
+async function saveCustomerWishCar(newVal) {
+  if(!currentCustomer) return;
+  window._lastLocalChange = Date.now();
+  const cleaned = (newVal||'').trim();
+  if(cleaned === (currentCustomer.wishCar||'')) return; // 변경 없음
+  const oldVal = currentCustomer.wishCar || '';
+  currentCustomer.wishCar = cleaned;
+  if(isSbConfigured()) {
+    try { await sbUpdateCustomer(currentCustomer); showGlobalToast('✓ 희망차종이 저장되었습니다.'); }
+    catch(e) {
+      showGlobalToast('⚠️ 저장 실패: ' + (e.message||e));
+      currentCustomer.wishCar = oldVal; // 롤백
+      const el = document.getElementById('detailWishCar'); if(el) el.value = oldVal;
+    }
+  }
+}
+// ============ 상담 활동 카운터 (activity_logs) ============
+// 실적 귀속 = 고객 담당자(assign) 기준. 누가 눌렀든 담당자 실적으로 집계.
+const ACTIVITY_TYPES  = ['통화','견적제공','카톡문자','심사진행','방문'];
+const ACTIVITY_LABELS = { '통화':'통화','견적제공':'견적제공','카톡문자':'카톡/문자','심사진행':'심사진행','방문':'방문' };
+let _activityCache = []; // 현재 상세 고객의 활동 로그 행 배열
+
+function _todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+async function loadActivityForCustomer(customerId) {
+  _activityCache = [];
+  if(!isSbConfigured() || customerId == null) { renderActivityCounter(); return; }
+  try {
+    const rows = await sbFetch('activity_logs?customer_id=eq.' + customerId + '&order=id.asc&select=*');
+    _activityCache = Array.isArray(rows) ? rows : [];
+  } catch(e) { console.warn('활동로그 로드 실패:', e); _activityCache = []; }
+  renderActivityCounter();
+}
+function renderActivityCounter() {
+  const box = document.getElementById('activityCounterBtns');
+  const owner = document.getElementById('activityOwner');
+  if(!box) return;
+  const staff = (currentCustomer && currentCustomer.assign) ? currentCustomer.assign : (currentUser || '');
+  if(owner) owner.textContent = staff ? '(' + staff + ' 실적)' : '';
+  box.innerHTML = ACTIVITY_TYPES.map(t => {
+    const cnt = _activityCache.filter(a => a.activity_type === t).length;
+    const label = ACTIVITY_LABELS[t] || t;
+    const xBtn = cnt > 0
+      ? `<div onclick="event.stopPropagation();unbumpActivity('${t}')" title="취소(-1)" style="position:absolute;top:3px;right:4px;font-size:11px;color:var(--text3);padding:0 4px;border-radius:3px;line-height:1.4;transition:.15s;" onmouseover="this.style.color='var(--red)';this.style.background='rgba(255,68,68,.15)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">✕</div>`
+      : '';
+    return `<div onclick="bumpActivity('${t}')" style="position:relative;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:12px 4px 8px;text-align:center;cursor:pointer;transition:.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+        ${xBtn}
+        <div style="font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:${cnt>0?'var(--accent)':'var(--text3)'};line-height:1;">${cnt}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:5px;">${label}</div>
+      </div>`;
+  }).join('');
+}
+async function bumpActivity(type) {
+  if(!currentCustomer) return;
+  if(!ACTIVITY_TYPES.includes(type)) return;
+  if(!isSbConfigured()) { showGlobalToast('⚠️ DB 연결이 필요합니다.'); return; }
+  const staff = currentCustomer.assign || currentUser || '';
+  if(!staff) { showGlobalToast('⚠️ 담당자가 지정되어야 집계됩니다.'); return; }
+  window._lastLocalChange = Date.now();
+  const row = {
+    customer_id: currentCustomer.id,
+    staff: staff,
+    activity_type: type,
+    log_date: _todayStr(),
+    created_by: currentUser || ''
+  };
+  try {
+    const res = await sbFetch('activity_logs', 'POST', [row]);
+    const saved = Array.isArray(res) ? res[0] : res;
+    if(saved) _activityCache.push(saved);
+    renderActivityCounter();
+  } catch(e) {
+    showGlobalToast('⚠️ 활동 저장 실패: ' + (e.message||e));
+  }
+}
+async function unbumpActivity(type) {
+  if(!currentCustomer) return;
+  if(!isSbConfigured()) return;
+  // 이 고객·해당 항목의 가장 최근(=id 최대) 1건 삭제
+  const matches = _activityCache.filter(a => a.activity_type === type);
+  if(!matches.length) return;
+  const last = matches.reduce((m,a) => (a.id > m.id ? a : m), matches[0]);
+  window._lastLocalChange = Date.now();
+  try {
+    await sbFetch('activity_logs?id=eq.' + last.id, 'DELETE');
+    _activityCache = _activityCache.filter(a => a.id !== last.id);
+    renderActivityCounter();
+  } catch(e) {
+    showGlobalToast('⚠️ 취소 실패: ' + (e.message||e));
+  }
+}
+// ============ 관리자 대시보드 · 영업자 활동 집계 ============
+let _allActivityCache = [];
+async function initActivityDashboard() {
+  const ySel = document.getElementById('actAggYear');
+  const mSel = document.getElementById('actAggMonth');
+  if(ySel && ySel.options.length === 0) {
+    const ty = new Date().getFullYear();
+    let h = ''; for(let y=ty; y>=ty-3; y--) h += `<option value="${y}">${y}년</option>`;
+    ySel.innerHTML = h; ySel.value = String(ty); // 기본=올해
+  }
+  if(mSel && mSel.options.length === 0) {
+    let h = ''; for(let m=1; m<=12; m++) h += `<option value="${m}">${m}월</option>`;
+    mSel.innerHTML = h; mSel.value = String(new Date().getMonth()+1); // 기본=이번달
+  }
+  if(isSbConfigured()) {
+    try { const r = await sbFetch('activity_logs?order=id.asc&select=*'); _allActivityCache = Array.isArray(r)?r:[]; }
+    catch(e) { console.warn('활동집계 로드 실패:', e); _allActivityCache = []; }
+  }
+  onActivityPeriodChange();
+}
+function onActivityPeriodChange() {
+  const mode = document.getElementById('actAggMode')?.value || 'month';
+  const mSel = document.getElementById('actAggMonth');
+  if(mSel) mSel.style.display = (mode === 'year') ? 'none' : '';
+  renderActivityDashboardTable();
+}
+function _filteredActivityRows() {
+  const mode = document.getElementById('actAggMode')?.value || 'month';
+  const y = document.getElementById('actAggYear')?.value;
+  const m = document.getElementById('actAggMonth')?.value;
+  return _allActivityCache.filter(a => {
+    if(!a.log_date) return false;
+    const p = String(a.log_date).split('-');
+    if(String(parseInt(p[0])) !== String(parseInt(y))) return false;
+    if(mode === 'month' && String(parseInt(p[1])) !== String(parseInt(m))) return false;
+    return true;
+  });
+}
+function _aggregateActivity(rows) {
+  const set = new Set();
+  if(typeof staffList !== 'undefined') staffList.filter(u=>u.active && u.role==='staff').forEach(u=>set.add(u.name));
+  rows.forEach(a => { if(a.staff) set.add(a.staff); });
+  const staffs = [...set].sort((a,b)=>String(a).localeCompare(String(b),'ko'));
+  const agg = {};
+  staffs.forEach(s => { agg[s] = {}; ACTIVITY_TYPES.forEach(t => agg[s][t] = 0); });
+  rows.forEach(a => { if(agg[a.staff] && ACTIVITY_TYPES.includes(a.activity_type)) agg[a.staff][a.activity_type]++; });
+  return { staffs, agg };
+}
+function renderActivityDashboardTable() {
+  const box = document.getElementById('actAggTable'); if(!box) return;
+  const rows = _filteredActivityRows();
+  const { staffs, agg } = _aggregateActivity(rows);
+  if(!staffs.length) {
+    box.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:24px;">해당 기간 활동 데이터가 없습니다.</div>';
+    return;
+  }
+  const colTot = {}; ACTIVITY_TYPES.forEach(t => colTot[t] = 0);
+  let grand = 0;
+  let body = '';
+  staffs.forEach(s => {
+    let rowTot = 0;
+    let tds = '';
+    ACTIVITY_TYPES.forEach(t => {
+      const v = agg[s][t]; colTot[t] += v; rowTot += v;
+      tds += `<td style="text-align:center;padding:9px 8px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;${v>0?'':'color:var(--text3);'}">${v}</td>`;
+    });
+    grand += rowTot;
+    body += `<tr><td style="padding:9px 12px;border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap;">${s}</td>${tds}<td style="text-align:center;padding:9px 8px;border-bottom:1px solid var(--border);font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent);">${rowTot}</td></tr>`;
+  });
+  let footTds = '';
+  ACTIVITY_TYPES.forEach(t => { footTds += `<td style="text-align:center;padding:9px 8px;font-weight:700;font-family:'JetBrains Mono',monospace;">${colTot[t]}</td>`; });
+  const head = ACTIVITY_TYPES.map(t => `<th style="padding:9px 8px;font-size:11px;color:var(--text2);font-weight:600;text-align:center;white-space:nowrap;">${ACTIVITY_LABELS[t]||t}</th>`).join('');
+  box.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:520px;">
+    <thead><tr style="border-bottom:1px solid var(--border2);">
+      <th style="padding:9px 12px;font-size:11px;color:var(--text2);font-weight:600;text-align:left;">영업자</th>${head}
+      <th style="padding:9px 8px;font-size:11px;color:var(--text2);font-weight:600;text-align:center;">합계</th>
+    </tr></thead>
+    <tbody>${body}</tbody>
+    <tfoot><tr style="border-top:2px solid var(--border2);background:var(--bg3);">
+      <td style="padding:9px 12px;font-weight:700;">합계</td>${footTds}
+      <td style="text-align:center;padding:9px 8px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent);">${grand}</td>
+    </tr></tfoot>
+  </table>`;
+}
+function exportActivityExcel() {
+  if(typeof XLSX === 'undefined') { showGlobalToast('⚠️ 엑셀 모듈 로드 실패'); return; }
+  const mode = document.getElementById('actAggMode')?.value || 'month';
+  const y = document.getElementById('actAggYear')?.value;
+  const m = document.getElementById('actAggMonth')?.value;
+  const periodLabel = (mode === 'year') ? `${y}년` : `${y}년${m}월`;
+  const rows = _filteredActivityRows();
+  const { staffs, agg } = _aggregateActivity(rows);
+  // 시트1: 요약 (영업자 × 항목)
+  const aoa1 = [['영업자', ...ACTIVITY_TYPES.map(t=>ACTIVITY_LABELS[t]||t), '합계']];
+  const colTot = {}; ACTIVITY_TYPES.forEach(t => colTot[t] = 0); let grand = 0;
+  staffs.forEach(s => {
+    let rt = 0; const r = [s];
+    ACTIVITY_TYPES.forEach(t => { const v = agg[s][t]; r.push(v); colTot[t]+=v; rt+=v; });
+    r.push(rt); grand += rt; aoa1.push(r);
+  });
+  aoa1.push(['합계', ...ACTIVITY_TYPES.map(t=>colTot[t]), grand]);
+  // 시트2: 일자별 상세 (raw)
+  const cmap = {}; if(typeof customers !== 'undefined') customers.forEach(c => cmap[c.id] = c.name);
+  const aoa2 = [['날짜','영업자','항목','고객명','입력자','입력시각']];
+  rows.slice().sort((a,b)=> String(a.log_date).localeCompare(String(b.log_date)) || (a.id-b.id)).forEach(a => {
+    aoa2.push([
+      a.log_date, a.staff, ACTIVITY_LABELS[a.activity_type]||a.activity_type,
+      cmap[a.customer_id] || ('#'+a.customer_id), a.created_by || '',
+      a.created_at ? new Date(a.created_at).toLocaleString('ko-KR') : ''
+    ]);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa1), '요약');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa2), '일자별상세');
+  XLSX.writeFile(wb, `영업자활동집계_${periodLabel}.xlsx`);
 }
 async function changeCustomerMemoTag(newVal) {
   if(!currentCustomer) return;
@@ -6186,6 +6442,14 @@ async function saveFunding() {
     }
   }
   let saveSuccess = false;
+  // 펀딩체크 확인/제거 상태 보존 (수정 폼에 없는 필드라 누락 시 false로 덮어써지는 것 방지)
+  if(editingFundingId) {
+    const _prevF = fundingList.find(f => f.id === editingFundingId);
+    if(_prevF) {
+      entry.checkViewed    = _prevF.checkViewed    === true;
+      entry.checkDismissed = _prevF.checkDismissed === true;
+    }
+  }
   try {
     let saved;
     if(isSbConfigured()) {
@@ -7113,18 +7377,10 @@ function goPaginate(key, n) {
 function resetPage(key) { setPage(key, 1); }
 const APP_SETTINGS_TABLE = 'app_settings';
 async function sbLoadSetting(key) {
-  // 중복 행이 있어도 '가장 최근' 값을 읽음 (오래된 행으로 되돌아가는 문제 방지)
   try {
-    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}&select=value,updated_at&order=updated_at.desc.nullslast&limit=1`);
-    if(Array.isArray(rows) && rows.length) return rows[0].value;
-    return null;
-  } catch(e) {
-    // 정렬 쿼리 미지원 등 실패 시 단순 조회로 폴백
-    try {
-      const rows2 = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}&select=value`);
-      return (rows2 && rows2[0]) ? rows2[0].value : null;
-    } catch(_) { return null; }
-  }
+    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}&select=value`);
+    return (rows && rows[0]) ? rows[0].value : null;
+  } catch(e) { return null; }
 }
 async function sbSaveSetting(key, value) {
   const row = { key, value, updated_at: new Date().toISOString() };
@@ -7280,8 +7536,11 @@ async function loadData() {
     const dbStaff = await sbLoadStaff();
     staffList.length = 0; // 하드코딩 초기값 완전 제거
     dbStaff.forEach(s => staffList.push(s));
+    // 차량재고 배지용 캐시 (관리자만)
+    if(currentRole === 'admin') {
+      try { _vstockCache = await sbLoadVehicleStock(); } catch(_){}
+    }
     try { await loadAppSettings(); } catch(e) { console.warn('settings 로드 실패:', e); }
-    try { _vstockCache = await sbLoadVehicleStock(); updateVstockNavBadge(); } catch(e) { console.warn('vstock 로드 실패:', e); }
     syncAllAssignSelects();
     // 투데이즈카 이관 DB 직영업 오표기 정정 (관리자 1회)
     try { await revertTodayscarDirectMark(); } catch(e) { console.warn('이관DB 정정 실패:', e); }
@@ -7351,6 +7610,8 @@ function _rerenderCurrentPage(syncType) {
       else if(typeof renderDBStats === 'function') renderDBStats();
     }
     if(typeof refreshAlarmBadge === 'function') refreshAlarmBadge(); if(typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
+    if(typeof updateVstockBadge === 'function') updateVstockBadge();
+    if(document.getElementById('page-vehiclestock')?.classList.contains('active') && typeof renderVehicleStockList === 'function') renderVehicleStockList();
     if(document.getElementById('fundingCheckDropdown')?.style.display === 'flex' && typeof renderFundingCheckDropdown === 'function') renderFundingCheckDropdown();
   } catch(e) {
     console.warn('rerender skipped', e);
@@ -7391,6 +7652,13 @@ function _dataSignature() {
   if(typeof fundingList !== 'undefined' && Array.isArray(fundingList)) {
     for(const f of fundingList) {
       s += '#' + f.id + ':' + (f.checkViewed?1:0) + ':' + (f.checkDismissed?1:0) + ':' + (f.confirmed?1:0);
+    }
+  }
+  // 차량재고 상태 변화 감지 (신규요청/확인/완료)
+  if(typeof _vstockCache !== 'undefined' && Array.isArray(_vstockCache)) {
+    s += 'V' + _vstockCache.length;
+    for(const v of _vstockCache) {
+      s += '$' + v.id + ':' + (v.viewed?1:0) + ':' + (v.status||'');
     }
   }
   return s;
@@ -7741,7 +8009,14 @@ function renderStaffStatCard(u, uDB) {
 let sourceOptions = ['네이버','인스타그램','카카오','지인소개','기타'];
 let divisionOptions = ['개인','법인','개인사업자'];
 let memoTagOptions = ['조건맞으면즉시','4대보험가입 직장인'];
-// ===== [관리 목록] 드래그 정렬 + 이름변경 공통 =====
+function openSourceMgrModal() {
+  renderSourceMgrList();
+  document.getElementById('sourceMgrModal').classList.add('open');
+}
+function sortSourceOptions() {
+  sourceOptions.sort((a,b)=>String(a).localeCompare(String(b),'ko'));
+}
+// ============ 항목 관리 공통: 드래그 정렬 + 인라인 이름변경 (mgr*) ============
 let _mgrDrag = { kind: null, from: -1 };
 function _mgrArr(kind){ return kind==='status'?statusOptions : kind==='source'?sourceOptions : kind==='memotag'?memoTagOptions : null; }
 function _mgrRerender(kind){
@@ -7760,7 +8035,7 @@ function mgrDragEnd(ev){
   if(row) row.style.opacity='';
 }
 function mgrDragOver(ev){ ev.preventDefault(); try{ ev.dataTransfer.dropEffect='move'; }catch(_){} }
-function mgrDrop(kind, to, ev){
+async function mgrDrop(kind, to, ev){
   ev.preventDefault(); ev.stopPropagation();
   if(_mgrDrag.kind !== kind){ _mgrDrag={kind:null,from:-1}; return; }
   const from=_mgrDrag.from; _mgrDrag={kind:null,from:-1};
@@ -7769,6 +8044,15 @@ function mgrDrop(kind, to, ev){
   const [moved]=arr.splice(from,1);
   arr.splice(to,0,moved);
   _mgrRerender(kind);
+  // 순서 영구 저장
+  if(typeof isSbConfigured === 'function' && isSbConfigured()){
+    try {
+      window._lastLocalChange = Date.now();
+      if(kind==='status') await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
+      else if(kind==='source') await sbSaveSetting('sourceOptions', [...sourceOptions]);
+      else if(kind==='memotag') await sbSaveSetting('memoTagOptions', [...memoTagOptions]);
+    } catch(e){ console.warn('순서 저장 실패:', e); }
+  }
 }
 // 유입경로 이름변경 (사용 중 고객 source 도 함께 갱신)
 async function mgrRenameSource(i, val){
@@ -7819,12 +8103,13 @@ async function mgrRenameMemoTag(i, val){
     showGlobalToast('"'+old+'" → "'+val+'" 변경 완료');
   }
 }
-function openSourceMgrModal() {
-  renderSourceMgrList();
-  document.getElementById('sourceMgrModal').classList.add('open');
-}
-function sortSourceOptions() {
-  sourceOptions.sort((a,b)=>String(a).localeCompare(String(b),'ko'));
+// 상태 색상 실시간 미리보기 (피커 드래그 중 — 목록 재렌더 안 함)
+function mgrColorPreview(id, color) {
+  const opt = statusOptions.find(o => o.id === id);
+  if(!opt) return;
+  opt.color = color;
+  const badge = document.getElementById('mgrBadge_' + id);
+  if(badge) badge.innerHTML = statusBadge(opt.label);
 }
 function renderSourceMgrList() {
   const list = document.getElementById('sourceMgrList');
@@ -7843,6 +8128,7 @@ function addSourceOption() {
   if(!val) { inp.focus(); return; }
   if(sourceOptions.includes(val)) { showGlobalToast('이미 존재하는 유입경로입니다.'); return; }
   sourceOptions.push(val);
+  sortSourceOptions();
   inp.value = '';
   renderSourceMgrList();
   showGlobalToast('"'+val+'" 추가 완료');
@@ -7897,34 +8183,15 @@ async function saveStatusOptionsToServer() {
     return;
   }
   try {
-    const val = JSON.parse(JSON.stringify(statusOptions));
-    const nowIso = new Date().toISOString();
-    // 중복 행 대비: 동일 key 의 '모든' 행을 새 값으로 덮어쓰기 (삭제 반영 보장)
-    const patched = await sbFetch(
-      `${APP_SETTINGS_TABLE}?key=eq.statusOptions`,
-      'PATCH',
-      { value: val, updated_at: nowIso }
-    );
-    if(!Array.isArray(patched) || patched.length === 0) {
-      await sbFetch(APP_SETTINGS_TABLE, 'POST', [{ key:'statusOptions', value: val, updated_at: nowIso }]);
-    }
-    // 검증: 모든 행이 새 길이(삭제 반영)로 바뀌었는지 확인
-    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.statusOptions&select=value`);
-    const ok = Array.isArray(rows) && rows.length > 0 &&
-               rows.every(r => Array.isArray(r.value) && r.value.length === val.length);
-    if(!ok) {
-      alert('저장 확인 실패: 서버에 반영되지 않았습니다.\n(중복/권한 문제 가능 — 새로고침 후 재확인 필요)');
-      return;
-    }
-    syncAllStatusSelects();
-    if(typeof notifyDataChanged === 'function') notifyDataChanged('statusOptions');
-    showGlobalToast('💾 상태 항목이 저장되었습니다. 전 화면에 반영됨');
+    await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
+    showGlobalToast('💾 상태 항목이 영구 저장되었습니다.');
     closeModal('statusMgrModal');
   } catch(e) {
     alert('저장 실패: ' + e.message);
   }
 }
 function syncSourceSelects() {
+  sortSourceOptions();
   const fSrc = document.getElementById('f_source');
   if(fSrc) {
     const prev = fSrc.value;
@@ -8327,18 +8594,6 @@ function syncAllStatusSelects() {
     dSt.value=v;
     applyDetailStatusColor(v);
   }
-  // 상단 빠른 상태필터 버튼 재렌더 (상태 추가/삭제/색상 즉시 반영)
-  const _qb = document.getElementById('statusQuickBtns');
-  if(_qb) {
-    const _cur = document.getElementById('dbStatusFilter') ? document.getElementById('dbStatusFilter').value : '';
-    _qb.innerHTML = '<button onclick="quickStatusFilter(\'\')" class="quick-btn" data-val="" style="padding:4px 12px;font-size:11px;border-radius:999px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">전체</button>' +
-      statusOptions.map(o=>'<button onclick="quickStatusFilter(\''+o.label+'\')" class="quick-btn" data-val="'+o.label+'" style="padding:4px 12px;font-size:11px;border-radius:999px;border:1px solid '+o.color+'22;background:'+hexToRgba(o.color,0.1)+';color:'+o.color+';cursor:pointer;">'+o.label+'</button>').join('');
-    _qb.querySelectorAll('.quick-btn').forEach(b=>{
-      const active = b.dataset.val === _cur;
-      b.style.fontWeight = active ? '700' : '400';
-      b.style.boxShadow = active ? '0 0 0 2px currentColor' : 'none';
-    });
-  }
   renderStatusOptionList();
   initDBFilters();
   refreshAllViews();
@@ -8394,7 +8649,7 @@ function deleteStatusOption(id) {
   syncAllStatusSelects();
   showGlobalToast(`"${opt.label}" 상태가 삭제되었습니다.`);
 }
-function updateStatusLabel(id, newLabel) {
+async function updateStatusLabel(id, newLabel) {
   newLabel = newLabel.trim();
   if(!newLabel) return;
   const opt = statusOptions.find(o=>o.id===id);
@@ -8405,10 +8660,33 @@ function updateStatusLabel(id, newLabel) {
     showGlobalToast('이미 존재하는 상태명입니다.');
     return;
   }
-  customers.forEach(c=>{ if(c.status===oldLabel) c.status=newLabel; });
+  // 1) 메모리 즉시 반영
+  window._lastLocalChange = Date.now();
+  const affected = customers.filter(c=>c.status===oldLabel);
+  affected.forEach(c=>{ c.status=newLabel; });
   opt.label = newLabel;
   syncAllStatusSelects();
-  showGlobalToast(`"${oldLabel}" → "${newLabel}" 변경 완료`);
+  if(typeof filterDB==='function') filterDB();
+  // 2) DB 영구 반영: 기존 status인 고객 전체를 새 이름으로 일괄 PATCH + statusOptions 저장
+  if(isSbConfigured()) {
+    try {
+      if(affected.length > 0) {
+        await sbFetch('customers?status=eq.'+encodeURIComponent(oldLabel), 'PATCH', { status: newLabel });
+      }
+      await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
+      window._lastLocalChange = Date.now();
+      showGlobalToast(`"${oldLabel}" → "${newLabel}" 변경 완료 (DB ${affected.length}건 반영)`);
+    } catch(e) {
+      // 실패 시 롤백 (화면/DB 불일치 방지)
+      affected.forEach(c=>{ c.status=oldLabel; });
+      opt.label = oldLabel;
+      syncAllStatusSelects();
+      if(typeof filterDB==='function') filterDB();
+      showGlobalToast('⚠️ DB 반영 실패, 변경 취소: '+(e.message||e));
+    }
+  } else {
+    showGlobalToast(`"${oldLabel}" → "${newLabel}" 변경 완료 (로컬)`);
+  }
 }
 function updateStatusColor(id, color) {
   const opt = statusOptions.find(o=>o.id===id);
@@ -9173,7 +9451,7 @@ function mgrAddStatus() {
   renderStatusMgrList();
   showGlobalToast('"' + label + '" 상태가 추가되었습니다.');
 }
-async function mgrUpdateLabel(id, newLabel) {
+function mgrUpdateLabel(id, newLabel) {
   newLabel = newLabel.trim();
   if(!newLabel) { renderStatusMgrList(); return; }
   const opt = statusOptions.find(o => o.id === id);
@@ -9183,43 +9461,19 @@ async function mgrUpdateLabel(id, newLabel) {
     renderStatusMgrList(); return;
   }
   const oldLabel = opt.label;
-  const cnt = customers.filter(c => c.status === oldLabel).length;
-  // 1) 메모리 반영
   customers.forEach(c => { if(c.status === oldLabel) c.status = newLabel; });
   opt.label = newLabel;
   syncAllStatusSelects();
   renderStatusMgrList();
-  // 2) DB 영구 반영: 해당 상태 고객 일괄 변경 + 상태목록 저장
-  if(typeof isSbConfigured === 'function' && isSbConfigured()) {
-    try {
-      window._lastLocalChange = Date.now();
-      if(cnt > 0) await sbFetch(`customers?status=eq.${encodeURIComponent(oldLabel)}`, 'PATCH', { status: newLabel }, 'return=minimal');
-      await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
-      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
-      showGlobalToast('"' + oldLabel + '" → "' + newLabel + '" 변경 완료 (고객 ' + cnt + '건 DB 반영)');
-    } catch(e) {
-      showGlobalToast('⚠️ DB 반영 실패: ' + (e.message || e));
-    }
-  } else {
-    showGlobalToast('"' + oldLabel + '" → "' + newLabel + '" 변경 완료');
-  }
-}
-function mgrColorPreview(id, color) {
-  // 색상 피커 드래그 중 실시간 미리보기 (가벼운 갱신: 목록 재렌더 안 함 → 피커 유지)
-  const opt = statusOptions.find(o => o.id === id);
-  if(!opt) return;
-  opt.color = color;
-  const badge = document.getElementById('mgrBadge_' + id);
-  if(badge) badge.innerHTML = statusBadge(opt.label);
+  showGlobalToast('"' + oldLabel + '" → "' + newLabel + '" 변경 완료');
 }
 function mgrUpdateColor(id, color) {
-  // 색 선택 확정 시: 메모리 반영 + 전체 화면(테이블/필터/뱃지) 즉시 동기화
   const opt = statusOptions.find(o => o.id === id);
-  if(!opt) return;
-  opt.color = color;
-  const badge = document.getElementById('mgrBadge_' + id);
-  if(badge) badge.innerHTML = statusBadge(opt.label);
-  syncAllStatusSelects();   // 목록 전체 재렌더는 하지 않음(피커 보존)
+  if(opt) {
+    opt.color = color;
+    syncAllStatusSelects();
+    renderStatusMgrList();
+  }
 }
 function mgrDelete(id) {
   const opt = statusOptions.find(o => o.id === id);
@@ -9480,7 +9734,7 @@ function openSmsModal() {
   // 템플릿 옵션 로드
   loadSmsTemplateOptions();
   // 발송 회사 초기화
-  document.querySelectorAll('input[name="smsCompany"]').forEach(r => r.checked = (r.value === 'TS AUTO PLAN / 타소'));
+  document.querySelectorAll('input[name="smsCompany"]').forEach(r => r.checked = false);
   document.getElementById('smsBody').value = '';
   renderSmsRecipients();
   updateSmsPreview();
@@ -9553,10 +9807,8 @@ function composeSmsMessage() {
   const myName = me ? me.name : currentUser;
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const myTitle = me?.title || '팀장'; // staffList에 직책 필드 있으면 사용, 없으면 기본값
-  // (광고)·080 자동삽입 토글(관리자 테스트용): 체크 시 본문에서 제외하고 알리고 자동삽입에 맡김
-  const _skipAdTag = !!(document.getElementById('smsSkipAdTag') && document.getElementById('smsSkipAdTag').checked);
   // 합성
-  let msg = _skipAdTag ? '' : '(광고)\n';
+  let msg = '(광고)\n';
   if (body) msg += body + '\n';
   msg += '\n';
   if (company) {
@@ -9565,7 +9817,7 @@ function composeSmsMessage() {
     if (myPhone) msg += ' / ' + myPhone;
     msg += '\n';
   }
-  if (!_skipAdTag) msg += '\n무료수신거부: 080-881-1254'; // 알리고 발급 080 수신거부번호
+  msg += '\n무료수신거부: 080-XXX-XXXX'; // 080 임대 번호 발급 후 교체 예정
   return msg;
 }
 function updateSmsPreview() {
@@ -9836,196 +10088,82 @@ async function appendSmsLog(entry) {
   try { localStorage.setItem(SMS_LOGS_KEY, JSON.stringify(logs)); } catch {}
 }
 
-// ============================================================================
-// [알리고 중계 설정] — Edge Function 배포 후 URL 입력
-// ============================================================================
-const ALIGO_RELAY_URL = 'https://enlwenuqztgpflmbicdf.supabase.co/functions/v1/aligo-relay';
-const RELAY_TOKEN     = '';     // VPS 중계서버 인증토큰 (VPS 전환 후 입력. Supabase Edge Function은 비워둬도 무방)
-const SMS_TEST_MODE   = true;  // true=테스트발송(과금·실발송 없음) / 실발송 전환 시 false
-const SMS_MAX_SEND    = 200;   // 1회 최대 발송 인원
-
-// 회사 → 발신번호 매핑 (알리고에 등록된 번호만)
-const SMS_SENDER_MAP = {
-  'TS AUTO PLAN / 타소': '15883621',
-  // '투데이즈카': '15775485',   // ← 알리고 발신번호 등록 후 주석 해제
-};
-
-// 단체문자 발송 (테스트 버전: 중계서버 호출 + 응답확인. 메모/로그 기록은 실발송 전환 시 추가)
+// 발송 (현재는 검증만, 실제 발송은 백엔드 연동 후)
 async function sendSmsBulk() {
-  // 관리자 전용 (테스트 기간): 직원은 발송 불가, 현상태 유지
-  if (currentRole !== 'admin') { alert('단체문자 발송은 현재 관리자 전용 기능입니다.'); return; }
-
+  // === 임시 차단: 실제 발송 막음 (기능 완성 후 이 2줄만 제거) ===
+  alert('단체문자발송 반영중입니다');
+  return;
+  // ----------------------------------------------------------------
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value;
   if (!company) { alert('발송 회사를 선택해주세요.'); return; }
-
-  const sender = SMS_SENDER_MAP[company] || '';
-  if (!sender) { alert(`'${company}'는 발신번호가 등록되어 있지 않습니다.\n현재는 TS AUTO PLAN(1588-3621)만 발송 가능합니다.`); return; }
-
   const body = document.getElementById('smsBody').value.trim();
   if (!body) { alert('메시지 본문을 입력해주세요.'); return; }
   if (smsRecipients.length === 0) { alert('수신자를 1명 이상 추가해주세요.'); return; }
-
-  // 1회 최대 200명: 초과 시 앞에서 200명까지만 발송
-  const overLimit = smsRecipients.length > SMS_MAX_SEND;
-  const toSend = smsRecipients.slice(0, SMS_MAX_SEND);
-  const lastName = toSend.length ? (toSend[toSend.length - 1].name || '이름없음') : '';
-
-  // 야간 발송 차단 (실발송 시에만)
-  if (!SMS_TEST_MODE) {
-    const h = new Date().getHours();
-    if (h >= 21 || h < 8) {
-      if (!confirm('현재 야간 시간대(21시~08시)입니다.\n광고문자 발송은 법적으로 제한됩니다.\n그래도 계속하시겠습니까?')) return;
-    }
+  // 야간 발송 차단
+  const h = new Date().getHours();
+  if (h >= 21 || h < 8) {
+    if (!confirm('현재 야간 시간대(21시~08시)입니다.\n광고문자 발송은 법적으로 제한됩니다.\n그래도 계속하시겠습니까?')) return;
   }
-
-  if (!ALIGO_RELAY_URL) { alert('중계서버 URL(ALIGO_RELAY_URL)이 설정되지 않았습니다.'); return; }
-
   const msg = composeSmsMessage();
+  const ok = confirm(`총 ${smsRecipients.length}명에게 발송합니다.\n\n계속할까요?`);
+  if (!ok) return;
+
+  // === 발송 처리 (현재 백엔드 미연결 → 시뮬레이션) ===
+  // TODO: 실제 알리고 API 호출은 Vercel 서버리스 함수 연동 후
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  const dateISO = now.toISOString().slice(0,10);
   const bytes = new Blob([msg]).size;
   const msgType = bytes > 90 ? 'LMS' : 'SMS';
 
-  // 중계서버 호출 공통 헤더 (Supabase Edge Function + VPS 중계서버 모두 호환)
-  const relayHeaders = {
-    'Content-Type': 'application/json',
-    'apikey': SB_KEY,
-    'Authorization': 'Bearer ' + SB_KEY,
-    'X-Relay-Token': RELAY_TOKEN,
-  };
-
-  // 잔액 부족 사전 체크 (실발송 시에만)
-  if (!SMS_TEST_MODE) {
-    try {
-      const rRes = await fetch(ALIGO_RELAY_URL, { method: 'POST', headers: relayHeaders, body: JSON.stringify({ action: 'remain' }) });
-      const rem = await rRes.json();
-      const availRaw = (msgType === 'SMS') ? rem.SMS_CNT : (msgType === 'LMS') ? rem.LMS_CNT : rem.MMS_CNT;
-      const avail = parseInt(availRaw ?? '-1', 10);
-      if (!isNaN(avail) && avail >= 0 && avail < toSend.length) {
-        alert('발송불가, 관리자에게 문의하세요.\n\n(발송 가능 포인트/건수가 부족합니다)');
-        return;
-      }
-    } catch (_) { /* 잔액조회 실패 시 발송 진행 (부족하면 알리고 응답에서 차단됨) */ }
-  }
-
-  const modeLabel = SMS_TEST_MODE ? '🧪 테스트 발송 (실제 발송·과금 없음)' : '⚠️ 실제 발송';
-  const overMsg = overLimit ? `\n\n⚠️ 총 ${smsRecipients.length}명 중 앞에서 ${toSend.length}명만 발송됩니다.\n(마지막 발송 예정: ${lastName}님)` : '';
-  if (!confirm(`${modeLabel}\n\n회사: ${company}\n발신번호: ${sender}\n수신자: ${toSend.length}명\n유형: ${msgType} (${bytes}byte)${overMsg}\n\n계속할까요?`)) return;
-
-  // 중계서버(발송) 호출
-  let resp;
-  try {
-    const res = await fetch(ALIGO_RELAY_URL, {
-      method: 'POST',
-      headers: relayHeaders,
-      body: JSON.stringify({
-        action: 'send',
-        company: company,
-        sender: sender,
-        receivers: toSend.map(r => r.phone),
-        msg: msg,
-        msg_type: msgType,
-        title: msgType === 'SMS' ? '' : company,
-        testmode: SMS_TEST_MODE ? true : false,
-      }),
-    });
-    resp = await res.json();
-  } catch (e) {
-    alert('중계서버 호출 실패:\n' + (e.message || e));
-    return;
-  }
-
-  // 알리고 응답 처리
-  const success = String(resp.result_code ?? '') === '1';
-  const overInfo = overLimit
-    ? `\n\n⚠️ 총 ${smsRecipients.length}명 중 ${toSend.length}명까지 발송\n· 마지막 발송 고객: ${lastName}님\n· 미발송: ${smsRecipients.length - toSend.length}명 (다시 발송하려면 발송된 ${toSend.length}명을 제외하고 재시도하세요)`
-    : '';
-  if (success) {
-    alert(`✅ ${SMS_TEST_MODE ? '[테스트] ' : ''}발송 성공\n\n` +
-          `· 발송: ${toSend.length}명\n` +
-          `· success_cnt: ${resp.success_cnt ?? '-'} / error_cnt: ${resp.error_cnt ?? '-'}\n` +
-          `· msg_id: ${resp.msg_id ?? '-'}` +
-          overInfo +
-          (SMS_TEST_MODE ? '\n\n※ 테스트모드: 실제 문자는 발송되지 않았습니다.' : ''));
-  } else {
-    alert(`❌ 발송 실패\n\n` +
-          `result_code: ${resp.result_code ?? resp.error ?? '-'}\n` +
-          `message: ${resp.message ?? resp.hint ?? '-'}\n\n` +
-          `(원본: ${JSON.stringify(resp).slice(0, 300)})`);
-  }
-  console.log('[SMS 발송결과]', { request: { company, sender, count: toSend.length, msgType, testmode: SMS_TEST_MODE }, response: resp });
-
-  // 테스트모드에선 기록하지 않음(실데이터 오염 방지). 실발송 성공 시에만 로그·메모·최근상담일 갱신.
-  if (!SMS_TEST_MODE && success) {
-    window._lastLocalChange = Date.now();
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-    const todayISO = now.toISOString().split('T')[0];
-
-    // 1) sms_logs 1건 기록 (Supabase 직접 저장 → 직원 공유·통계 일치)
-    try {
-      await sbFetch('sms_logs', 'POST', [{
-        sent_at: now.toISOString(),
-        date_iso: todayISO,
-        sender: sender,
-        sender_id: currentUser,
-        company: company,
-        msg_type: msgType,
-        bytes: bytes,
-        content: msg,
-        recipient_count: toSend.length,
-        recipients: toSend.map(r => ({ name: r.name, phone: r.phone, customerId: r.customerId })),
-        result_summary: {
-          success: Number(resp.success_cnt ?? 0),
-          fail: Number(resp.error_cnt ?? 0),
-          reject: 0,
-          pending: Math.max(0, toSend.length - Number(resp.success_cnt ?? 0) - Number(resp.error_cnt ?? 0)),
-          result_code: resp.result_code,
-          msg_id: resp.msg_id ?? null,
-          raw_msg_type: resp.msg_type ?? msgType
-        },
-        aligo_group_id: String(resp.msg_id ?? '')
-      }]);
-    } catch (e) {
-      if (typeof showGlobalToast === 'function') showGlobalToast('\u26a0\ufe0f 발송로그 저장 실패: ' + (e.message || e));
-    }
-
-    // 2) 수신 고객별 '문자발송' 메모 + 최근상담일 갱신 (customerId 있는 수신자만)
-    const targets = toSend
-      .filter(r => r.customerId != null)
-      .map(r => (typeof customers !== 'undefined' ? customers.find(c => c.id === r.customerId) : null))
-      .filter(Boolean);
-    let memoOk = 0, memoFail = 0;
-    const makeMemo = () => ({
-      text: '[단체문자발송] ' + company + ' 광고문자 발송',
+  // 1) 각 고객(customerId 있는 건) 메모에 단체문자 발송 기록 추가
+  for (const r of smsRecipients) {
+    if (!r.customerId) continue;
+    const c = (typeof customers !== 'undefined') ? customers.find(x => x.id === r.customerId) : null;
+    if (!c) continue;
+    if (!Array.isArray(c.memos)) c.memos = [];
+    // 누적 횟수 계산: 기존 단체문자발송 메모 카운트 + 1
+    const prevCount = c.memos.filter(m => m.text && m.text.includes('단체문자발송')).length;
+    const newCount = prevCount + 1;
+    c.memos.unshift({
+      text: `[단체문자발송 #${newCount}] ${company} / ${msgType} / ${bytes}byte`,
       author: currentUser,
       date: dateStr,
-      dateISO: todayISO,
-      dateTS: now.toISOString(),
-      resetConsult: true,
-      isSystem: true
+      dateISO: dateISO,
+      isSystem: false  // 일반 상담메모처럼 처리 → 최근상담일 갱신됨
     });
+    // Supabase 저장
     if (typeof isSbConfigured === 'function' && isSbConfigured()) {
-      const CONC = 5; // 동시 5건씩 (대량발송 부하·실패 완화)
-      for (let k = 0; k < targets.length; k += CONC) {
-        const batch = targets.slice(k, k + CONC);
-        await Promise.all(batch.map(async (c) => {
-          try {
-            if (!Array.isArray(c.memos)) c.memos = [];
-            c.memos.unshift(makeMemo());
-            await sbFetch(`customers?id=eq.${c.id}`, 'PATCH', { memos: c.memos });
-            memoOk++;
-          } catch (_) { memoFail++; }
-        }));
-      }
-      if (typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      try { await sbUpdateCustomer(c); } catch(e) { console.warn('메모 저장 실패:', e); }
     }
-
-    alert(`✅ 발송 기록 완료\n\n· sms_logs: 1건 저장\n· 고객메모: ${memoOk}건 기록${memoFail ? ` (실패 ${memoFail}건)` : ''}\n· 최근상담일: ${todayISO} 로 갱신`);
-
-    closeModal('smsBulkModal');
-    if (typeof refreshAllViews === 'function') refreshAllViews();
-    else if (typeof filterDB === 'function') filterDB();
-    if (typeof renderSmsStats === 'function') { try { renderSmsStats(); } catch (_) {} }
   }
+
+  // 2) 발송 로그 저장 (대시보드 집계용)
+  await appendSmsLog({
+    sentAt: now.toISOString(),
+    dateISO: dateISO,
+    sender: currentUser,
+    senderId: currentUserId,
+    company: company,
+    recipientCount: smsRecipients.length,
+    msgType: msgType,
+    bytes: bytes,
+    content: msg,
+    recipients: smsRecipients.map(r => ({ name: r.name, phone: r.phone, customerId: r.customerId || null, result: 'pending' })),
+    resultSummary: { success: 0, reject: 0, fail: 0, pending: smsRecipients.length },
+    customerIds: smsRecipients.map(r => r.customerId).filter(Boolean),
+  });
+
+  if (typeof showGlobalToast === 'function') showGlobalToast('단체문자발송 반영중입니다');
+  else alert('단체문자발송 반영중입니다');
+  console.log('[SMS 발송]', { company, message: msg, recipients: smsRecipients });
+
+  closeModal('smsBulkModal');
+  // 화면 새로고침
+  if (typeof refreshAllViews === 'function') refreshAllViews();
+  else if (typeof filterDB === 'function') filterDB();
+  // 집계 즉시 갱신
+  if (typeof renderSmsStats === 'function') { try { renderSmsStats(); } catch(_){} }
 }
 function openEditModal() {  }
 let nextId = customers.length+1;
@@ -11292,16 +11430,6 @@ let _vstockCache = [];
 let _vstockFilter = 'all';
 let _currentVstock = null;
 let _vstockManualMode = false;
-function updateVstockNavBadge() {
-  const badge = document.getElementById('vstockNavBadge');
-  if(!badge) return;
-  const isAdmin = currentRole === 'admin';
-  let list = Array.isArray(_vstockCache) ? _vstockCache : [];
-  if(!isAdmin) list = list.filter(v => v.author_id === currentUserId || v.author === currentUser);
-  const n = list.filter(v => (v.status||'미완료') !== '완료').length;
-  if(n > 0) { badge.textContent = n > 99 ? '99+' : String(n); badge.style.display = ''; }
-  else { badge.style.display = 'none'; }
-}
 async function sbLoadVehicleStock() {
   if(!isSbConfigured()) return [];
   try {
@@ -11395,11 +11523,10 @@ async function submitVehicleStock() {
     });
     closeModal('vehicleStockModal');
     showGlobalToast('차량재고 요청이 등록되었습니다.');
+    await refreshVstockCache();
     // 차량재고 페이지가 열려있으면 목록 즉시 갱신
     if(document.getElementById('page-vehiclestock')?.classList.contains('active')) {
       try { await renderVehicleStockPage(); } catch(e){}
-    } else {
-      try { _vstockCache = await sbLoadVehicleStock(); updateVstockNavBadge(); } catch(e){}
     }
   } catch(e) { alert('요청 실패: ' + e.message); }
 }
@@ -11410,6 +11537,24 @@ async function renderVehicleStockPage() {
     : '내가 요청한 차량재고 확인 건입니다';
   _vstockCache = await sbLoadVehicleStock();
   renderVehicleStockList();
+  updateVstockBadge();
+}
+// 차량재고 메뉴 배지: [신규 미확인] / [확인했지만 미완료]
+function updateVstockBadge() {
+  const el = document.getElementById('vstockNavBadge');
+  if(!el) return;
+  if(currentRole !== 'admin') { el.style.display = 'none'; return; }
+  const pending = _vstockCache.filter(v => (v.status||'미완료') !== '완료');
+  const newCnt = pending.filter(v => !v.viewed).length;
+  const viewedCnt = pending.filter(v => v.viewed).length;
+  if(newCnt === 0 && viewedCnt === 0) { el.style.display = 'none'; return; }
+  el.textContent = newCnt + ' / ' + viewedCnt;
+  el.style.display = 'inline-flex';
+}
+// 배지용 캐시 로드 (페이지 미진입 상태에서도 갱신)
+async function refreshVstockCache() {
+  if(currentRole !== 'admin') return;
+  try { _vstockCache = await sbLoadVehicleStock(); updateVstockBadge(); } catch(_){}
 }
 function setVstockFilter(f, btn) {
   _vstockFilter = f;
@@ -11419,7 +11564,6 @@ function setVstockFilter(f, btn) {
   renderVehicleStockList();
 }
 function renderVehicleStockList() {
-  updateVstockNavBadge();
   const wrap = document.getElementById('vstockListWrap');
   if(!wrap) return;
   const isAdmin = currentRole === 'admin';
@@ -11506,6 +11650,12 @@ function openVehicleStockDetail(id) {
   cBtn.className = done ? 'btn btn-ghost' : 'btn btn-primary';
   document.getElementById('vsd_delBtn').style.display = canAct ? '' : 'none';
   document.getElementById('vehicleStockDetailModal').classList.add('open');
+  // 관리자가 상세를 열면 '확인' 처리 (신규 → 확인-미완료 로 이동)
+  if(currentRole === 'admin' && !v.viewed) {
+    sbUpdateVehicleStock(v.id, { viewed: true })
+      .then(() => { v.viewed = true; updateVstockBadge(); })
+      .catch(e => console.warn('viewed 갱신 실패:', e));
+  }
 }
 async function toggleVehicleStockDone() {
   if(!_currentVstock) return;
@@ -11518,6 +11668,7 @@ async function toggleVehicleStockDone() {
     showGlobalToast(done ? '미완료로 변경되었습니다.' : '완료 처리되었습니다.');
     closeModal('vehicleStockDetailModal');
     renderVehicleStockList();
+    updateVstockBadge();
   } catch(e) { alert('처리 실패: ' + e.message); }
 }
 async function deleteVehicleStock() {
@@ -11529,6 +11680,7 @@ async function deleteVehicleStock() {
     showGlobalToast('삭제되었습니다.');
     closeModal('vehicleStockDetailModal');
     renderVehicleStockList();
+    updateVstockBadge();
   } catch(e) { alert('삭제 실패: ' + e.message); }
 }
 function setEmojiMode(useEmoji, silent) {
@@ -12068,9 +12220,10 @@ function setFundingCheckViewed(id) {
     const f = fundingList.find(x=>x.id===id);
     if (f && !f.checkViewed) {
       f.checkViewed = true; // 낙관적 반영
+      window._lastLocalChange = Date.now(); // 폴링 stale 덮어쓰기 방지
       if (typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
       if (typeof sbSaveFundingCheckFlags==='function') {
-        sbSaveFundingCheckFlags(f).catch(e=>{
+        sbSaveFundingCheckFlags(f).then(()=>{ window._lastLocalChange = Date.now(); }).catch(e=>{
           f.checkViewed = false; // 실패 시 롤백 → 화면/DB 불일치 방지
           if (typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
           if (typeof renderFundingCheckDropdown === 'function') renderFundingCheckDropdown();
@@ -12185,12 +12338,14 @@ async function markAllFundingCheckViewed(ev) {
   if (!targets.length) { renderFundingCheckDropdown(); refreshFundingCheckBadge(); return; }
   if (!confirm(targets.length + '건을 모두 확인 처리할까요?')) return;
   // 낙관적 반영
+  window._lastLocalChange = Date.now(); // 폴링 stale 덮어쓰기 방지
   targets.forEach(f => { f.checkViewed = true; });
   renderFundingCheckDropdown();
   refreshFundingCheckBadge();
   if (typeof isSbConfigured==='function' && isSbConfigured() && typeof sbSaveFundingCheckFlags==='function') {
     try {
       await Promise.all(targets.map(f => sbSaveFundingCheckFlags(f)));
+      window._lastLocalChange = Date.now(); // 저장 완료 후 재설정
       if (typeof _dataSignature==='function') window._lastDataSig = _dataSignature();
       if (typeof showGlobalToast==='function') showGlobalToast('✅ '+targets.length+'건 확인 처리 완료');
     } catch(e) {
@@ -12221,8 +12376,9 @@ function dismissFundingCheck(fid, ev) {
     const f = fundingList.find(x=>x.id===fid);
     if (f && !f.checkDismissed) {
       f.checkDismissed = true; // 낙관적 반영
+      window._lastLocalChange = Date.now(); // 폴링 stale 덮어쓰기 방지
       if (typeof sbSaveFundingCheckFlags==='function') {
-        sbSaveFundingCheckFlags(f).catch(e=>{
+        sbSaveFundingCheckFlags(f).then(()=>{ window._lastLocalChange = Date.now(); }).catch(e=>{
           f.checkDismissed = false; // 실패 시 롤백
           renderFundingCheckDropdown();
           refreshFundingCheckBadge();
