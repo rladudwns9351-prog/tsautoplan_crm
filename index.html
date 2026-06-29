@@ -3253,6 +3253,10 @@
             <textarea id="smsBody" oninput="updateSmsPreview()" placeholder="(광고) 다음 줄부터 내용을 입력하세요..." style="width:100%;padding:12px 14px 12px 70px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:140px;line-height:1.6;"></textarea>
           </div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px;">💡 (광고) 표기는 법적 의무로 자동 추가됩니다 (수정불가)</div>
+          <label class="admin-only" style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--text2);cursor:pointer;background:rgba(255,153,68,.08);border:1px solid rgba(255,153,68,.3);border-radius:5px;padding:6px 10px;">
+            <input type="checkbox" id="smsSkipAdTag" onchange="updateSmsPreview()" style="accent-color:var(--accent);">
+            <span>🧪 [테스트용] 알리고 자동삽입 사용 — 본문에서 (광고)·080 제외 (실발송 테스트 후 제거 예정)</span>
+          </label>
         </div>
         <!-- 미리보기 -->
         <div>
@@ -7727,6 +7731,62 @@ function renderStaffStatCard(u, uDB) {
 let sourceOptions = ['네이버','인스타그램','카카오','지인소개','기타'];
 let divisionOptions = ['개인','법인','개인사업자'];
 let memoTagOptions = ['조건맞으면즉시','4대보험가입 직장인'];
+// ===== [관리 목록] 드래그 정렬 + 이름변경 공통 =====
+let _mgrDrag = { kind: null, from: -1 };
+function _mgrArr(kind){ return kind==='status'?statusOptions : kind==='source'?sourceOptions : kind==='memotag'?memoTagOptions : null; }
+function _mgrRerender(kind){
+  if(kind==='status'){ syncAllStatusSelects(); renderStatusMgrList(); }
+  else if(kind==='source'){ renderSourceMgrList(); }
+  else if(kind==='memotag'){ renderMemoTagMgrList(); syncMemoTagSelects(); }
+}
+function mgrDragStart(kind, i, ev){
+  _mgrDrag = { kind: kind, from: i };
+  try { ev.dataTransfer.effectAllowed='move'; ev.dataTransfer.setData('text/plain', String(i)); } catch(_){}
+  const row = ev.currentTarget && ev.currentTarget.closest ? ev.currentTarget.closest('[data-mgr-row]') : null;
+  if(row) row.style.opacity='0.4';
+}
+function mgrDragEnd(ev){
+  const row = ev.currentTarget && ev.currentTarget.closest ? ev.currentTarget.closest('[data-mgr-row]') : null;
+  if(row) row.style.opacity='';
+}
+function mgrDragOver(ev){ ev.preventDefault(); try{ ev.dataTransfer.dropEffect='move'; }catch(_){} }
+function mgrDrop(kind, to, ev){
+  ev.preventDefault(); ev.stopPropagation();
+  if(_mgrDrag.kind !== kind){ _mgrDrag={kind:null,from:-1}; return; }
+  const from=_mgrDrag.from; _mgrDrag={kind:null,from:-1};
+  const arr=_mgrArr(kind);
+  if(!arr || from<0 || to<0 || from===to || from>=arr.length || to>=arr.length){ _mgrRerender(kind); return; }
+  const [moved]=arr.splice(from,1);
+  arr.splice(to,0,moved);
+  _mgrRerender(kind);
+}
+// 유입경로 이름변경 (사용 중 고객 source 도 함께 갱신)
+function mgrRenameSource(i, val){
+  val=(val||'').trim();
+  const old=sourceOptions[i];
+  if(old==null){ renderSourceMgrList(); return; }
+  if(!val){ renderSourceMgrList(); return; }
+  if(val===old) return;
+  if(sourceOptions.some((s,idx)=>idx!==i && s===val)){ showGlobalToast('이미 존재하는 유입경로입니다.'); renderSourceMgrList(); return; }
+  customers.forEach(c=>{ if(c.source===old) c.source=val; });
+  sourceOptions[i]=val;
+  renderSourceMgrList();
+  showGlobalToast('"'+old+'" → "'+val+'" 변경 완료');
+}
+// 메모태그 이름변경 (사용 중 고객 memoTag 도 함께 갱신)
+function mgrRenameMemoTag(i, val){
+  val=(val||'').trim();
+  const old=memoTagOptions[i];
+  if(old==null){ renderMemoTagMgrList(); return; }
+  if(!val){ renderMemoTagMgrList(); return; }
+  if(val===old) return;
+  if(memoTagOptions.some((s,idx)=>idx!==i && s===val)){ showGlobalToast('이미 존재하는 항목입니다.'); renderMemoTagMgrList(); return; }
+  customers.forEach(c=>{ if(c.memoTag===old) c.memoTag=val; });
+  memoTagOptions[i]=val;
+  renderMemoTagMgrList();
+  syncMemoTagSelects();
+  showGlobalToast('"'+old+'" → "'+val+'" 변경 완료');
+}
 function openSourceMgrModal() {
   renderSourceMgrList();
   document.getElementById('sourceMgrModal').classList.add('open');
@@ -7737,13 +7797,11 @@ function sortSourceOptions() {
 function renderSourceMgrList() {
   const list = document.getElementById('sourceMgrList');
   if(!list) return;
-  sortSourceOptions();
   list.innerHTML = sourceOptions.map((s,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;">
-      <span style="flex:1;font-size:13px;">${s}</span>
-      <div style="display:flex;gap:4px;">
-        <button onclick="deleteSource(${i})" style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:var(--red);border-radius:4px;padding:4px 9px;cursor:pointer;font-size:12px;">삭제</button>
-      </div>
+    <div data-mgr-row ondragover="mgrDragOver(event)" ondrop="mgrDrop('source',${i},event)" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;">
+      <span draggable="true" ondragstart="mgrDragStart('source',${i},event)" ondragend="mgrDragEnd(event)" title="드래그하여 순서 변경" style="cursor:grab;user-select:none;color:var(--text3);font-size:16px;flex-shrink:0;line-height:1;">⠿</span>
+      <input type="text" value="${escapeHtml(s)}" maxlength="20" onblur="mgrRenameSource(${i}, this.value)" onkeydown="if(event.key==='Enter') this.blur()" style="flex:1;min-width:0;padding:6px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">
+      <button onclick="deleteSource(${i})" style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:var(--red);border-radius:5px;padding:5px 10px;cursor:pointer;font-size:12px;flex-shrink:0;">삭제</button>
     </div>`).join('');
   syncSourceSelects();
 }
@@ -7753,7 +7811,6 @@ function addSourceOption() {
   if(!val) { inp.focus(); return; }
   if(sourceOptions.includes(val)) { showGlobalToast('이미 존재하는 유입경로입니다.'); return; }
   sourceOptions.push(val);
-  sortSourceOptions();
   inp.value = '';
   renderSourceMgrList();
   showGlobalToast('"'+val+'" 추가 완료');
@@ -7816,7 +7873,6 @@ async function saveStatusOptionsToServer() {
   }
 }
 function syncSourceSelects() {
-  sortSourceOptions();
   const fSrc = document.getElementById('f_source');
   if(fSrc) {
     const prev = fSrc.value;
@@ -7938,13 +7994,11 @@ function renderMemoTagMgrList() {
   const el = document.getElementById('memoTagMgrList');
   if(!el) return;
   el.innerHTML = memoTagOptions.map((s,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;">
-      <span style="flex:1;font-size:13px;font-weight:600;">${escapeHtml(s)}</span>
-      <button class="btn btn-ghost btn-sm" onclick="moveMemoTag(${i},-1)" style="padding:2px 8px;">▲</button>
-      <button class="btn btn-ghost btn-sm" onclick="moveMemoTag(${i},1)" style="padding:2px 8px;">▼</button>
-      <button class="btn btn-ghost btn-sm" onclick="deleteMemoTag(${i})" style="padding:2px 10px;color:var(--red);background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);">삭제</button>
-    </div>
-  `).join('');
+    <div data-mgr-row ondragover="mgrDragOver(event)" ondrop="mgrDrop('memotag',${i},event)" style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;">
+      <span draggable="true" ondragstart="mgrDragStart('memotag',${i},event)" ondragend="mgrDragEnd(event)" title="드래그하여 순서 변경" style="cursor:grab;user-select:none;color:var(--text3);font-size:16px;flex-shrink:0;line-height:1;">⠿</span>
+      <input type="text" value="${escapeHtml(s)}" maxlength="30" onblur="mgrRenameMemoTag(${i}, this.value)" onkeydown="if(event.key==='Enter') this.blur()" style="flex:1;min-width:0;padding:6px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">
+      <button onclick="deleteMemoTag(${i})" style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:var(--red);border-radius:5px;padding:5px 10px;cursor:pointer;font-size:12px;flex-shrink:0;">삭제</button>
+    </div>`).join('');
 }
 function addMemoTagOption() {
   const input = document.getElementById('newMemoTagInput');
@@ -9013,7 +9067,9 @@ function renderStatusMgrList() {
     return;
   }
   list.innerHTML = statusOptions.map((o, i) => `
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;">
+    <div data-mgr-row ondragover="mgrDragOver(event)" ondrop="mgrDrop('status',${i},event)" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;">
+      <!-- 드래그 핸들 -->
+      <span draggable="true" ondragstart="mgrDragStart('status',${i},event)" ondragend="mgrDragEnd(event)" title="드래그하여 순서 변경" style="cursor:grab;user-select:none;color:var(--text3);font-size:16px;flex-shrink:0;line-height:1;">⠿</span>
       <!-- 색상 피커 -->
       <input type="color" value="${o.color}"
         title="색상 변경"
@@ -9030,13 +9086,6 @@ function renderStatusMgrList() {
       <span style="font-size:11px;color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">
         ${customers.filter(c=>c.status===o.label).length}명
       </span>
-      <!-- 순서 버튼 -->
-      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
-        <button onclick="mgrMove(${o.id},-1)" ${i===0?'disabled':''}
-          style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;line-height:1.4;">▲</button>
-        <button onclick="mgrMove(${o.id},1)" ${i===statusOptions.length-1?'disabled':''}
-          style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;line-height:1.4;">▼</button>
-      </div>
       <!-- 삭제 버튼 -->
       <button onclick="mgrDelete(${o.id})"
         style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:var(--red);border-radius:5px;padding:5px 10px;cursor:pointer;font-size:12px;flex-shrink:0;">
@@ -9415,8 +9464,10 @@ function composeSmsMessage() {
   const myName = me ? me.name : currentUser;
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const myTitle = me?.title || '팀장'; // staffList에 직책 필드 있으면 사용, 없으면 기본값
+  // (광고)·080 자동삽입 토글(관리자 테스트용): 체크 시 본문에서 제외하고 알리고 자동삽입에 맡김
+  const _skipAdTag = !!(document.getElementById('smsSkipAdTag') && document.getElementById('smsSkipAdTag').checked);
   // 합성
-  let msg = '(광고)\n';
+  let msg = _skipAdTag ? '' : '(광고)\n';
   if (body) msg += body + '\n';
   msg += '\n';
   if (company) {
@@ -9425,7 +9476,7 @@ function composeSmsMessage() {
     if (myPhone) msg += ' / ' + myPhone;
     msg += '\n';
   }
-  msg += '\n무료수신거부: 080-881-1254'; // 알리고 발급 080 수신거부번호
+  if (!_skipAdTag) msg += '\n무료수신거부: 080-881-1254'; // 알리고 발급 080 수신거부번호
   return msg;
 }
 function updateSmsPreview() {
@@ -9700,7 +9751,9 @@ async function appendSmsLog(entry) {
 // [알리고 중계 설정] — Edge Function 배포 후 URL 입력
 // ============================================================================
 const ALIGO_RELAY_URL = 'https://enlwenuqztgpflmbicdf.supabase.co/functions/v1/aligo-relay';
+const RELAY_TOKEN     = '';     // VPS 중계서버 인증토큰 (VPS 전환 후 입력. Supabase Edge Function은 비워둬도 무방)
 const SMS_TEST_MODE   = true;  // true=테스트발송(과금·실발송 없음) / 실발송 전환 시 false
+const SMS_MAX_SEND    = 200;   // 1회 최대 발송 인원
 
 // 회사 → 발신번호 매핑 (알리고에 등록된 번호만)
 const SMS_SENDER_MAP = {
@@ -9710,6 +9763,9 @@ const SMS_SENDER_MAP = {
 
 // 단체문자 발송 (테스트 버전: 중계서버 호출 + 응답확인. 메모/로그 기록은 실발송 전환 시 추가)
 async function sendSmsBulk() {
+  // 관리자 전용 (테스트 기간): 직원은 발송 불가, 현상태 유지
+  if (currentRole !== 'admin') { alert('단체문자 발송은 현재 관리자 전용 기능입니다.'); return; }
+
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value;
   if (!company) { alert('발송 회사를 선택해주세요.'); return; }
 
@@ -9719,7 +9775,11 @@ async function sendSmsBulk() {
   const body = document.getElementById('smsBody').value.trim();
   if (!body) { alert('메시지 본문을 입력해주세요.'); return; }
   if (smsRecipients.length === 0) { alert('수신자를 1명 이상 추가해주세요.'); return; }
-  if (smsRecipients.length > 1000) { alert(`수신자가 ${smsRecipients.length}명입니다.\n1회 최대 1,000명까지 가능합니다. 나눠서 발송해주세요.`); return; }
+
+  // 1회 최대 200명: 초과 시 앞에서 200명까지만 발송
+  const overLimit = smsRecipients.length > SMS_MAX_SEND;
+  const toSend = smsRecipients.slice(0, SMS_MAX_SEND);
+  const lastName = toSend.length ? (toSend[toSend.length - 1].name || '이름없음') : '';
 
   // 야간 발송 차단 (실발송 시에만)
   if (!SMS_TEST_MODE) {
@@ -9729,33 +9789,49 @@ async function sendSmsBulk() {
     }
   }
 
-  if (!ALIGO_RELAY_URL) {
-    alert('중계서버 URL(ALIGO_RELAY_URL)이 설정되지 않았습니다.\nEdge Function 배포 후 코드 상단의 ALIGO_RELAY_URL에 입력하세요.');
-    return;
-  }
+  if (!ALIGO_RELAY_URL) { alert('중계서버 URL(ALIGO_RELAY_URL)이 설정되지 않았습니다.'); return; }
 
   const msg = composeSmsMessage();
   const bytes = new Blob([msg]).size;
   const msgType = bytes > 90 ? 'LMS' : 'SMS';
 
-  const modeLabel = SMS_TEST_MODE ? '🧪 테스트 발송 (실제 발송·과금 없음)' : '⚠️ 실제 발송';
-  if (!confirm(`${modeLabel}\n\n회사: ${company}\n발신번호: ${sender}\n수신자: ${smsRecipients.length}명\n유형: ${msgType} (${bytes}byte)\n\n계속할까요?`)) return;
+  // 중계서버 호출 공통 헤더 (Supabase Edge Function + VPS 중계서버 모두 호환)
+  const relayHeaders = {
+    'Content-Type': 'application/json',
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'X-Relay-Token': RELAY_TOKEN,
+  };
 
-  // 중계서버(Edge Function) 호출
+  // 잔액 부족 사전 체크 (실발송 시에만)
+  if (!SMS_TEST_MODE) {
+    try {
+      const rRes = await fetch(ALIGO_RELAY_URL, { method: 'POST', headers: relayHeaders, body: JSON.stringify({ action: 'remain' }) });
+      const rem = await rRes.json();
+      const availRaw = (msgType === 'SMS') ? rem.SMS_CNT : (msgType === 'LMS') ? rem.LMS_CNT : rem.MMS_CNT;
+      const avail = parseInt(availRaw ?? '-1', 10);
+      if (!isNaN(avail) && avail >= 0 && avail < toSend.length) {
+        alert('발송불가, 관리자에게 문의하세요.\n\n(발송 가능 포인트/건수가 부족합니다)');
+        return;
+      }
+    } catch (_) { /* 잔액조회 실패 시 발송 진행 (부족하면 알리고 응답에서 차단됨) */ }
+  }
+
+  const modeLabel = SMS_TEST_MODE ? '🧪 테스트 발송 (실제 발송·과금 없음)' : '⚠️ 실제 발송';
+  const overMsg = overLimit ? `\n\n⚠️ 총 ${smsRecipients.length}명 중 앞에서 ${toSend.length}명만 발송됩니다.\n(마지막 발송 예정: ${lastName}님)` : '';
+  if (!confirm(`${modeLabel}\n\n회사: ${company}\n발신번호: ${sender}\n수신자: ${toSend.length}명\n유형: ${msgType} (${bytes}byte)${overMsg}\n\n계속할까요?`)) return;
+
+  // 중계서버(발송) 호출
   let resp;
   try {
     const res = await fetch(ALIGO_RELAY_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + SB_KEY,
-      },
+      headers: relayHeaders,
       body: JSON.stringify({
         action: 'send',
         company: company,
         sender: sender,
-        receivers: smsRecipients.map(r => r.phone),
+        receivers: toSend.map(r => r.phone),
         msg: msg,
         msg_type: msgType,
         title: msgType === 'SMS' ? '' : company,
@@ -9764,19 +9840,21 @@ async function sendSmsBulk() {
     });
     resp = await res.json();
   } catch (e) {
-    alert('중계서버 호출 실패:\n' + (e.message || e) + '\n\n(Edge Function 배포/URL/CORS를 확인하세요)');
+    alert('중계서버 호출 실패:\n' + (e.message || e));
     return;
   }
 
   // 알리고 응답 처리
   const success = String(resp.result_code ?? '') === '1';
+  const overInfo = overLimit
+    ? `\n\n⚠️ 총 ${smsRecipients.length}명 중 ${toSend.length}명까지 발송\n· 마지막 발송 고객: ${lastName}님\n· 미발송: ${smsRecipients.length - toSend.length}명 (다시 발송하려면 발송된 ${toSend.length}명을 제외하고 재시도하세요)`
+    : '';
   if (success) {
     alert(`✅ ${SMS_TEST_MODE ? '[테스트] ' : ''}발송 성공\n\n` +
-          `result_code: ${resp.result_code}\n` +
-          `success_cnt: ${resp.success_cnt ?? '-'}\n` +
-          `error_cnt: ${resp.error_cnt ?? '-'}\n` +
-          `msg_id: ${resp.msg_id ?? '-'}\n` +
-          `msg_type: ${resp.msg_type ?? '-'}` +
+          `· 발송: ${toSend.length}명\n` +
+          `· success_cnt: ${resp.success_cnt ?? '-'} / error_cnt: ${resp.error_cnt ?? '-'}\n` +
+          `· msg_id: ${resp.msg_id ?? '-'}` +
+          overInfo +
           (SMS_TEST_MODE ? '\n\n※ 테스트모드: 실제 문자는 발송되지 않았습니다.' : ''));
   } else {
     alert(`❌ 발송 실패\n\n` +
@@ -9784,7 +9862,7 @@ async function sendSmsBulk() {
           `message: ${resp.message ?? resp.hint ?? '-'}\n\n` +
           `(원본: ${JSON.stringify(resp).slice(0, 300)})`);
   }
-  console.log('[SMS 발송결과]', { request: { company, sender, count: smsRecipients.length, msgType, testmode: SMS_TEST_MODE }, response: resp });
+  console.log('[SMS 발송결과]', { request: { company, sender, count: toSend.length, msgType, testmode: SMS_TEST_MODE }, response: resp });
 
   // 테스트모드에선 기록하지 않음(실데이터 오염 방지). 실발송 성공 시에만 로그·메모·최근상담일 갱신.
   if (!SMS_TEST_MODE && success) {
@@ -9804,13 +9882,16 @@ async function sendSmsBulk() {
         msg_type: msgType,
         bytes: bytes,
         content: msg,
-        recipient_count: smsRecipients.length,
-        recipients: smsRecipients.map(r => ({ name: r.name, phone: r.phone, customerId: r.customerId })),
+        recipient_count: toSend.length,
+        recipients: toSend.map(r => ({ name: r.name, phone: r.phone, customerId: r.customerId })),
         result_summary: {
+          success: Number(resp.success_cnt ?? 0),
+          fail: Number(resp.error_cnt ?? 0),
+          reject: 0,
+          pending: Math.max(0, toSend.length - Number(resp.success_cnt ?? 0) - Number(resp.error_cnt ?? 0)),
           result_code: resp.result_code,
-          success_cnt: resp.success_cnt ?? null,
-          error_cnt: resp.error_cnt ?? null,
-          msg_type: resp.msg_type ?? msgType
+          msg_id: resp.msg_id ?? null,
+          raw_msg_type: resp.msg_type ?? msgType
         },
         aligo_group_id: String(resp.msg_id ?? '')
       }]);
@@ -9819,7 +9900,7 @@ async function sendSmsBulk() {
     }
 
     // 2) 수신 고객별 '문자발송' 메모 + 최근상담일 갱신 (customerId 있는 수신자만)
-    const targets = smsRecipients
+    const targets = toSend
       .filter(r => r.customerId != null)
       .map(r => (typeof customers !== 'undefined' ? customers.find(c => c.id === r.customerId) : null))
       .filter(Boolean);
@@ -9828,15 +9909,15 @@ async function sendSmsBulk() {
       text: '[단체문자발송] ' + company + ' 광고문자 발송',
       author: currentUser,
       date: dateStr,
-      dateISO: todayISO,   // 최근상담일이 이 날짜로 갱신됨
+      dateISO: todayISO,
       dateTS: now.toISOString(),
-      resetConsult: true,  // 최근상담일 갱신 인정
+      resetConsult: true,
       isSystem: true
     });
     if (typeof isSbConfigured === 'function' && isSbConfigured()) {
       const CONC = 5; // 동시 5건씩 (대량발송 부하·실패 완화)
-      for (let i = 0; i < targets.length; i += CONC) {
-        const batch = targets.slice(i, i + CONC);
+      for (let k = 0; k < targets.length; k += CONC) {
+        const batch = targets.slice(k, k + CONC);
         await Promise.all(batch.map(async (c) => {
           try {
             if (!Array.isArray(c.memos)) c.memos = [];
@@ -9849,7 +9930,7 @@ async function sendSmsBulk() {
       if (typeof notifyDataChanged === 'function') notifyDataChanged('customers');
     }
 
-    alert(`\u2705 발송 기록 완료\n\n\u00b7 sms_logs: 1건 저장\n\u00b7 고객메모: ${memoOk}건 기록${memoFail ? ` (실패 ${memoFail}건)` : ''}\n\u00b7 최근상담일: ${todayISO} 로 갱신`);
+    alert(`✅ 발송 기록 완료\n\n· sms_logs: 1건 저장\n· 고객메모: ${memoOk}건 기록${memoFail ? ` (실패 ${memoFail}건)` : ''}\n· 최근상담일: ${todayISO} 로 갱신`);
 
     closeModal('smsBulkModal');
     if (typeof refreshAllViews === 'function') refreshAllViews();
