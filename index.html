@@ -120,7 +120,8 @@
         업체 검색
       </div>
       <div class="nav-item" onclick="goPage(&#39;vehiclestock&#39;,this)">
-        차량재고
+        <span style="flex:1;">차량재고</span>
+        <span id="vstockNavBadge" style="display:none;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;line-height:18px;text-align:center;font-family:'JetBrains Mono',monospace;"></span>
       </div>
       <div class="nav-item" onclick="goPage(&#39;calc33&#39;,this)">
         3.3% 계산기
@@ -7280,6 +7281,7 @@ async function loadData() {
     staffList.length = 0; // 하드코딩 초기값 완전 제거
     dbStaff.forEach(s => staffList.push(s));
     try { await loadAppSettings(); } catch(e) { console.warn('settings 로드 실패:', e); }
+    try { _vstockCache = await sbLoadVehicleStock(); updateVstockNavBadge(); } catch(e) { console.warn('vstock 로드 실패:', e); }
     syncAllAssignSelects();
     // 투데이즈카 이관 DB 직영업 오표기 정정 (관리자 1회)
     try { await revertTodayscarDirectMark(); } catch(e) { console.warn('이관DB 정정 실패:', e); }
@@ -7769,31 +7771,53 @@ function mgrDrop(kind, to, ev){
   _mgrRerender(kind);
 }
 // 유입경로 이름변경 (사용 중 고객 source 도 함께 갱신)
-function mgrRenameSource(i, val){
+async function mgrRenameSource(i, val){
   val=(val||'').trim();
   const old=sourceOptions[i];
   if(old==null){ renderSourceMgrList(); return; }
   if(!val){ renderSourceMgrList(); return; }
   if(val===old) return;
   if(sourceOptions.some((s,idx)=>idx!==i && s===val)){ showGlobalToast('이미 존재하는 유입경로입니다.'); renderSourceMgrList(); return; }
+  const cnt = customers.filter(c=>c.source===old).length;
   customers.forEach(c=>{ if(c.source===old) c.source=val; });
   sourceOptions[i]=val;
   renderSourceMgrList();
-  showGlobalToast('"'+old+'" → "'+val+'" 변경 완료');
+  if(typeof isSbConfigured === 'function' && isSbConfigured()){
+    try {
+      window._lastLocalChange = Date.now();
+      if(cnt>0) await sbFetch(`customers?source=eq.${encodeURIComponent(old)}`, 'PATCH', { source: val }, 'return=minimal');
+      await sbSaveSetting('sourceOptions', [...sourceOptions]);
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      showGlobalToast('"'+old+'" → "'+val+'" 변경 완료 (고객 '+cnt+'건 DB 반영)');
+    } catch(e){ showGlobalToast('⚠️ DB 반영 실패: ' + (e.message||e)); }
+  } else {
+    showGlobalToast('"'+old+'" → "'+val+'" 변경 완료');
+  }
 }
 // 메모태그 이름변경 (사용 중 고객 memoTag 도 함께 갱신)
-function mgrRenameMemoTag(i, val){
+async function mgrRenameMemoTag(i, val){
   val=(val||'').trim();
   const old=memoTagOptions[i];
   if(old==null){ renderMemoTagMgrList(); return; }
   if(!val){ renderMemoTagMgrList(); return; }
   if(val===old) return;
   if(memoTagOptions.some((s,idx)=>idx!==i && s===val)){ showGlobalToast('이미 존재하는 항목입니다.'); renderMemoTagMgrList(); return; }
+  const cnt = customers.filter(c=>c.memoTag===old).length;
   customers.forEach(c=>{ if(c.memoTag===old) c.memoTag=val; });
   memoTagOptions[i]=val;
   renderMemoTagMgrList();
   syncMemoTagSelects();
-  showGlobalToast('"'+old+'" → "'+val+'" 변경 완료');
+  if(typeof isSbConfigured === 'function' && isSbConfigured()){
+    try {
+      window._lastLocalChange = Date.now();
+      if(cnt>0) await sbFetch(`customers?memo_tag=eq.${encodeURIComponent(old)}`, 'PATCH', { memo_tag: val }, 'return=minimal');
+      await sbSaveSetting('memoTagOptions', [...memoTagOptions]);
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      showGlobalToast('"'+old+'" → "'+val+'" 변경 완료 (고객 '+cnt+'건 DB 반영)');
+    } catch(e){ showGlobalToast('⚠️ DB 반영 실패: ' + (e.message||e)); }
+  } else {
+    showGlobalToast('"'+old+'" → "'+val+'" 변경 완료');
+  }
 }
 function openSourceMgrModal() {
   renderSourceMgrList();
@@ -8302,6 +8326,18 @@ function syncAllStatusSelects() {
     ).join('');
     dSt.value=v;
     applyDetailStatusColor(v);
+  }
+  // 상단 빠른 상태필터 버튼 재렌더 (상태 추가/삭제/색상 즉시 반영)
+  const _qb = document.getElementById('statusQuickBtns');
+  if(_qb) {
+    const _cur = document.getElementById('dbStatusFilter') ? document.getElementById('dbStatusFilter').value : '';
+    _qb.innerHTML = '<button onclick="quickStatusFilter(\'\')" class="quick-btn" data-val="" style="padding:4px 12px;font-size:11px;border-radius:999px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">전체</button>' +
+      statusOptions.map(o=>'<button onclick="quickStatusFilter(\''+o.label+'\')" class="quick-btn" data-val="'+o.label+'" style="padding:4px 12px;font-size:11px;border-radius:999px;border:1px solid '+o.color+'22;background:'+hexToRgba(o.color,0.1)+';color:'+o.color+';cursor:pointer;">'+o.label+'</button>').join('');
+    _qb.querySelectorAll('.quick-btn').forEach(b=>{
+      const active = b.dataset.val === _cur;
+      b.style.fontWeight = active ? '700' : '400';
+      b.style.boxShadow = active ? '0 0 0 2px currentColor' : 'none';
+    });
   }
   renderStatusOptionList();
   initDBFilters();
@@ -9137,7 +9173,7 @@ function mgrAddStatus() {
   renderStatusMgrList();
   showGlobalToast('"' + label + '" 상태가 추가되었습니다.');
 }
-function mgrUpdateLabel(id, newLabel) {
+async function mgrUpdateLabel(id, newLabel) {
   newLabel = newLabel.trim();
   if(!newLabel) { renderStatusMgrList(); return; }
   const opt = statusOptions.find(o => o.id === id);
@@ -9147,11 +9183,26 @@ function mgrUpdateLabel(id, newLabel) {
     renderStatusMgrList(); return;
   }
   const oldLabel = opt.label;
+  const cnt = customers.filter(c => c.status === oldLabel).length;
+  // 1) 메모리 반영
   customers.forEach(c => { if(c.status === oldLabel) c.status = newLabel; });
   opt.label = newLabel;
   syncAllStatusSelects();
   renderStatusMgrList();
-  showGlobalToast('"' + oldLabel + '" → "' + newLabel + '" 변경 완료');
+  // 2) DB 영구 반영: 해당 상태 고객 일괄 변경 + 상태목록 저장
+  if(typeof isSbConfigured === 'function' && isSbConfigured()) {
+    try {
+      window._lastLocalChange = Date.now();
+      if(cnt > 0) await sbFetch(`customers?status=eq.${encodeURIComponent(oldLabel)}`, 'PATCH', { status: newLabel }, 'return=minimal');
+      await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      showGlobalToast('"' + oldLabel + '" → "' + newLabel + '" 변경 완료 (고객 ' + cnt + '건 DB 반영)');
+    } catch(e) {
+      showGlobalToast('⚠️ DB 반영 실패: ' + (e.message || e));
+    }
+  } else {
+    showGlobalToast('"' + oldLabel + '" → "' + newLabel + '" 변경 완료');
+  }
 }
 function mgrColorPreview(id, color) {
   // 색상 피커 드래그 중 실시간 미리보기 (가벼운 갱신: 목록 재렌더 안 함 → 피커 유지)
@@ -11241,6 +11292,16 @@ let _vstockCache = [];
 let _vstockFilter = 'all';
 let _currentVstock = null;
 let _vstockManualMode = false;
+function updateVstockNavBadge() {
+  const badge = document.getElementById('vstockNavBadge');
+  if(!badge) return;
+  const isAdmin = currentRole === 'admin';
+  let list = Array.isArray(_vstockCache) ? _vstockCache : [];
+  if(!isAdmin) list = list.filter(v => v.author_id === currentUserId || v.author === currentUser);
+  const n = list.filter(v => (v.status||'미완료') !== '완료').length;
+  if(n > 0) { badge.textContent = n > 99 ? '99+' : String(n); badge.style.display = ''; }
+  else { badge.style.display = 'none'; }
+}
 async function sbLoadVehicleStock() {
   if(!isSbConfigured()) return [];
   try {
@@ -11337,6 +11398,8 @@ async function submitVehicleStock() {
     // 차량재고 페이지가 열려있으면 목록 즉시 갱신
     if(document.getElementById('page-vehiclestock')?.classList.contains('active')) {
       try { await renderVehicleStockPage(); } catch(e){}
+    } else {
+      try { _vstockCache = await sbLoadVehicleStock(); updateVstockNavBadge(); } catch(e){}
     }
   } catch(e) { alert('요청 실패: ' + e.message); }
 }
@@ -11356,6 +11419,7 @@ function setVstockFilter(f, btn) {
   renderVehicleStockList();
 }
 function renderVehicleStockList() {
+  updateVstockNavBadge();
   const wrap = document.getElementById('vstockListWrap');
   if(!wrap) return;
   const isAdmin = currentRole === 'admin';
