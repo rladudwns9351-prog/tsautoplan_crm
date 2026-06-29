@@ -7866,7 +7866,9 @@ async function saveStatusOptionsToServer() {
   }
   try {
     await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
-    showGlobalToast('💾 상태 항목이 영구 저장되었습니다.');
+    syncAllStatusSelects();
+    if(typeof notifyDataChanged === 'function') notifyDataChanged('statusOptions');
+    showGlobalToast('💾 상태 항목이 저장되었습니다. 전 화면에 반영됨');
     closeModal('statusMgrModal');
   } catch(e) {
     alert('저장 실패: ' + e.message);
@@ -9073,10 +9075,11 @@ function renderStatusMgrList() {
       <!-- 색상 피커 -->
       <input type="color" value="${o.color}"
         title="색상 변경"
+        oninput="mgrColorPreview(${o.id}, this.value)"
         onchange="mgrUpdateColor(${o.id}, this.value)"
         style="width:28px;height:28px;padding:2px;background:none;border:1px solid var(--border2);border-radius:5px;cursor:pointer;flex-shrink:0;">
       <!-- 뱃지 미리보기 -->
-      <span style="flex-shrink:0;">${statusBadge(o.label)}</span>
+      <span id="mgrBadge_${o.id}" style="flex-shrink:0;">${statusBadge(o.label)}</span>
       <!-- 이름 편집 인풋 -->
       <input type="text" value="${o.label}" maxlength="10"
         onblur="mgrUpdateLabel(${o.id}, this.value)"
@@ -9124,13 +9127,22 @@ function mgrUpdateLabel(id, newLabel) {
   renderStatusMgrList();
   showGlobalToast('"' + oldLabel + '" → "' + newLabel + '" 변경 완료');
 }
-function mgrUpdateColor(id, color) {
+function mgrColorPreview(id, color) {
+  // 색상 피커 드래그 중 실시간 미리보기 (가벼운 갱신: 목록 재렌더 안 함 → 피커 유지)
   const opt = statusOptions.find(o => o.id === id);
-  if(opt) {
-    opt.color = color;
-    syncAllStatusSelects();
-    renderStatusMgrList();
-  }
+  if(!opt) return;
+  opt.color = color;
+  const badge = document.getElementById('mgrBadge_' + id);
+  if(badge) badge.innerHTML = statusBadge(opt.label);
+}
+function mgrUpdateColor(id, color) {
+  // 색 선택 확정 시: 메모리 반영 + 전체 화면(테이블/필터/뱃지) 즉시 동기화
+  const opt = statusOptions.find(o => o.id === id);
+  if(!opt) return;
+  opt.color = color;
+  const badge = document.getElementById('mgrBadge_' + id);
+  if(badge) badge.innerHTML = statusBadge(opt.label);
+  syncAllStatusSelects();   // 목록 전체 재렌더는 하지 않음(피커 보존)
 }
 function mgrDelete(id) {
   const opt = statusOptions.find(o => o.id === id);
