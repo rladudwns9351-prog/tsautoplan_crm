@@ -158,6 +158,21 @@
             <div class="page-sub" id="dateDisplay">2026년 5월 28일 목요일</div>
           </div>
         </div>
+        <!-- ===== 영업자 상담 활동 집계 (관리자) ===== -->
+        <div class="admin-only" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <div style="font-size:15px;font-weight:700;">📊 영업자 상담 활동 집계</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <select id="actAggMode" onchange="onActivityPeriodChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;">
+                <option value="month">월간</option><option value="year">연간</option>
+              </select>
+              <select id="actAggYear" onchange="renderActivityDashboardTable()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+              <select id="actAggMonth" onchange="renderActivityDashboardTable()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+              <button onclick="exportActivityExcel()" class="btn btn-primary btn-sm" style="font-size:11px;">📥 엑셀</button>
+            </div>
+          </div>
+          <div id="actAggTable" style="overflow-x:auto;"></div>
+        </div>
         <!-- ===== 관리자 기간 필터 (펀딩진행일자 기준) ===== -->
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
           <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 조회기간</span>
@@ -960,7 +975,7 @@
             <!-- 담당자 변경 (관리자 전용) -->
             
             <!-- 상태 변경 (관리자 + 직원 모두 드롭다운) -->
-            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val"><input type="text" id="detailCar" onblur="saveCustomerCar(this.value)" onkeydown="if(event.key===&#39;Enter&#39;) this.blur();" placeholder="관심차량 입력" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;text-align:right;max-width:170px;" onfocus="this.style.borderColor=&#39;var(--accent)&#39;" onblur_extra=""></span></div><div class="info-row" data-field="source" style="align-items:center;"><span class="info-key">유입경로</span><span class="info-val"><span id="detailSource">직영업</span><select id="detailSourceSel" class="admin-only" onchange="changeCustomerSource(this.value)" style="display:none;max-width:170px;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;text-overflow:ellipsis;"></select></span></div><div class="info-row" data-field="division" style="align-items:center;">
+            <div class="info-row" data-field="car"><span class="info-key">관심차량</span><span class="info-val"><input type="text" id="detailCar" onblur="saveCustomerCar(this.value)" onkeydown="if(event.key===&#39;Enter&#39;) this.blur();" placeholder="관심차량 입력" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;text-align:right;max-width:170px;" onfocus="this.style.borderColor=&#39;var(--accent)&#39;" onblur_extra=""></span></div><div class="info-row" data-field="wishCar"><span class="info-key">희망차종</span><span class="info-val"><input type="text" id="detailWishCar" onblur="saveCustomerWishCar(this.value)" onkeydown="if(event.key==='Enter') this.blur();" placeholder="희망차종 입력" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;text-align:right;max-width:170px;" onfocus="this.style.borderColor='var(--accent)'"></span></div><div class="info-row" data-field="source" style="align-items:center;"><span class="info-key">유입경로</span><span class="info-val"><span id="detailSource">직영업</span><select id="detailSourceSel" class="admin-only" onchange="changeCustomerSource(this.value)" style="display:none;max-width:170px;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;text-overflow:ellipsis;"></select></span></div><div class="info-row" data-field="division" style="align-items:center;">
               <span class="info-key">구분</span>
               <span class="info-val">
                 <select id="detailDivisionSel" onchange="changeCustomerDivision(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:4px 8px;font-family:inherit;outline:none;cursor:pointer;"><option value="">선택 안 함</option><option value="개인">개인</option><option value="법인">법인</option><option value="개인사업자">개인사업자</option></select>
@@ -1028,6 +1043,13 @@
         </div>
         <!-- Right: Tabs -->
         <div>
+          <div id="activityCounterPanel" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">📞 상담 활동 체크 <span id="activityOwner" style="font-size:11px;font-weight:500;color:var(--text3);margin-left:4px;"></span></div>
+              <div style="font-size:11px;color:var(--text3);">버튼 = +1 · ✕ = 취소</div>
+            </div>
+            <div id="activityCounterBtns" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
+          </div>
           <div class="tabs">
             <div class="tab active" onclick="switchTab(&#39;memo&#39;,this)">상담 메모</div>
             <div class="tab" onclick="switchTab(&#39;files&#39;,this)">고객 서류</div>
@@ -3357,6 +3379,7 @@ function customerToRow(c) {
     name:             c.name,
     phone:            c.phone,
     car:              c.car,
+    wish_car:         c.wishCar || null,
     source:           c.source,
     division:         c.division   || null,
     memo_tag:         c.memoTag    || null,
@@ -3387,6 +3410,7 @@ function rowToCustomer(r) {
     name:            r.name,
     phone:           r.phone,
     car:             r.car,
+    wishCar:         r.wish_car || '',
     source:          r.source,
     division:        r.division  || '',
     memoTag:         r.memo_tag  || '',
@@ -3511,18 +3535,40 @@ async function sbLoadCustomers() {
 }
 async function sbSaveCustomer(c) {
   const row = customerToRow(c);
-  const result = await sbFetch('customers?on_conflict=id', 'POST', [row]);
-  const saved = Array.isArray(result) ? result[0] : result;
-  if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
-  return saved ? rowToCustomer(saved) : null;
+  try {
+    const result = await sbFetch('customers?on_conflict=id', 'POST', [row]);
+    const saved = Array.isArray(result) ? result[0] : result;
+    if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+    return saved ? rowToCustomer(saved) : null;
+  } catch(e) {
+    if(String(e?.message||e).includes('wish_car')) {
+      delete row.wish_car; // DB에 컬럼 아직 없으면 제외 후 재시도
+      const result = await sbFetch('customers?on_conflict=id', 'POST', [row]);
+      const saved = Array.isArray(result) ? result[0] : result;
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      return saved ? rowToCustomer(saved) : null;
+    }
+    throw e;
+  }
 }
 async function sbUpdateCustomer(c) {
   const row = customerToRow(c);
   delete row.id; // PATCH 시 id는 URL에 포함, body에서 제거
-  const result = await sbFetch(`customers?id=eq.${c.id}`, 'PATCH', row);
-  const saved = Array.isArray(result) ? result[0] : result;
-  if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
-  return saved ? rowToCustomer(saved) : null;
+  try {
+    const result = await sbFetch(`customers?id=eq.${c.id}`, 'PATCH', row);
+    const saved = Array.isArray(result) ? result[0] : result;
+    if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+    return saved ? rowToCustomer(saved) : null;
+  } catch(e) {
+    if(String(e?.message||e).includes('wish_car')) {
+      delete row.wish_car; // DB에 컬럼 아직 없으면 제외 후 재시도
+      const result = await sbFetch(`customers?id=eq.${c.id}`, 'PATCH', row);
+      const saved = Array.isArray(result) ? result[0] : result;
+      if(typeof notifyDataChanged === 'function') notifyDataChanged('customers');
+      return saved ? rowToCustomer(saved) : null;
+    }
+    throw e;
+  }
 }
 async function sbDeleteCustomer(id) {
   const r = await sbFetch(`customers?id=eq.${id}`, 'DELETE');
@@ -3952,6 +3998,7 @@ function renderDashboard() {
     document.getElementById('adminDashboard').style.display = '';
     document.getElementById('staffDashboard').style.display = 'none';
     renderAdminDashboard();
+    if(typeof initActivityDashboard === 'function') initActivityDashboard();
   } else {
     document.getElementById('adminDashboard').style.display = 'none';
     document.getElementById('staffDashboard').style.display = '';
@@ -4786,6 +4833,8 @@ function openDetail(id) {
   document.getElementById('detailName').textContent = c.name;
   document.getElementById('detailPhone').value = c.phone || '';
   document.getElementById('detailCar').value = c.car || '';
+  { const _wc = document.getElementById('detailWishCar'); if(_wc) _wc.value = c.wishCar || ''; }
+  if(typeof loadActivityForCustomer === 'function') loadActivityForCustomer(c.id);
   document.getElementById('detailSource').textContent = c.source;
   fillSourceSelect(c.source || '');
   fillDivisionSelect(document.getElementById('detailDivisionSel'), c.division || '');
@@ -5061,6 +5110,216 @@ async function saveCustomerCar(newVal) {
   document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
   refreshAllViews();
   renderMemos();
+}
+// 희망차종 자동저장 (관리목적 · 메모 히스토리 남기지 않음 · 빈값=삭제 허용)
+async function saveCustomerWishCar(newVal) {
+  if(!currentCustomer) return;
+  window._lastLocalChange = Date.now();
+  const cleaned = (newVal||'').trim();
+  if(cleaned === (currentCustomer.wishCar||'')) return; // 변경 없음
+  const oldVal = currentCustomer.wishCar || '';
+  currentCustomer.wishCar = cleaned;
+  if(isSbConfigured()) {
+    try { await sbUpdateCustomer(currentCustomer); showGlobalToast('✓ 희망차종이 저장되었습니다.'); }
+    catch(e) {
+      showGlobalToast('⚠️ 저장 실패: ' + (e.message||e));
+      currentCustomer.wishCar = oldVal; // 롤백
+      const el = document.getElementById('detailWishCar'); if(el) el.value = oldVal;
+    }
+  }
+}
+// ============ 상담 활동 카운터 (activity_logs) ============
+// 실적 귀속 = 고객 담당자(assign) 기준. 누가 눌렀든 담당자 실적으로 집계.
+const ACTIVITY_TYPES  = ['통화','견적제공','카톡문자','심사진행','방문'];
+const ACTIVITY_LABELS = { '통화':'통화','견적제공':'견적제공','카톡문자':'카톡/문자','심사진행':'심사진행','방문':'방문' };
+let _activityCache = []; // 현재 상세 고객의 활동 로그 행 배열
+
+function _todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+async function loadActivityForCustomer(customerId) {
+  _activityCache = [];
+  if(!isSbConfigured() || customerId == null) { renderActivityCounter(); return; }
+  try {
+    const rows = await sbFetch('activity_logs?customer_id=eq.' + customerId + '&order=id.asc&select=*');
+    _activityCache = Array.isArray(rows) ? rows : [];
+  } catch(e) { console.warn('활동로그 로드 실패:', e); _activityCache = []; }
+  renderActivityCounter();
+}
+function renderActivityCounter() {
+  const box = document.getElementById('activityCounterBtns');
+  const owner = document.getElementById('activityOwner');
+  if(!box) return;
+  const staff = (currentCustomer && currentCustomer.assign) ? currentCustomer.assign : (currentUser || '');
+  if(owner) owner.textContent = staff ? '(' + staff + ' 실적)' : '';
+  box.innerHTML = ACTIVITY_TYPES.map(t => {
+    const cnt = _activityCache.filter(a => a.activity_type === t).length;
+    const label = ACTIVITY_LABELS[t] || t;
+    const xBtn = cnt > 0
+      ? `<div onclick="event.stopPropagation();unbumpActivity('${t}')" title="취소(-1)" style="position:absolute;top:3px;right:4px;font-size:11px;color:var(--text3);padding:0 4px;border-radius:3px;line-height:1.4;transition:.15s;" onmouseover="this.style.color='var(--red)';this.style.background='rgba(255,68,68,.15)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">✕</div>`
+      : '';
+    return `<div onclick="bumpActivity('${t}')" style="position:relative;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:12px 4px 8px;text-align:center;cursor:pointer;transition:.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+        ${xBtn}
+        <div style="font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:${cnt>0?'var(--accent)':'var(--text3)'};line-height:1;">${cnt}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:5px;">${label}</div>
+      </div>`;
+  }).join('');
+}
+async function bumpActivity(type) {
+  if(!currentCustomer) return;
+  if(!ACTIVITY_TYPES.includes(type)) return;
+  if(!isSbConfigured()) { showGlobalToast('⚠️ DB 연결이 필요합니다.'); return; }
+  const staff = currentCustomer.assign || currentUser || '';
+  if(!staff) { showGlobalToast('⚠️ 담당자가 지정되어야 집계됩니다.'); return; }
+  window._lastLocalChange = Date.now();
+  const row = {
+    customer_id: currentCustomer.id,
+    staff: staff,
+    activity_type: type,
+    log_date: _todayStr(),
+    created_by: currentUser || ''
+  };
+  try {
+    const res = await sbFetch('activity_logs', 'POST', [row]);
+    const saved = Array.isArray(res) ? res[0] : res;
+    if(saved) _activityCache.push(saved);
+    renderActivityCounter();
+  } catch(e) {
+    showGlobalToast('⚠️ 활동 저장 실패: ' + (e.message||e));
+  }
+}
+async function unbumpActivity(type) {
+  if(!currentCustomer) return;
+  if(!isSbConfigured()) return;
+  // 이 고객·해당 항목의 가장 최근(=id 최대) 1건 삭제
+  const matches = _activityCache.filter(a => a.activity_type === type);
+  if(!matches.length) return;
+  const last = matches.reduce((m,a) => (a.id > m.id ? a : m), matches[0]);
+  window._lastLocalChange = Date.now();
+  try {
+    await sbFetch('activity_logs?id=eq.' + last.id, 'DELETE');
+    _activityCache = _activityCache.filter(a => a.id !== last.id);
+    renderActivityCounter();
+  } catch(e) {
+    showGlobalToast('⚠️ 취소 실패: ' + (e.message||e));
+  }
+}
+// ============ 관리자 대시보드 · 영업자 활동 집계 ============
+let _allActivityCache = [];
+async function initActivityDashboard() {
+  const ySel = document.getElementById('actAggYear');
+  const mSel = document.getElementById('actAggMonth');
+  if(ySel && ySel.options.length === 0) {
+    const ty = new Date().getFullYear();
+    let h = ''; for(let y=ty; y>=ty-3; y--) h += `<option value="${y}">${y}년</option>`;
+    ySel.innerHTML = h; ySel.value = String(ty); // 기본=올해
+  }
+  if(mSel && mSel.options.length === 0) {
+    let h = ''; for(let m=1; m<=12; m++) h += `<option value="${m}">${m}월</option>`;
+    mSel.innerHTML = h; mSel.value = String(new Date().getMonth()+1); // 기본=이번달
+  }
+  if(isSbConfigured()) {
+    try { const r = await sbFetch('activity_logs?order=id.asc&select=*'); _allActivityCache = Array.isArray(r)?r:[]; }
+    catch(e) { console.warn('활동집계 로드 실패:', e); _allActivityCache = []; }
+  }
+  onActivityPeriodChange();
+}
+function onActivityPeriodChange() {
+  const mode = document.getElementById('actAggMode')?.value || 'month';
+  const mSel = document.getElementById('actAggMonth');
+  if(mSel) mSel.style.display = (mode === 'year') ? 'none' : '';
+  renderActivityDashboardTable();
+}
+function _filteredActivityRows() {
+  const mode = document.getElementById('actAggMode')?.value || 'month';
+  const y = document.getElementById('actAggYear')?.value;
+  const m = document.getElementById('actAggMonth')?.value;
+  return _allActivityCache.filter(a => {
+    if(!a.log_date) return false;
+    const p = String(a.log_date).split('-');
+    if(String(parseInt(p[0])) !== String(parseInt(y))) return false;
+    if(mode === 'month' && String(parseInt(p[1])) !== String(parseInt(m))) return false;
+    return true;
+  });
+}
+function _aggregateActivity(rows) {
+  const set = new Set();
+  if(typeof staffList !== 'undefined') staffList.filter(u=>u.active && u.role==='staff').forEach(u=>set.add(u.name));
+  rows.forEach(a => { if(a.staff) set.add(a.staff); });
+  const staffs = [...set].sort((a,b)=>String(a).localeCompare(String(b),'ko'));
+  const agg = {};
+  staffs.forEach(s => { agg[s] = {}; ACTIVITY_TYPES.forEach(t => agg[s][t] = 0); });
+  rows.forEach(a => { if(agg[a.staff] && ACTIVITY_TYPES.includes(a.activity_type)) agg[a.staff][a.activity_type]++; });
+  return { staffs, agg };
+}
+function renderActivityDashboardTable() {
+  const box = document.getElementById('actAggTable'); if(!box) return;
+  const rows = _filteredActivityRows();
+  const { staffs, agg } = _aggregateActivity(rows);
+  if(!staffs.length) {
+    box.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:24px;">해당 기간 활동 데이터가 없습니다.</div>';
+    return;
+  }
+  const colTot = {}; ACTIVITY_TYPES.forEach(t => colTot[t] = 0);
+  let grand = 0;
+  let body = '';
+  staffs.forEach(s => {
+    let rowTot = 0;
+    let tds = '';
+    ACTIVITY_TYPES.forEach(t => {
+      const v = agg[s][t]; colTot[t] += v; rowTot += v;
+      tds += `<td style="text-align:center;padding:9px 8px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;${v>0?'':'color:var(--text3);'}">${v}</td>`;
+    });
+    grand += rowTot;
+    body += `<tr><td style="padding:9px 12px;border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap;">${s}</td>${tds}<td style="text-align:center;padding:9px 8px;border-bottom:1px solid var(--border);font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent);">${rowTot}</td></tr>`;
+  });
+  let footTds = '';
+  ACTIVITY_TYPES.forEach(t => { footTds += `<td style="text-align:center;padding:9px 8px;font-weight:700;font-family:'JetBrains Mono',monospace;">${colTot[t]}</td>`; });
+  const head = ACTIVITY_TYPES.map(t => `<th style="padding:9px 8px;font-size:11px;color:var(--text2);font-weight:600;text-align:center;white-space:nowrap;">${ACTIVITY_LABELS[t]||t}</th>`).join('');
+  box.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:520px;">
+    <thead><tr style="border-bottom:1px solid var(--border2);">
+      <th style="padding:9px 12px;font-size:11px;color:var(--text2);font-weight:600;text-align:left;">영업자</th>${head}
+      <th style="padding:9px 8px;font-size:11px;color:var(--text2);font-weight:600;text-align:center;">합계</th>
+    </tr></thead>
+    <tbody>${body}</tbody>
+    <tfoot><tr style="border-top:2px solid var(--border2);background:var(--bg3);">
+      <td style="padding:9px 12px;font-weight:700;">합계</td>${footTds}
+      <td style="text-align:center;padding:9px 8px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent);">${grand}</td>
+    </tr></tfoot>
+  </table>`;
+}
+function exportActivityExcel() {
+  if(typeof XLSX === 'undefined') { showGlobalToast('⚠️ 엑셀 모듈 로드 실패'); return; }
+  const mode = document.getElementById('actAggMode')?.value || 'month';
+  const y = document.getElementById('actAggYear')?.value;
+  const m = document.getElementById('actAggMonth')?.value;
+  const periodLabel = (mode === 'year') ? `${y}년` : `${y}년${m}월`;
+  const rows = _filteredActivityRows();
+  const { staffs, agg } = _aggregateActivity(rows);
+  // 시트1: 요약 (영업자 × 항목)
+  const aoa1 = [['영업자', ...ACTIVITY_TYPES.map(t=>ACTIVITY_LABELS[t]||t), '합계']];
+  const colTot = {}; ACTIVITY_TYPES.forEach(t => colTot[t] = 0); let grand = 0;
+  staffs.forEach(s => {
+    let rt = 0; const r = [s];
+    ACTIVITY_TYPES.forEach(t => { const v = agg[s][t]; r.push(v); colTot[t]+=v; rt+=v; });
+    r.push(rt); grand += rt; aoa1.push(r);
+  });
+  aoa1.push(['합계', ...ACTIVITY_TYPES.map(t=>colTot[t]), grand]);
+  // 시트2: 일자별 상세 (raw)
+  const cmap = {}; if(typeof customers !== 'undefined') customers.forEach(c => cmap[c.id] = c.name);
+  const aoa2 = [['날짜','영업자','항목','고객명','입력자','입력시각']];
+  rows.slice().sort((a,b)=> String(a.log_date).localeCompare(String(b.log_date)) || (a.id-b.id)).forEach(a => {
+    aoa2.push([
+      a.log_date, a.staff, ACTIVITY_LABELS[a.activity_type]||a.activity_type,
+      cmap[a.customer_id] || ('#'+a.customer_id), a.created_by || '',
+      a.created_at ? new Date(a.created_at).toLocaleString('ko-KR') : ''
+    ]);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa1), '요약');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa2), '일자별상세');
+  XLSX.writeFile(wb, `영업자활동집계_${periodLabel}.xlsx`);
 }
 async function changeCustomerMemoTag(newVal) {
   if(!currentCustomer) return;
@@ -6183,6 +6442,14 @@ async function saveFunding() {
     }
   }
   let saveSuccess = false;
+  // 펀딩체크 확인/제거 상태 보존 (수정 폼에 없는 필드라 누락 시 false로 덮어써지는 것 방지)
+  if(editingFundingId) {
+    const _prevF = fundingList.find(f => f.id === editingFundingId);
+    if(_prevF) {
+      entry.checkViewed    = _prevF.checkViewed    === true;
+      entry.checkDismissed = _prevF.checkDismissed === true;
+    }
+  }
   try {
     let saved;
     if(isSbConfigured()) {
