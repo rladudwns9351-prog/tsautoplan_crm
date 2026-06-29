@@ -7112,10 +7112,18 @@ function goPaginate(key, n) {
 function resetPage(key) { setPage(key, 1); }
 const APP_SETTINGS_TABLE = 'app_settings';
 async function sbLoadSetting(key) {
+  // 중복 행이 있어도 '가장 최근' 값을 읽음 (오래된 행으로 되돌아가는 문제 방지)
   try {
-    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}&select=value`);
-    return (rows && rows[0]) ? rows[0].value : null;
-  } catch(e) { return null; }
+    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}&select=value,updated_at&order=updated_at.desc.nullslast&limit=1`);
+    if(Array.isArray(rows) && rows.length) return rows[0].value;
+    return null;
+  } catch(e) {
+    // 정렬 쿼리 미지원 등 실패 시 단순 조회로 폴백
+    try {
+      const rows2 = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.${encodeURIComponent(key)}&select=value`);
+      return (rows2 && rows2[0]) ? rows2[0].value : null;
+    } catch(_) { return null; }
+  }
 }
 async function sbSaveSetting(key, value) {
   const row = { key, value, updated_at: new Date().toISOString() };
@@ -7865,7 +7873,25 @@ async function saveStatusOptionsToServer() {
     return;
   }
   try {
-    await sbSaveSetting('statusOptions', JSON.parse(JSON.stringify(statusOptions)));
+    const val = JSON.parse(JSON.stringify(statusOptions));
+    const nowIso = new Date().toISOString();
+    // 중복 행 대비: 동일 key 의 '모든' 행을 새 값으로 덮어쓰기 (삭제 반영 보장)
+    const patched = await sbFetch(
+      `${APP_SETTINGS_TABLE}?key=eq.statusOptions`,
+      'PATCH',
+      { value: val, updated_at: nowIso }
+    );
+    if(!Array.isArray(patched) || patched.length === 0) {
+      await sbFetch(APP_SETTINGS_TABLE, 'POST', [{ key:'statusOptions', value: val, updated_at: nowIso }]);
+    }
+    // 검증: 모든 행이 새 길이(삭제 반영)로 바뀌었는지 확인
+    const rows = await sbFetch(`${APP_SETTINGS_TABLE}?key=eq.statusOptions&select=value`);
+    const ok = Array.isArray(rows) && rows.length > 0 &&
+               rows.every(r => Array.isArray(r.value) && r.value.length === val.length);
+    if(!ok) {
+      alert('저장 확인 실패: 서버에 반영되지 않았습니다.\n(중복/권한 문제 가능 — 새로고침 후 재확인 필요)');
+      return;
+    }
     syncAllStatusSelects();
     if(typeof notifyDataChanged === 'function') notifyDataChanged('statusOptions');
     showGlobalToast('💾 상태 항목이 저장되었습니다. 전 화면에 반영됨');
