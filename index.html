@@ -5154,7 +5154,8 @@ function renderActivityCounter() {
   const staff = (currentCustomer && currentCustomer.assign) ? currentCustomer.assign : (currentUser || '');
   if(owner) owner.textContent = staff ? '(' + staff + ' 실적)' : '';
   box.innerHTML = ACTIVITY_TYPES.map(t => {
-    const cnt = _activityCache.filter(a => a.activity_type === t).length;
+    // 현재 담당자가 남긴 것만 카운트 → 재배분 시 새 담당자는 0부터 (이전 담당자 로그는 DB 보존, 대시보드 실적 유지)
+    const cnt = _activityCache.filter(a => a.activity_type === t && a.staff === staff).length;
     const label = ACTIVITY_LABELS[t] || t;
     const xBtn = cnt > 0
       ? `<div onclick="event.stopPropagation();unbumpActivity('${t}')" title="취소(-1)" style="position:absolute;top:3px;right:4px;font-size:11px;color:var(--text3);padding:0 4px;border-radius:3px;line-height:1.4;transition:.15s;" onmouseover="this.style.color='var(--red)';this.style.background='rgba(255,68,68,.15)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">✕</div>`
@@ -5192,8 +5193,9 @@ async function bumpActivity(type) {
 async function unbumpActivity(type) {
   if(!currentCustomer) return;
   if(!isSbConfigured()) return;
-  // 이 고객·해당 항목의 가장 최근(=id 최대) 1건 삭제
-  const matches = _activityCache.filter(a => a.activity_type === type);
+  // 이 고객·해당 항목 중 현재 담당자가 남긴 가장 최근(=id 최대) 1건만 삭제
+  const staff = currentCustomer.assign || currentUser || '';
+  const matches = _activityCache.filter(a => a.activity_type === type && a.staff === staff);
   if(!matches.length) return;
   const last = matches.reduce((m,a) => (a.id > m.id ? a : m), matches[0]);
   window._lastLocalChange = Date.now();
@@ -5491,7 +5493,7 @@ function latestConsultDate(c) {
 var dbSortKey = '';   // '', 'lastConsult', 'nextConsult'
 var dbSortDir = 'desc'; // 'asc' | 'desc'
 function dbSortVal(c, key) {
-  if(key === 'lastConsult') return consultDateISO(c) || c.date || '';
+  if(key === 'lastConsult') return consultSortKey(c);  // 날짜만이 아닌 전체 시각(시:분:초) 기준 → 재배분/최근활동이 상단
   if(key === 'nextConsult') return getNextConsult(c) || '';
   return '';
 }
