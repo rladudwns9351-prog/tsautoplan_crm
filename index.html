@@ -110,6 +110,9 @@
       <div class="nav-item" onclick="goPage(&#39;alarmperiodic&#39;,this)" style="margin-left:8px;border-left:2px solid var(--border2);">
         주기별 알람
       </div>
+      <div class="nav-item" onclick="window.open(&#39;https://notebooklm.google.com/&#39;,&#39;_blank&#39;,&#39;noopener&#39;)">
+        금융사ai
+      </div>
       <div class="nav-item" onclick="goPage(&#39;script&#39;,this)">
         스크립트생성
       </div>
@@ -10200,7 +10203,9 @@ async function saveCustomer() {
     assign:document.getElementById('f_assign').value,
     status:document.getElementById('f_status').value,
     date:new Date().toISOString().split('T')[0],
-    memos: memo?[{text:memo,author:currentUser,date:new Date().toLocaleDateString('ko-KR')}]:[],
+    memos: memo
+      ?[{text:memo,author:currentUser,date:new Date().toLocaleDateString('ko-KR'),dateISO:new Date().toISOString().split('T')[0],dateTS:new Date().toISOString()}]
+      :[{text:'[배분] '+(document.getElementById('f_assign').value||'')+'에게 신규 배분',author:currentUser,date:new Date().toLocaleDateString('ko-KR'),dateISO:new Date().toISOString().split('T')[0],dateTS:new Date().toISOString(),resetConsult:true,isSystem:true}],
     files:[],
     important:false, retrieved:false, nextConsult:'',
     originalAssignedManager:   document.getElementById('f_assign').value || null,
@@ -12559,7 +12564,7 @@ async function confirmBulkImport(){
     name:p.name, phone:p.phone, car:p.car, source:p.source,
     division:p.division, memoTag:'', assign:p.assign, status:p.status,
     date:today,
-    memos:[{text:p.memo, author:currentUser, date:localeDate}],
+    memos:[{text:p.memo, author:currentUser, date:localeDate, dateISO:today, dateTS:new Date().toISOString()}],
     files:[], important:false, retrieved:false, nextConsult:'',
     originalAssignedManager:p.assign||null,
     originalAssignedManagerId:p.assign||null,
