@@ -4839,7 +4839,7 @@ function openDetail(id) {
   { const _wc = document.getElementById('detailWishCar'); if(_wc) _wc.value = c.wishCar || ''; }
   if(typeof loadActivityForCustomer === 'function') loadActivityForCustomer(c.id);
   document.getElementById('detailSource').textContent = c.source;
-  fillSourceSelect(c.source || '');
+  fillDetailSourceSelect(c.source || '');
   fillDivisionSelect(document.getElementById('detailDivisionSel'), c.division || '');
   fillMemoTagSelect(document.getElementById('detailMemoTagSel'), c.memoTag || '');
   try { refreshDetailFieldOrder(); } catch(e){}
@@ -4960,7 +4960,7 @@ async function syncFundingAssign(customerId, newAssign) {
   }
 }
 // 유입경로 드롭다운 채우기 (관리자만 표시) — 현재값 기본 선택, 기존 데이터의 경로 + 직영업 동적 구성
-function fillSourceSelect(current) {
+function fillDetailSourceSelect(current) {
   const sel = document.getElementById('detailSourceSel');
   const txt = document.getElementById('detailSource');
   if(!sel || !txt) return;
