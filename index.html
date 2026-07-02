@@ -5257,7 +5257,15 @@ function _aggregateActivity(rows) {
   const set = new Set();
   if(typeof staffList !== 'undefined') staffList.filter(u=>u.active && u.role==='staff').forEach(u=>set.add(u.name));
   rows.forEach(a => { if(a.staff) set.add(a.staff); });
-  const staffs = [...set].sort((a,b)=>String(a).localeCompare(String(b),'ko'));
+  const uidMap = {};
+  if(typeof staffList !== 'undefined') staffList.forEach(u=>{ if(u.name) uidMap[u.name] = u.userid || ''; });
+  const staffs = [...set].sort((a,b)=>{
+    const ua = uidMap[a], ub = uidMap[b];
+    if(ua && ub) return String(ua).localeCompare(String(ub),'en');
+    if(ua) return -1;
+    if(ub) return 1;
+    return String(a).localeCompare(String(b),'ko');
+  });
   const agg = {};
   staffs.forEach(s => { agg[s] = {}; ACTIVITY_TYPES.forEach(t => agg[s][t] = 0); });
   rows.forEach(a => { if(agg[a.staff] && ACTIVITY_TYPES.includes(a.activity_type)) agg[a.staff][a.activity_type]++; });
