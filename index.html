@@ -8556,10 +8556,12 @@ function colFilterDB(keepPage) {
   const q      = (document.getElementById('dbSearchQ')?.value||'').toLowerCase();
   const topStatus = document.getElementById('dbStatusFilter')?.value||'';
   const topSource = document.getElementById('dbSourceFilter')?.value||'';
+  // 이름/연락처/차량 검색 입력 시(관리자) 구디비·종료디비까지 통합 조회
+  const _searchAll = currentRole==='admin' && !!(q || name || phone || car);
   let list = customers.filter(c=>{
     if(dbViewMode==='gudb'){ if(c.assign!=='구디비') return false; }
     else if(dbViewMode==='ended'){ if(c.assign!=='종료디비') return false; }
-    else if(!(q && currentRole==='admin') && (c.assign==='구디비'||c.assign==='종료디비')) return false;
+    else if(!_searchAll && (c.assign==='구디비'||c.assign==='종료디비')) return false;
     if(currentRole!=='admin' && c.assign!==currentUser) return false;
     if(currentRole!=='admin' && c.retrieved) return false;
     if(dbImportantOnly && !c.important) return false;
@@ -8570,7 +8572,7 @@ function colFilterDB(keepPage) {
     if(source && c.source!==source) return false;
     if(division && (c.division||'')!==division) return false;
     if(memoTag && (c.memoTag||'')!==memoTag) return false;
-    if(assign && c.assign!==assign && !(q && currentRole==='admin')) return false;
+    if(assign && c.assign!==assign && !_searchAll) return false;
     if(status && c.status!==status) return false;
     if(q && !c.name.toLowerCase().includes(q) && !c.phone.includes(q) && !c.car.toLowerCase().includes(q)) return false;
     if(topStatus && c.status!==topStatus) return false;
