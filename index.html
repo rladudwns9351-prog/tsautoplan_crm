@@ -8274,7 +8274,7 @@ async function saveStatusOptionsToServer() {
 function syncSourceSelects() {
   sortSourceOptions();
   const fSrc = document.getElementById('f_source');
-  if(fSrc) {
+  if(fSrc && !window._existingCustMode) {
     const prev = fSrc.value;
     fSrc.innerHTML = sourceOptions.map(s=>'<option value="'+s+'"'+(s===prev?' selected':'')+'>'+s+'</option>').join('');
   }
