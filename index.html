@@ -83,6 +83,9 @@
       <div class="nav-item" onclick="openFundingModal(null)" style="margin-left:8px;border-left:2px solid var(--border2);">
         직영업 펀딩등록
       </div>
+      <div class="nav-item" onclick="openExistingCustModal()" style="margin-left:8px;border-left:2px solid var(--border2);">
+        기고객 DB등록
+      </div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">통계</div>
@@ -4695,7 +4698,7 @@ function renderStaffDashboard() {
   const contracted  = myInPeriod.filter(c => c.status === '계약완료').length;
   const consulting  = myInPeriod.filter(c => c.status === '상담중' || c.status === '신규문의').length;
   const fundingDone = myInPeriod.filter(c => c.status === '펀딩완료').length;
-  const isDirect = (c) => (c.source === '펀딩등록' || c.source === '직영업');
+  const isDirect = (c) => (c.source === '펀딩등록' || c.source === '직영업' || c.source === '기존고객 ★');
   const directContracts = myInPeriod.filter(c =>
     isDirect(c) && (c.status === '계약완료' || c.status === '펀딩완료')
   ).length;
@@ -5725,9 +5728,10 @@ function isNewDB(c) {
 }
 function directBadge(c) {
   if(!c) return '';
-  if(c.source === '펀딩등록' || c.source === '직영업') {
-    return ' <span style="font-size:9px;font-weight:700;background:rgba(255,153,68,.18);color:#ff9944;border:1px solid rgba(255,153,68,.5);border-radius:3px;padding:1px 5px;margin-left:4px;">직영업</span>';
-  }
+  const _badge = ' <span style="font-size:9px;font-weight:700;background:rgba(255,153,68,.18);color:#ff9944;border:1px solid rgba(255,153,68,.5);border-radius:3px;padding:1px 5px;margin-left:4px;">직영업</span>';
+  if(c.source === '펀딩등록' || c.source === '직영업') return _badge;
+  // 기고객은 펀딩이 등록된 경우에만 직영업 마크 표시
+  if(c.source === '기존고객 ★' && typeof fundingList !== 'undefined' && Array.isArray(fundingList) && fundingList.some(f=>f.customerId===c.id)) return _badge;
   return '';
 }
 function getNextConsult(c) {
@@ -6986,7 +6990,7 @@ function renderFundingPage() {
         '<input type="checkbox" class="funding-check" data-id="'+f.id+'" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);">'+
       '</td>'+
       '<td style="text-align:center;font-size:12px;color:var(--text3);">'+(pg.total-(pg.startIndex+i))+'</td>'+
-      '<td style="font-weight:600;white-space:nowrap;">'+escapeHtml(f.customerName||'')+(linkedC && linkedC.source==='직영업' ? ' <span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,153,68,.4);margin-left:4px;letter-spacing:.3px;">직영업</span>' : '')+fileBadge+'</td>'+
+      '<td style="font-weight:600;white-space:nowrap;">'+escapeHtml(f.customerName||'')+(linkedC && (linkedC.source==='직영업'||linkedC.source==='기존고객 ★') ? ' <span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,153,68,.4);margin-left:4px;letter-spacing:.3px;">직영업</span>' : '')+fileBadge+'</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">'+f.phone+'</td>'+
       '<td style="font-size:12px;white-space:nowrap;">'+f.car+(colorStr?' <span style="color:var(--text3);font-size:10px;">'+colorStr+'</span>':'')+'</td>'+
       '<td style="font-size:12px;color:var(--text2);white-space:nowrap;">'+f.assign+'</td>'+
@@ -7476,6 +7480,8 @@ async function loadAppSettings() {
     sortSourceOptions();
     syncSourceSelects();
   }
+  // 기고객 DB등록용 고정 유입경로는 항상 확보 (필터/조회 가능하도록)
+  if(!sourceOptions.includes('기존고객 ★')) { sourceOptions.push('기존고객 ★'); sortSourceOptions(); syncSourceSelects(); }
   const stats = await sbLoadSetting('statusOptions');
   if(Array.isArray(stats) && stats.length > 0) {
     statusOptions.length = 0;
@@ -8003,12 +8009,12 @@ function renderDBStatsRealtime() {
     if(toVal   && d > toVal)   return false;
     return true;
   }
-  const totalInRange = customers.filter(c => inRange(c.date)).length;
+  const totalInRange = customers.filter(c => inRange(c.date) && isDistributedDB(c)).length;
   document.getElementById('statsTotalDB').textContent = totalInRange;
   const active2 = staffList.filter(u => u.active && u.role === 'staff');
   function buildStaffDB(uName) {
     const trimName = (uName || '').trim();
-    return customers.filter(c => (c.assign || '').trim() === trimName && inRange(c.date));
+    return customers.filter(c => (c.assign || '').trim() === trimName && inRange(c.date) && isDistributedDB(c));
   }
   if(currentRole !== 'admin') {
     const me = staffList.find(u => (u.name || '').trim() === (currentUser || '').trim());
@@ -8079,7 +8085,9 @@ function renderStaffStatCard(u, uDB) {
     '</div>'+
   '</div>';
 }
-let sourceOptions = ['네이버','인스타그램','카카오','지인소개','기타'];
+let sourceOptions = ['네이버','인스타그램','카카오','지인소개','기타','기존고객 ★'];
+// 배분통계 전용: 관리자가 실제 배분한 DB만 true (직영업·펀딩등록·기고객 제외)
+function isDistributedDB(c){ return !!c && c.source !== '직영업' && c.source !== '펀딩등록' && c.source !== '기존고객 ★'; }
 let divisionOptions = ['개인','법인','개인사업자'];
 let memoTagOptions = ['조건맞으면즉시','4대보험가입 직장인'];
 function openSourceMgrModal() {
@@ -9603,9 +9611,36 @@ function openAddModal() {
     sel.disabled = false;
     sel.style.opacity = '1';
   }
-  fillSourceSelect(document.getElementById('f_source'), '');
+  const srcEl = document.getElementById('f_source');
+  fillSourceSelect(srcEl, '');
+  srcEl.disabled = false; srcEl.style.opacity = '1';
   fillDivisionSelect(document.getElementById('f_division'), '');
   fillMemoTagSelect(document.getElementById('f_memoTag'), '');
+  window._existingCustMode = false;
+  const _t = document.querySelector('#addModal .modal-title'); if(_t) _t.textContent = '신규 고객 등록';
+  document.getElementById('addModal').classList.add('open');
+}
+// 기고객 DB등록: 유입경로=기존고객 고정, 담당자=본인(영업자) 고정 / 그 외 신규등록과 동일
+function openExistingCustModal() {
+  renderAddModalFields();
+  // 담당자
+  const selA = document.getElementById('f_assign');
+  fillAssignSelect(selA, currentRole === 'staff' ? currentUser : getActiveStaff()[0]?.name || '');
+  if(currentRole === 'staff') {
+    selA.value = currentUser; selA.disabled = true; selA.style.opacity = '0.6';
+  } else {
+    // 관리자는 대상 영업자 선택 가능
+    selA.disabled = false; selA.style.opacity = '1';
+  }
+  // 유입경로: 기존고객 고정
+  const selS = document.getElementById('f_source');
+  if(!sourceOptions.includes('기존고객 ★')) sourceOptions.push('기존고객 ★');
+  fillSourceSelect(selS, '기존고객 ★');
+  selS.value = '기존고객 ★'; selS.disabled = true; selS.style.opacity = '0.6';
+  fillDivisionSelect(document.getElementById('f_division'), '');
+  fillMemoTagSelect(document.getElementById('f_memoTag'), '');
+  window._existingCustMode = true;
+  const _t = document.querySelector('#addModal .modal-title'); if(_t) _t.textContent = '기고객 DB 등록';
   document.getElementById('addModal').classList.add('open');
 }
 const ADD_MODAL_DEFAULT_FIELDS = [
@@ -10336,11 +10371,13 @@ function exportDBStatsExcel() {
   const rows = activeStaff.map(u=>{
     const name = u.name;
     const newDB = customers.filter(c=>{
+      if(!isDistributedDB(c)) return false;
       const effMgr = c.originalAssignedManager || c.assign;
       if(effMgr !== name) return false;
       return inRange(c.firstAssignedAt || c.date || '', fromVal, toVal);
     });
     const oldDB = customers.filter(c=>{
+      if(!isDistributedDB(c)) return false;
       if(c.assign !== name) return false;
       if(!c.originalAssignedManager || c.originalAssignedManager === name) return false;
       return inRange(c.reassignDate || c.date || '', fromVal, toVal);
@@ -10422,10 +10459,10 @@ function renderDBStats() {
   }
   const liveStats = registeredStaff.map(u=>({
     name: u.name,
-    total:    customers.filter(c=>c.assign===u.name && !c.retrieved && inRange2(c.date||'',fromVal2,toVal2)).length,
-    absent:   customers.filter(c=>c.assign===u.name && !c.retrieved && inRange2(c.date||'',fromVal2,toVal2) && c.status==='부재').length,
-    contract: customers.filter(c=>c.assign===u.name && !c.retrieved && inRange2(c.date||'',fromVal2,toVal2) && c.status==='계약완료').length,
-    consult:  customers.filter(c=>c.assign===u.name && !c.retrieved && inRange2(c.date||'',fromVal2,toVal2) && c.status==='상담중').length,
+    total:    customers.filter(c=>c.assign===u.name && !c.retrieved && isDistributedDB(c) && inRange2(c.date||'',fromVal2,toVal2)).length,
+    absent:   customers.filter(c=>c.assign===u.name && !c.retrieved && isDistributedDB(c) && inRange2(c.date||'',fromVal2,toVal2) && c.status==='부재').length,
+    contract: customers.filter(c=>c.assign===u.name && !c.retrieved && isDistributedDB(c) && inRange2(c.date||'',fromVal2,toVal2) && c.status==='계약완료').length,
+    consult:  customers.filter(c=>c.assign===u.name && !c.retrieved && isDistributedDB(c) && inRange2(c.date||'',fromVal2,toVal2) && c.status==='상담중').length,
   }));
   const maxTotal = Math.max(...liveStats.map(s=>s.total), 1);
   const H = 140;
