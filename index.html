@@ -7477,11 +7477,13 @@ async function loadAppSettings() {
   if(Array.isArray(srcs) && srcs.length > 0) {
     sourceOptions.length = 0;
     srcs.forEach(s => sourceOptions.push(s));
+    // 기고객 DB등록용 고정 유입경로는 항상 확보 (필터 초기화 방지 위해 sync 前에 추가)
+    if(!sourceOptions.includes('기존고객 ★')) sourceOptions.push('기존고객 ★');
     sortSourceOptions();
     syncSourceSelects();
+  } else if(!sourceOptions.includes('기존고객 ★')) {
+    sourceOptions.push('기존고객 ★'); sortSourceOptions(); syncSourceSelects();
   }
-  // 기고객 DB등록용 고정 유입경로는 항상 확보 (필터/조회 가능하도록)
-  if(!sourceOptions.includes('기존고객 ★')) { sourceOptions.push('기존고객 ★'); sortSourceOptions(); syncSourceSelects(); }
   const stats = await sbLoadSetting('statusOptions');
   if(Array.isArray(stats) && stats.length > 0) {
     statusOptions.length = 0;
