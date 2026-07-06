@@ -10279,8 +10279,8 @@ async function sendSmsBulk(testMode) {
   const body = document.getElementById('smsBody').value.trim();
   if (!body) { alert('메시지 본문을 입력해주세요.'); return; }
   if (smsRecipients.length === 0) { alert('수신자를 1명 이상 추가해주세요.'); return; }
-  // 광고성(금액/키워드) 감지 → 실발송 차단, 관리자 메일 발송요청
-  if (!testMode && detectAdContent(body)) {
+  // 광고성(금액/키워드) 감지 → 실발송·테스트 모두 차단, 관리자 메일 발송요청
+  if (detectAdContent(body)) {
     if (!confirm('💰 금액·광고성 내용이 감지되었습니다.\n\nAPI 즉시발송은 제한됩니다(스팸제재 방지).\n[확인]을 누르면 관리자에게 발송요청이 전달되고,\n관리자가 알리고에서 직접 발송합니다.\n\n발송요청 하시겠습니까?')) return;
     try {
       const mr = await sendAdRequestMail();
