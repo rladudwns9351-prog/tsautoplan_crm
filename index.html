@@ -3221,12 +3221,13 @@
 </div>
 <!-- ===== 파일 미리보기 모달 ===== -->
 <div class="modal-bg" id="filePreviewModal">
-  <div class="modal" style="width:90vw;max-width:1000px;height:88vh;padding:0;display:flex;flex-direction:column;">
+  <div class="modal" style="width:90vw;max-width:1000px;height:88vh;padding:0;display:flex;flex-direction:column;position:relative;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--bg2);">
       <div style="display:flex;align-items:center;gap:10px;min-width:0;">
         <span id="fpv_icon" style="font-size:20px;">📄</span>
         <span id="fpv_name" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
         <span id="fpv_size" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;"></span>
+        <span id="fpv_counter" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;"></span>
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost btn-sm" onclick="downloadCurrentPreview()">⬇️ 다운로드</button>
@@ -3234,6 +3235,8 @@
       </div>
     </div>
     <div id="fpv_body" style="flex:1;overflow:auto;background:#000;display:flex;align-items:center;justify-content:center;"></div>
+    <button id="fpv_prev" onclick="pvNavGo(-1)" title="이전 (←)" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.55);color:#fff;font-size:24px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;transition:.15s;" onmouseover="this.style.background='rgba(0,0,0,.85)'" onmouseout="this.style.background='rgba(0,0,0,.55)'">‹</button>
+    <button id="fpv_next" onclick="pvNavGo(1)" title="다음 (→)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.55);color:#fff;font-size:24px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;transition:.15s;" onmouseover="this.style.background='rgba(0,0,0,.85)'" onmouseout="this.style.background='rgba(0,0,0,.55)'">›</button>
   </div>
 </div>
 <!-- ===== 단체문자 발송 모달 ===== -->
@@ -6207,6 +6210,7 @@ async function previewFmFile(i) {
   const f = fmUploadedFiles[i];
   if(!f || !f.path) { alert('파일 정보를 찾을 수 없습니다.'); return; }
   _currentPreview = f;
+  _pvNav = { arr: fmUploadedFiles, idx: i, fn: previewFmFile }; pvSyncNav();
   document.getElementById('fpv_icon').textContent = fileIcon(f.name);
   document.getElementById('fpv_name').textContent = f.name;
   document.getElementById('fpv_size').textContent = f.size || '';
@@ -9124,10 +9128,34 @@ async function deleteFile(i) {
   if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
 }
 let _currentPreview = null;
+// ── 미리보기 파일 넘겨보기 (키보드 ←/→ · 좌우 화살표 버튼) ──
+let _pvNav = null; // { arr, idx, fn }
+function pvSyncNav(){
+  const prev=document.getElementById('fpv_prev'), next=document.getElementById('fpv_next'), cnt=document.getElementById('fpv_counter');
+  if(!prev||!next) return;
+  const arr=(_pvNav&&Array.isArray(_pvNav.arr))?_pvNav.arr:[];
+  const previewable=arr.filter(x=>x&&x.path);
+  const show=previewable.length>1?'flex':'none';
+  prev.style.display=show; next.style.display=show;
+  if(cnt){
+    if(previewable.length>1 && _pvNav){
+      const pos=previewable.findIndex(x=>x===arr[_pvNav.idx]);
+      cnt.textContent=(pos>=0?(pos+1):1)+' / '+previewable.length;
+    } else cnt.textContent='';
+  }
+}
+function pvNavGo(dir){
+  if(!_pvNav||!Array.isArray(_pvNav.arr)||!_pvNav.arr.length) return;
+  const arr=_pvNav.arr, n=arr.length; let idx=_pvNav.idx;
+  for(let s=0;s<n;s++){ idx=(idx+dir+n)%n; if(arr[idx]&&arr[idx].path) break; }
+  if(idx===_pvNav.idx) return;
+  if(typeof _pvNav.fn==='function') _pvNav.fn(idx);
+}
 async function previewFile(i) {
   const f = currentCustomer.files[i];
   if(!f || !f.path) { alert('파일 정보를 찾을 수 없습니다.'); return; }
   _currentPreview = f;
+  _pvNav = { arr: currentCustomer.files, idx: i, fn: previewFile }; pvSyncNav();
   document.getElementById('fpv_icon').textContent = fileIcon(f.name);
   document.getElementById('fpv_name').textContent = f.name;
   document.getElementById('fpv_size').textContent = f.size || '';
@@ -9229,6 +9257,7 @@ async function previewFfmFile(i) {
   const f = _ffmFiles[i];
   if(!f || !f.path) return;
   _currentPreview = f;
+  _pvNav = { arr: _ffmFiles, idx: i, fn: previewFfmFile }; pvSyncNav();
   document.getElementById('fpv_icon').textContent = fileIcon(f.name);
   document.getElementById('fpv_name').textContent = f.name;
   document.getElementById('fpv_size').textContent = f.size || '';
@@ -10613,6 +10642,13 @@ window.addEventListener('keydown', e => {
       fundingLinkedCustomerId = null;
     }
   }
+});
+// 파일 미리보기 모달 → 키보드 ←/→ 로 이전/다음 파일 넘겨보기
+window.addEventListener('keydown', e => {
+  const m = document.getElementById('filePreviewModal');
+  if(!m || !m.classList.contains('open')) return;
+  if(e.key === 'ArrowLeft'){ e.preventDefault(); pvNavGo(-1); }
+  else if(e.key === 'ArrowRight'){ e.preventDefault(); pvNavGo(1); }
 });
 // 백스페이스 → 이전 화면으로 (입력칸/모달/로그인화면에서는 동작 안 함)
 window.addEventListener('keydown', e => {
