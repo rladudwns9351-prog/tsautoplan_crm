@@ -10006,7 +10006,7 @@ function clearSmsRecipients() {
 }
 
 // 메시지 합성 (실제 발송 형식)
-function composeSmsMessage() {
+function composeSmsMessage(withAd = true) {
   const body = document.getElementById('smsBody').value.trim();
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value || '';
   // 로그인한 영업자 정보
@@ -10015,7 +10015,7 @@ function composeSmsMessage() {
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const myTitle = me?.title || '팀장';
   // 합성 ((광고) 상단 자동, 서명 포함 / 무료수신거부는 광고성 감지 시 관리자 메일에만)
-  let msg = '(광고)\n';
+  let msg = withAd ? '(광고)\n' : '';
   if (body) msg += body + '\n';
   msg += '\n';
   if (company) {
@@ -10336,7 +10336,8 @@ function buildRecipientCSV() {
 }
 async function sendAdRequestMail() {
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value || '';
-  const preview = composeAdMessage();
+  // 관리자 메일 본문: (광고) 접두어·무료수신거부 제외 (알리고 자동반영)
+  const preview = composeSmsMessage(false);
   const me = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === currentUser) : null;
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const now = new Date();
