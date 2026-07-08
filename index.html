@@ -10087,6 +10087,10 @@ function _smsResultOf(l){
 }
 let _smsStatsSig = '';        // 마지막 렌더 시그니처(깜빡임/리셋 방지)
 let _smsStatsRendered = false; // 최초 렌더 여부
+function toggleSmsLogDetail(id){
+  const el = document.getElementById(id);
+  if(el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+}
 async function renderSmsStats() {
   const body = document.getElementById('smsStatsBody');
   if (!body) return;
@@ -10172,28 +10176,40 @@ async function renderSmsStats() {
           '<span style="color:var(--green);">'+s.success+'</span> / <span style="color:#ff9944;">'+s.reject+'</span> / <span style="color:var(--red);">'+s.fail+'</span> / <span style="color:var(--text3);">'+s.pending+'</span></div>'+
       '</div>').join('')+
     '</div>';
-  // 담당자별 발송일자·건수 집계 (담당자 + 발송일자 단위)
-  const bySenderDate = {};
-  filtered.forEach(l => {
-    const sndr = l.sender || '미상';
-    const d = l.dateISO || (l.sentAt ? l.sentAt.slice(0,10) : '');
-    const key = sndr + '|' + d;
-    if (!bySenderDate[key]) bySenderDate[key] = { sender:sndr, date:d, count:0 };
-    bySenderDate[key].count += (l.recipientCount || 0);
+  // 발송 건별 이력 (행: 일자·시간·담당자·건수 / 클릭 시 발송내용+수신자 펼침)
+  const logsSorted = [...filtered].sort((a,b)=>{
+    const ta = a.sentAt || (a.dateISO||''); const tb = b.sentAt || (b.dateISO||'');
+    return ta < tb ? 1 : (ta > tb ? -1 : 0);
   });
-  const sdRows = Object.values(bySenderDate)
-    .sort((a,b) => a.date === b.date ? a.sender.localeCompare(b.sender) : (a.date < b.date ? 1 : -1));
-  const detailRows = sdRows.map(s =>
-    '<div style="display:grid;grid-template-columns:1fr 130px 90px;gap:0;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;">'+
-      '<div style="font-weight:600;">'+escapeHtml(s.sender)+'</div>'+
-      '<div style="font-family:JetBrains Mono,monospace;color:var(--text2);">'+escapeHtml(s.date||'-')+'</div>'+
-      '<div style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--green);font-weight:700;">'+s.count.toLocaleString()+'건</div>'+
-    '</div>').join('');
+  const logRows = logsSorted.map((l,i) => {
+    const dt = l.sentAt ? new Date(l.sentAt) : null;
+    const dstr = dt && !isNaN(dt) ? dt.toLocaleDateString('ko-KR') : (l.dateISO || '-');
+    const tstr = dt && !isNaN(dt) ? dt.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) : '';
+    const rid = 'smslog_' + (l.id != null ? l.id : 'x'+i);
+    const recips = (l.recipients||[]).map(r =>
+      '<div style="display:flex;gap:10px;padding:2px 0;"><span style="min-width:90px;color:var(--text);">'+escapeHtml(r.name||'-')+'</span><span style="color:var(--text2);">'+escapeHtml(formatPhone(r.phone||''))+'</span></div>'
+    ).join('') || '<div style="color:var(--text3);">수신자 정보 없음</div>';
+    const header =
+      '<div onclick="toggleSmsLogDetail(\''+rid+'\')" style="display:grid;grid-template-columns:110px 62px 1fr 78px;gap:0;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;cursor:pointer;" onmouseover="this.style.background=\'var(--bg3)\'" onmouseout="this.style.background=\'\'">'+
+        '<div style="font-family:JetBrains Mono,monospace;color:var(--text2);">'+escapeHtml(dstr)+'</div>'+
+        '<div style="font-family:JetBrains Mono,monospace;color:var(--text3);">'+escapeHtml(tstr)+'</div>'+
+        '<div style="font-weight:600;">'+escapeHtml(l.sender||'미상')+' <span style="color:var(--text3);font-weight:400;font-size:11px;">'+(l.company?'/ '+escapeHtml(l.company):'')+'</span></div>'+
+        '<div style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--green);font-weight:700;">'+(l.recipientCount||0).toLocaleString()+'건</div>'+
+      '</div>';
+    const detail =
+      '<div id="'+rid+'" style="display:none;padding:12px 16px;background:var(--bg4);border-bottom:1px solid var(--border);">'+
+        '<div style="font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:600;">📝 발송 내용 ('+(l.msgType||'SMS')+')</div>'+
+        '<div style="white-space:pre-wrap;font-size:12px;color:var(--text);background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;margin-bottom:12px;line-height:1.6;">'+escapeHtml(l.content||'(내용 없음)')+'</div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:600;">👥 수신 고객 ('+(l.recipientCount||0)+'명)</div>'+
+        '<div style="font-size:12px;font-family:JetBrains Mono,monospace;line-height:1.6;max-height:260px;overflow-y:auto;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:8px 12px;">'+recips+'</div>'+
+      '</div>';
+    return header + detail;
+  }).join('');
   const detailHTML =
-    '<div style="font-size:11px;color:var(--text3);margin:16px 0 8px;font-weight:600;">🧾 담당자별 발송 집계 ('+label+')</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 130px 90px;gap:0;padding:8px 12px;background:var(--bg4);border:1px solid var(--border);border-radius:6px 6px 0 0;font-size:11px;color:var(--text3);font-weight:600;">'+
-      '<div>담당자</div><div>발송일자</div><div style="text-align:right;">건수</div></div>'+
-    '<div style="border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">'+detailRows+'</div>';
+    '<div style="font-size:11px;color:var(--text3);margin:16px 0 8px;font-weight:600;">🧾 발송 이력 ('+label+') · 행 클릭 시 상세 내역</div>'+
+    '<div style="display:grid;grid-template-columns:110px 62px 1fr 78px;gap:0;padding:8px 12px;background:var(--bg4);border:1px solid var(--border);border-radius:6px 6px 0 0;font-size:11px;color:var(--text3);font-weight:600;">'+
+      '<div>발송일자</div><div>시간</div><div>담당자 / 회사</div><div style="text-align:right;">건수</div></div>'+
+    '<div style="border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">'+logRows+'</div>';
 
   body.innerHTML = summaryHTML + senderHTML + detailHTML;
   _smsStatsRendered = true;
