@@ -3282,10 +3282,9 @@
         <div style="margin-bottom:14px;">
           <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;">메시지 본문 <span id="smsByteCount" style="font-size:10px;color:var(--text3);font-family:JetBrains Mono,monospace;margin-left:6px;">0 byte</span></div>
           <div style="position:relative;">
-            <div style="position:absolute;top:12px;left:14px;font-size:13px;color:var(--text3);font-weight:600;pointer-events:none;z-index:1;">(광고)</div>
-            <textarea id="smsBody" oninput="updateSmsPreview()" placeholder="(광고) 다음 줄부터 내용을 입력하세요..." style="width:100%;padding:12px 14px 12px 70px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:140px;line-height:1.6;"></textarea>
+            <textarea id="smsBody" oninput="updateSmsPreview()" placeholder="발송할 내용을 입력하세요..." style="width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:140px;line-height:1.6;"></textarea>
           </div>
-          <div style="font-size:10px;color:var(--text3);margin-top:4px;">💡 (광고) 표기는 법적 의무로 자동 추가됩니다 (수정불가)</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;">💡 금액·광고성 내용 감지 시 관리자 발송요청으로 전환됩니다 ((광고)·무료수신거부 자동 포함)</div>
         </div>
         <!-- 미리보기 -->
         <div>
@@ -9965,19 +9964,22 @@ function composeSmsMessage() {
   const me = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === currentUser) : null;
   const myName = me ? me.name : currentUser;
   const myPhone = me ? formatPhone(me.phone || '') : '';
-  const myTitle = me?.title || '팀장'; // staffList에 직책 필드 있으면 사용, 없으면 기본값
-  // 합성
-  let msg = '(광고)\n';
+  const myTitle = me?.title || '팀장';
+  // 정보성 합성 (광고표기·무료수신거부 없음, 서명만)
+  let msg = '';
   if (body) msg += body + '\n';
   msg += '\n';
   if (company) {
     msg += company + ' ' + myName;
     if (myTitle) msg += ' ' + myTitle;
     if (myPhone) msg += ' / ' + myPhone;
-    msg += '\n';
   }
-  msg += '\n무료수신거부: 0808811279';
-  return msg;
+  return msg.replace(/\n+$/, '');
+}
+// 광고성 발송용 합성 (관리자 메일요청 전용: (광고) + 무료수신거부 포함)
+function composeAdMessage() {
+  const base = composeSmsMessage();
+  return '(광고)\n' + base + '\n\n무료수신거부: 0808811279';
 }
 function updateSmsPreview() {
   const msg = composeSmsMessage();
@@ -10279,7 +10281,7 @@ function buildRecipientCSV() {
 }
 async function sendAdRequestMail() {
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value || '';
-  const preview = composeSmsMessage();
+  const preview = composeAdMessage();
   const me = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === currentUser) : null;
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const now = new Date();
