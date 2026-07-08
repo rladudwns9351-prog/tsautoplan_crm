@@ -7036,6 +7036,60 @@ function renderFundingPage() {
   navEl.innerHTML = buildPaginationHtml('funding', pg.page, pg.totalPages, pg.total);
 }
 let fundingLinkedCustomerId = null;
+// 연결 고객 표시 박스 (관리자면 이름+연락처 수정 버튼 노출)
+function renderLinkedCustomerBox(cid){
+  const info = document.getElementById('fm_dbLinkedInfo');
+  const c = customers.find(x=>x.id===cid);
+  if(!info || !c) return;
+  const editBtn = currentRole==='admin'
+    ? '<button onclick="editLinkedCustomer('+cid+')" style="margin-left:10px;padding:2px 10px;background:rgba(68,136,255,.18);border:1px solid rgba(68,136,255,.45);border-radius:5px;color:var(--blue);font-size:11px;cursor:pointer;font-family:inherit;">✏ 수정</button>'
+    : '';
+  info.innerHTML =
+    '👤 <strong>'+escapeHtml(c.name||'')+'</strong> &nbsp;'+escapeHtml(c.phone||'')+
+    ' &nbsp;·&nbsp; 담당: '+escapeHtml(c.assign||'')+
+    ' &nbsp;·&nbsp; 차량: '+escapeHtml(c.car||'')+editBtn;
+}
+// 연결 고객 이름/연락처 편집 폼 (관리자 전용)
+function editLinkedCustomer(cid){
+  if(currentRole!=='admin') return;
+  const info = document.getElementById('fm_dbLinkedInfo');
+  const c = customers.find(x=>x.id===cid);
+  if(!info || !c) return;
+  info.innerHTML =
+    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'+
+      '<input id="fmLinkName" value="'+escapeHtml(c.name||'')+'" placeholder="고객명" style="flex:1;min-width:120px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">'+
+      '<input id="fmLinkPhone" value="'+escapeHtml(c.phone||'')+'" maxlength="13" oninput="formatPhoneInput(this)" placeholder="연락처" style="flex:1;min-width:120px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">'+
+      '<button onclick="saveLinkedCustomer('+cid+')" style="padding:6px 12px;background:var(--blue);border:none;border-radius:5px;color:#fff;font-size:12px;cursor:pointer;font-family:inherit;">저장</button>'+
+      '<button onclick="renderLinkedCustomerBox('+cid+')" style="padding:6px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;">취소</button>'+
+    '</div>';
+}
+// 연결 고객 저장 (고객 DB + 연결 펀딩 동기화)
+async function saveLinkedCustomer(cid){
+  if(currentRole!=='admin') return;
+  const c = customers.find(x=>x.id===cid);
+  if(!c) return;
+  const name = (document.getElementById('fmLinkName')?.value||'').trim();
+  const phoneRaw = (document.getElementById('fmLinkPhone')?.value||'').replace(/[^\d]/g,'');
+  if(!name){ alert('고객명을 입력해주세요.'); return; }
+  if(!/^01\d{9}$/.test(phoneRaw)){ alert('연락처는 휴대폰 11자리(010-XXXX-XXXX)로 입력해주세요.'); return; }
+  const newPhone = formatPhone(phoneRaw);
+  const dup = customers.find(x=>x.id!==cid && (x.phone||'').replace(/[^\d]/g,'')===phoneRaw);
+  if(dup && !confirm('동일한 연락처의 다른 고객("'+dup.name+'")이 있습니다.\n그래도 저장할까요?')) return;
+  window._lastLocalChange = Date.now();
+  c.name = name; c.phone = newPhone;
+  const linkedFundings = (typeof fundingList!=='undefined' && Array.isArray(fundingList)) ? fundingList.filter(f=>f.customerId===cid) : [];
+  linkedFundings.forEach(f=>{ f.customerName = name; f.phone = newPhone; });
+  try {
+    if(typeof isSbConfigured==='function' && isSbConfigured()){
+      await sbUpdateCustomer(c);
+      await Promise.all(linkedFundings.map(f=>sbUpdateFunding(f)));
+    }
+  } catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
+  renderLinkedCustomerBox(cid);
+  if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
+  if(typeof refreshAllViews==='function') refreshAllViews();
+  showGlobalToast('✓ 연결 고객 정보 수정 완료');
+}
 function setFundingMode(customerId) {
   fundingLinkedCustomerId = customerId || null;
   const manualWrap = document.getElementById('fm_manualWrap');
@@ -7049,10 +7103,7 @@ function setFundingMode(customerId) {
     if(manualAssignWrap) manualAssignWrap.style.display='none';
     if(dbLinkedWrap) dbLinkedWrap.style.display='';
     const info = document.getElementById('fm_dbLinkedInfo');
-    if(info && c) info.innerHTML =
-      '👤 <strong>'+c.name+'</strong> &nbsp;'+c.phone+
-      ' &nbsp;·&nbsp; 담당: '+c.assign+
-      ' &nbsp;·&nbsp; 차량: '+c.car;
+    if(info && c) renderLinkedCustomerBox(customerId);
     const carEl = document.getElementById('fm_car');
     if(carEl && !carEl.value) carEl.value = c?.car||'';
     setTimeout(()=>autoAttachDBFiles(customerId), 50);
