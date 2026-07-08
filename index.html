@@ -10258,6 +10258,27 @@ async function resetSmsLogs() {
   }
 }
 async function appendSmsLog(entry) {
+  // Supabase 저장 (대시보드 집계는 Supabase에서 읽으므로 필수)
+  if (typeof isSbConfigured === 'function' && isSbConfigured()) {
+    try {
+      const row = {
+        sent_at:         entry.sentAt || new Date().toISOString(),
+        date_iso:        entry.dateISO || (entry.sentAt || '').slice(0,10),
+        sender:          entry.sender || '',
+        sender_id:       entry.senderId || '',
+        company:         entry.company || '',
+        msg_type:        entry.msgType || 'SMS',
+        bytes:           entry.bytes || 0,
+        content:         entry.content || '',
+        recipient_count: entry.recipientCount || 0,
+        recipients:      entry.recipients || [],
+        result_summary:  entry.resultSummary || {}
+      };
+      if (entry.aligoGroupId) row.aligo_group_id = entry.aligoGroupId;
+      await sbFetch('sms_logs', 'POST', [row]);
+    } catch (e) { console.warn('SMS 로그 Supabase 저장 실패(로컬 폴백):', e); }
+  }
+  // 로컬 캐시/폴백
   const logs = getSmsLogsLocal();
   logs.unshift(entry);
   if (logs.length > 1000) logs.length = 1000;
