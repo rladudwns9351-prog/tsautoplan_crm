@@ -5917,11 +5917,11 @@ function onCheckChange() {
     } else if(dbViewMode==='gudb' || dbViewMode==='ended'){
       if(_toGudbBtn) _toGudbBtn.style.display='none';
       if(_toEndedBtn) _toEndedBtn.style.display='none';
-      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
+      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; const _br=document.getElementById('bulkReassignSel'); if(_br){ const _prev=_br.value; fillAssignSelect(_br, _prev); } }
     } else {
       if(_toGudbBtn) _toGudbBtn.style.display='';
       if(_toEndedBtn) _toEndedBtn.style.display='';
-      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; fillAssignSelect(document.getElementById('bulkReassignSel'), ''); }
+      if(_reassignWrap){ _reassignWrap.style.display='inline-flex'; const _br=document.getElementById('bulkReassignSel'); if(_br){ const _prev=_br.value; fillAssignSelect(_br, _prev); } }
     }
   } else {
     bar.style.display = 'none';
@@ -7797,9 +7797,24 @@ function initSyncChannel() {
       } catch(_){} finally {
         _isSyncReloading = false;
       }
-    }, 5000);
+    }, 30000);
   }
   initSupabaseRealtime();
+}
+// 실시간 이벤트 디바운스: 동시 작업으로 이벤트가 몰릴 때 마지막 기준 1회만 로드 (트래픽 절감)
+function scheduleRealtimeReload(table) {
+  if(window._lastLocalChange && Date.now() - window._lastLocalChange < 1500) return; // 로컬 저장 직후 stale 방지
+  clearTimeout(window._rtReloadTimer);
+  window._rtReloadTimer = setTimeout(async () => {
+    if(_isSyncReloading) return;
+    _isSyncReloading = true;
+    try {
+      await loadData();
+      _rerenderIfChanged(table || 'realtime');
+    } catch(_){} finally {
+      _isSyncReloading = false;
+    }
+  }, 600);
 }
 function initSupabaseRealtime() {
   if(!isSbConfigured()) return;
@@ -7840,21 +7855,13 @@ function initSupabaseRealtime() {
         }
       }, 30000);
     };
-    ws.onmessage = async (e) => {
+    ws.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
         if(msg.event === 'postgres_changes' || (msg.payload && msg.payload.data)) {
           const table = msg.payload?.data?.table || msg.topic?.split(':').pop();
           window._realtimeReceivedData = true; // 실제 변경 이벤트 수신 확인 → polling 백업 생략 가능
-          if(window._lastLocalChange && Date.now() - window._lastLocalChange < 1500) return;
-          if(_isSyncReloading) return;
-          _isSyncReloading = true;
-          try {
-            await loadData();
-            _rerenderIfChanged(table || 'realtime');
-          } catch(_){} finally {
-            _isSyncReloading = false;
-          }
+          scheduleRealtimeReload(table); // 이벤트 몰림 시 디바운스로 1회만 로드
         }
       } catch(_){}
     };
