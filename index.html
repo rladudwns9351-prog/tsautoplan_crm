@@ -10272,11 +10272,12 @@ async function sendAdRequestMail() {
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const now = new Date();
   const when = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-  const text = `[광고문자 발송요청]\n\n요청시각: ${when}\n담당자: ${currentUser}${myPhone ? ' / ' + myPhone : ''}\n발송회사: ${company}\n대상인원: ${smsRecipients.length}명\n\n===== 발송내용 (미리보기) =====\n${preview}\n\n===== 수신자 목록 (첨부 recipients.csv / 알리고 복붙용) =====\n(첨부파일 참고)`;
+  const recipientList = smsRecipients.map(r => r.phone.replace(/[^0-9]/g, '') + ',' + (r.name || '')).join('\n');
+  const text = `[광고문자 발송요청]\n\n요청시각: ${when}\n담당자: ${currentUser}${myPhone ? ' / ' + myPhone : ''}\n발송회사: ${company}\n대상인원: ${smsRecipients.length}명\n\n===== 발송내용 (미리보기) =====\n${preview}\n\n===== 수신자 목록 (복붙용) =====\n휴대폰번호,고객명\n${recipientList}`;
   const resp = await fetch(`${SB_URL}/functions/v1/send-sms`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}`, 'apikey': SB_KEY },
-    body: JSON.stringify({ type: 'mail', subject: `[발송요청] ${company} / ${currentUser} / ${smsRecipients.length}명`, text, attachment: { filename: 'recipients.csv', content: buildRecipientCSV() } })
+    body: JSON.stringify({ type: 'mail', subject: `[발송요청] ${company} / ${currentUser} / ${smsRecipients.length}명`, text })
   });
   return await resp.json();
 }
