@@ -3310,7 +3310,7 @@
         <div style="position:relative;margin-bottom:10px;">
           <div style="display:flex;gap:6px;">
             <input type="text" id="smsManualName" oninput="searchSmsCustomer()" onfocus="searchSmsCustomer()" placeholder="이름 검색" style="flex:1;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;font-family:inherit;outline:none;">
-            <input type="text" id="smsManualPhone" oninput="searchSmsCustomer()" onfocus="searchSmsCustomer()" placeholder="연락처 검색" style="flex:2;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;font-family:inherit;outline:none;">
+            <input type="text" id="smsManualPhone" maxlength="13" oninput="formatPhoneInput(this);searchSmsCustomer()" onfocus="searchSmsCustomer()" placeholder="연락처 검색" style="flex:2;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;font-family:inherit;outline:none;">
             <button class="btn btn-primary btn-sm" onclick="addSmsRecipientManual()" style="padding:6px 14px;font-size:11px;" title="검색 결과 없을 시 직접 추가">+ 추가</button>
           </div>
           <div id="smsSearchResults" style="display:none;position:absolute;top:100%;left:0;right:0;margin-top:4px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;max-height:240px;overflow-y:auto;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,.6);"></div>
@@ -9918,6 +9918,13 @@ function formatPhone(p) {
   return s;
 }
 
+function formatPhoneInput(el){
+  let v = el.value.replace(/[^\d]/g,'').slice(0,11); // 숫자만, 최대 11자리
+  let out = v;
+  if(v.length>7) out = v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7);
+  else if(v.length>3) out = v.slice(0,3)+'-'+v.slice(3);
+  el.value = out;
+}
 function addSmsRecipientManual() {
   const n = document.getElementById('smsManualName').value.trim();
   const p = document.getElementById('smsManualPhone').value.replace(/[^\d]/g, '');
