@@ -3331,12 +3331,10 @@
     <!-- 푸터 -->
     <div style="padding:14px 22px;border-top:1px solid var(--border);background:var(--bg3);display:flex;justify-content:space-between;align-items:center;">
       <div style="font-size:11px;color:var(--text3);">
-        <span id="smsCostEst">예상 비용: 0원</span>
-        <span style="margin-left:12px;color:var(--text3);">• 21시~08시 발송 금지(야간법)</span>
+        <span style="color:var(--text3);">• 21시~08시 발송 금지(야간법)</span>
       </div>
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost" onclick="deleteCheckedSmsRecipients()" style="background:var(--bg4);">선택 삭제</button>
-        <button class="btn btn-ghost" onclick="sendSmsBulk(true)" style="background:var(--bg4);color:var(--text);padding:10px 20px;">🧪 테스트 발송</button>
         <button class="btn btn-primary" onclick="sendSmsBulk(false)" style="background:var(--red);color:#fff;padding:10px 24px;">📨 전송하기</button>
       </div>
     </div>
@@ -10021,9 +10019,9 @@ function composeSmsMessage() {
   if (body) msg += body + '\n';
   msg += '\n';
   if (company) {
-    msg += company + ' ' + myName;
+    msg += company.replace(/\s*\/\s*/g, ' ') + ' ' + myName;
     if (myTitle) msg += ' ' + myTitle;
-    if (myPhone) msg += ' / ' + myPhone;
+    if (myPhone) msg += ' ' + myPhone;
   }
   return msg.replace(/\n+$/, '');
 }
@@ -10037,10 +10035,6 @@ function updateSmsPreview() {
   // 바이트 계산 (한글 2byte)
   const bytes = new Blob([msg]).size;
   document.getElementById('smsByteCount').textContent = bytes + ' byte (' + (bytes > 90 ? 'LMS' : 'SMS') + ')';
-  // 예상비용 (SMS 8.4 / LMS 25 기준)
-  const unit = bytes > 90 ? 25 : 8.4;
-  const cost = Math.round(unit * smsRecipients.length);
-  document.getElementById('smsCostEst').textContent = `예상 비용: ${cost.toLocaleString('ko-KR')}원 (${bytes > 90 ? 'LMS' : 'SMS'} ${unit}원 × ${smsRecipients.length}건)`;
 }
 
 // 템플릿 (영업자별 무제한)
@@ -10389,10 +10383,35 @@ async function sendSmsBulk(testMode) {
   if (smsRecipients.length === 0) { alert('수신자를 1명 이상 추가해주세요.'); return; }
   // 광고성(금액/키워드) 감지 → 실발송·테스트 모두 차단, 관리자 메일 발송요청
   if (detectAdContent(body)) {
-    if (!confirm('💰 금액·광고성 내용이 감지되었습니다.\n\nAPI 즉시발송은 제한됩니다(스팸제재 방지).\n[확인]을 누르면 관리자에게 발송요청이 전달되고,\n관리자가 알리고에서 직접 발송합니다.\n\n발송요청 하시겠습니까?')) return;
+    if (!confirm("광고성 문자발송건, '확인' 요청하시면 관리자 개별발송 요청처리됩니다")) return;
     try {
       const mr = await sendAdRequestMail();
-      if (mr && mr.ok) { alert('✅ 발송요청 완료\n관리자에게 발송내용과 수신자 목록이 전달되었습니다.'); closeModal('smsBulkModal'); }
+      if (mr && mr.ok) {
+        // 연결된 DB 고객 메모에 광고성 발송 기록 (정보/광고 합산 카운팅) + 상담일 갱신
+        const _now = new Date();
+        const _dstr = _now.toLocaleDateString('ko-KR') + ' ' + _now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+        const _diso = _now.toISOString().slice(0,10);
+        const _adMsg = composeAdMessage();
+        const _adBytes = new Blob([_adMsg]).size;
+        const _adType = _adBytes > 90 ? 'LMS' : 'SMS';
+        window._lastLocalChange = Date.now();
+        for (const r of smsRecipients) {
+          if (!r.customerId) continue;
+          const c = (typeof customers !== 'undefined') ? customers.find(x => x.id === r.customerId) : null;
+          if (!c) continue;
+          if (!Array.isArray(c.memos)) c.memos = [];
+          const prevCount = c.memos.filter(m => m.text && m.text.includes('단체문자발송')).length;
+          c.memos.unshift({
+            text: `[단체문자발송 #${prevCount + 1}] 광고성(관리자요청) / ${company} / ${_adType} / ${_adBytes}byte`,
+            author: currentUser, date: _dstr, dateISO: _diso, isSystem: false
+          });
+          if (typeof isSbConfigured === 'function' && isSbConfigured()) {
+            try { await sbUpdateCustomer(c); } catch(e) { console.warn('광고성 메모 저장 실패:', e); }
+          }
+        }
+        if (typeof refreshAllViews === 'function') refreshAllViews();
+        alert('✅ 발송요청 완료\n관리자에게 발송내용과 수신자 목록이 전달되었습니다.'); closeModal('smsBulkModal');
+      }
       else alert('발송요청 실패\n\n' + JSON.stringify(mr, null, 2));
     } catch (e) { alert('발송요청 실패: ' + (e?.message || e)); }
     return;
@@ -10404,7 +10423,7 @@ async function sendSmsBulk(testMode) {
       if (!confirm('현재 야간 시간대(21시~08시)입니다.\n광고문자 발송은 법적으로 제한됩니다.\n그래도 계속하시겠습니까?')) return;
     }
   }
-  const msg = composeInfoMessage();
+  const msg = composeSmsMessage();
   const ok = confirm(testMode
     ? `🧪 테스트 발송 (실제 발송·과금 없음)\n총 ${smsRecipients.length}명 대상\n\n계속할까요?`
     : `총 ${smsRecipients.length}명에게 실제 발송합니다.\n\n계속할까요?`);
@@ -10451,7 +10470,7 @@ async function sendSmsBulk(testMode) {
     const prevCount = c.memos.filter(m => m.text && m.text.includes('단체문자발송')).length;
     const newCount = prevCount + 1;
     c.memos.unshift({
-      text: `[단체문자발송 #${newCount}] ${company} / ${msgType} / ${bytes}byte`,
+      text: `[단체문자발송 #${newCount}] 정보성 / ${company} / ${msgType} / ${bytes}byte`,
       author: currentUser,
       date: dateStr,
       dateISO: dateISO,
