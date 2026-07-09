@@ -3260,8 +3260,8 @@
           <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;">발송 회사 <span style="color:var(--red);">*</span></div>
           <div style="display:flex;gap:10px;">
             <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:13px;">
-              <input type="radio" name="smsCompany" value="TS AUTO PLAN / 타소" onchange="updateSmsPreview()" style="accent-color:var(--accent);">
-              <span>TS AUTO PLAN / 타소</span>
+              <input type="radio" name="smsCompany" value="TS AUTO PLAN" onchange="updateSmsPreview()" style="accent-color:var(--accent);">
+              <span>TS AUTO PLAN</span>
             </label>
           </div>
         </div>
@@ -10006,7 +10006,7 @@ function clearSmsRecipients() {
 }
 
 // 메시지 합성 (실제 발송 형식)
-function composeSmsMessage(withAd = true) {
+function composeSmsMessage() {
   const body = document.getElementById('smsBody').value.trim();
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value || '';
   // 로그인한 영업자 정보
@@ -10015,7 +10015,7 @@ function composeSmsMessage(withAd = true) {
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const myTitle = me?.title || '팀장';
   // 합성 ((광고) 상단 자동, 서명 포함 / 무료수신거부는 광고성 감지 시 관리자 메일에만)
-  let msg = withAd ? '(광고)\n' : '';
+  let msg = '(광고)\n';
   if (body) msg += body + '\n';
   msg += '\n';
   if (company) {
@@ -10336,8 +10336,7 @@ function buildRecipientCSV() {
 }
 async function sendAdRequestMail() {
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value || '';
-  // 관리자 메일 본문: (광고) 접두어·무료수신거부 제외 (알리고 자동반영)
-  const preview = composeSmsMessage(false);
+  const preview = composeAdMessage();
   const me = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === currentUser) : null;
   const myPhone = me ? formatPhone(me.phone || '') : '';
   const now = new Date();
