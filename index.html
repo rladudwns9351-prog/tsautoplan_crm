@@ -8644,7 +8644,7 @@ function colFilterDB(keepPage) {
     if(source && c.source!==source) return false;
     if(division && (c.division||'')!==division) return false;
     if(memoTag && (c.memoTag||'')!==memoTag) return false;
-    if(assign && c.assign!==assign && !_searchAll) return false;
+    if(assign && c.assign!==assign) return false;
     if(status && c.status!==status) return false;
     if(q && !c.name.toLowerCase().includes(q) && !c.phone.includes(q) && !c.car.toLowerCase().includes(q)) return false;
     if(topStatus && c.status!==topStatus) return false;
