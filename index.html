@@ -9916,7 +9916,7 @@ function openSmsModal() {
     // 광고수신동의 체크 (필드명 추정: ad_agree, adAgree, marketingConsent 등)
     const consent = c.ad_agree ?? c.adAgree ?? c.marketingConsent ?? c.sms_agree ?? null;
     if (consent === false) { excludedNoConsent++; return; }
-    smsRecipients.push({ name: c.name || '이름없음', phone, customerId: cid });
+    smsRecipients.push({ name: c.name || '이름없음', phone, customerId: cid, assign: c.assign || '' });
   });
   // 안내 표시
   const info = document.getElementById('smsConsentInfo');
@@ -10005,15 +10005,29 @@ function clearSmsRecipients() {
   renderSmsRecipients();
 }
 
+// 서명 담당자 결정
+//  - 영업자: 본인 정보 고정
+//  - 관리자: 선택 고객의 담당자 기준(단일). 담당자 2명 이상 섞이면 mixed 반환 → 발송 차단
+function getSmsSigner() {
+  if (typeof currentRole !== 'undefined' && currentRole !== 'admin') {
+    const me = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === currentUser) : null;
+    return { name: me ? me.name : currentUser, phone: me ? formatPhone(me.phone || '') : '', title: me?.title || '팀장', mixed: false };
+  }
+  // 관리자: 수신자들의 담당자 집합 (구디비/종료디비/빈값 제외)
+  const assigns = [...new Set((smsRecipients || []).map(r => r.assign).filter(a => a && a !== '구디비' && a !== '종료디비'))];
+  if (assigns.length > 1) return { mixed: true, assigns };
+  const target = assigns[0] || currentUser; // 담당자 없으면 관리자 본인
+  const s = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === target) : null;
+  return { name: s ? s.name : target, phone: s ? formatPhone(s.phone || '') : '', title: s?.title || '팀장', mixed: false };
+}
 // 메시지 합성 (실제 발송 형식)
-function composeSmsMessage() {
+function composeSmsMessage(signer) {
   const body = document.getElementById('smsBody').value.trim();
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value || '';
-  // 로그인한 영업자 정보
-  const me = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === currentUser) : null;
-  const myName = me ? me.name : currentUser;
-  const myPhone = me ? formatPhone(me.phone || '') : '';
-  const myTitle = me?.title || '팀장';
+  signer = signer || getSmsSigner();
+  const myName = signer.name || '';
+  const myPhone = signer.phone || '';
+  const myTitle = signer.title || '팀장';
   // 합성 ((광고) 상단 자동, 서명 포함 / 무료수신거부는 광고성 감지 시 관리자 메일에만)
   let msg = '(광고)\n';
   if (body) msg += body + '\n';
@@ -10026,12 +10040,19 @@ function composeSmsMessage() {
   return msg.replace(/\n+$/, '');
 }
 // 광고성 발송용 합성 (관리자 메일요청 전용: (광고) + 무료수신거부 포함)
-function composeAdMessage() {
-  return composeSmsMessage() + '\n\n무료수신거부: 0808811279';
+function composeAdMessage(signer) {
+  return composeSmsMessage(signer) + '\n\n무료수신거부: 0808811279';
 }
 function updateSmsPreview() {
-  const msg = composeAdMessage();
-  document.getElementById('smsPreview').textContent = msg;
+  const signer = getSmsSigner();
+  const prevEl = document.getElementById('smsPreview');
+  if (signer.mixed) {
+    prevEl.textContent = '⚠ 선택된 고객의 담당자가 여러 명입니다 (' + signer.assigns.join(', ') + ').\n한 담당자의 고객만 선택 후 발송해주세요.';
+    document.getElementById('smsByteCount').textContent = '0 byte';
+    return;
+  }
+  const msg = composeAdMessage(signer);
+  prevEl.textContent = msg;
   // 바이트 계산 (한글 2byte)
   const bytes = new Blob([msg]).size;
   document.getElementById('smsByteCount').textContent = bytes + ' byte (' + (bytes > 90 ? 'LMS' : 'SMS') + ')';
@@ -10336,17 +10357,19 @@ function buildRecipientCSV() {
 }
 async function sendAdRequestMail() {
   const company = document.querySelector('input[name="smsCompany"]:checked')?.value || '';
-  const preview = composeAdMessage();
-  const me = (typeof staffList !== 'undefined') ? staffList.find(u => u.name === currentUser) : null;
-  const myPhone = me ? formatPhone(me.phone || '') : '';
+  const signer = getSmsSigner();
+  const preview = composeAdMessage(signer);
+  const signerName = signer.name || currentUser;
+  const signerPhone = signer.phone || '';
+  const reqLine = (signerName !== currentUser) ? `\n요청자: ${currentUser}` : '';
   const now = new Date();
   const when = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   const recipientList = smsRecipients.map(r => r.phone.replace(/[^0-9]/g, '') + ',' + (r.name || '')).join('\n');
-  const text = `[광고문자 발송요청]\n\n요청시각: ${when}\n담당자: ${currentUser}${myPhone ? ' / ' + myPhone : ''}\n발송회사: ${company}\n대상인원: ${smsRecipients.length}명\n\n===== 발송내용 (미리보기) =====\n${preview}\n\n===== 수신자 목록 (복붙용) =====\n휴대폰번호,고객명\n${recipientList}`;
+  const text = `[광고문자 발송요청]\n\n요청시각: ${when}\n담당자: ${signerName}${signerPhone ? ' / ' + signerPhone : ''}${reqLine}\n발송회사: ${company}\n대상인원: ${smsRecipients.length}명\n\n===== 발송내용 (미리보기) =====\n${preview}\n\n===== 수신자 목록 (복붙용) =====\n휴대폰번호,고객명\n${recipientList}`;
   const resp = await fetch(`${SB_URL}/functions/v1/send-sms`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}`, 'apikey': SB_KEY },
-    body: JSON.stringify({ type: 'mail', subject: `[발송요청] ${company} / ${currentUser} / ${smsRecipients.length}명`, text })
+    body: JSON.stringify({ type: 'mail', subject: `[발송요청] ${company} / ${signerName} / ${smsRecipients.length}명`, text })
   });
   return await resp.json();
 }
@@ -10356,6 +10379,12 @@ async function sendSmsBulk(testMode) {
   const body = document.getElementById('smsBody').value.trim();
   if (!body) { alert('메시지 본문을 입력해주세요.'); return; }
   if (smsRecipients.length === 0) { alert('수신자를 1명 이상 추가해주세요.'); return; }
+  // 관리자: 담당자 2명 이상 섞이면 차단 (담당자별로 나눠 발송)
+  const signer = getSmsSigner();
+  if (signer.mixed) {
+    alert('선택된 고객의 담당자가 여러 명입니다 (' + signer.assigns.join(', ') + ').\n한 담당자의 고객만 선택 후 발송해주세요.');
+    return;
+  }
   // 야간(21~08시) 발송요청 접수 차단
   const _h = new Date().getHours();
   if (_h >= 21 || _h < 8) {
@@ -10369,7 +10398,7 @@ async function sendSmsBulk(testMode) {
       const now = new Date();
       const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
       const dateISO = now.toISOString().slice(0,10);
-      const msg = composeAdMessage();
+      const msg = composeAdMessage(signer);
       const bytes = new Blob([msg]).size;
       const msgType = bytes > 90 ? 'LMS' : 'SMS';
       window._lastLocalChange = Date.now();
