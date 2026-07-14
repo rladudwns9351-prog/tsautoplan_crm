@@ -104,6 +104,9 @@
       <div class="nav-item" onclick="goPage(&#39;settings&#39;,this)">
         설정
       </div>
+      <div class="nav-item" onclick="goPage(&#39;carnews&#39;,this)">
+        🚗 신차뉴스
+      </div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">도구</div>
@@ -2699,6 +2702,77 @@
         <div id="cf-verdict"></div>
       </div>
 
+    <div class="page" id="page-carnews">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🚗 신차뉴스</div>
+          <div class="page-sub">모터그래프 새모델 소식 자동수집 · 매일 갱신 · 6개월 경과 자동삭제 <span class="admin-only" style="color:var(--text3);">(현재 관리자 전용 테스트 중)</span></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="cn_count" style="font-size:12px;color:var(--text3);"></span>
+          <button onclick="loadCarNews()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;">↻ 새로고침</button>
+        </div>
+      </div>
+      <div class="section-card" style="padding:16px;margin-bottom:14px;">
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
+          <div class="form-field" style="min-width:130px;">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">구분</label>
+            <select id="cn_origin" onchange="renderCarNews()" style="padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+              <option value="">전체 (국산+외산)</option>
+              <option value="국산">국산차</option>
+              <option value="외산">외산차</option>
+            </select>
+          </div>
+          <div class="form-field" style="min-width:150px;">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">브랜드</label>
+            <select id="cn_brand" onchange="renderCarNews()" style="padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+              <option value="">전체 브랜드</option>
+            </select>
+          </div>
+          <div class="form-field" style="min-width:130px;">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">출시 기간</label>
+            <select id="cn_period" onchange="renderCarNews()" style="padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+              <option value="0">전체 기간</option>
+              <option value="7">최근 7일</option>
+              <option value="30">최근 30일</option>
+              <option value="90">최근 3개월</option>
+              <option value="180">최근 6개월</option>
+            </select>
+          </div>
+          <div class="form-field" style="min-width:150px;">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">정렬</label>
+            <select id="cn_sort" onchange="renderCarNews()" style="padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+              <option value="date_desc">출시일 최신순</option>
+              <option value="date_asc">출시일 오래된순</option>
+              <option value="brand">브랜드순</option>
+            </select>
+          </div>
+          <div class="form-field" style="flex:1;min-width:160px;">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">검색 (모델·제목)</label>
+            <input type="text" id="cn_search" oninput="renderCarNews()" placeholder="예: 넥쏘, EV, S클래스" style="padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;width:100%;outline:none;">
+          </div>
+        </div>
+      </div>
+      <div class="section-card" style="padding:0;overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="background:var(--bg3);border-bottom:1px solid var(--border);">
+              <th style="text-align:left;padding:11px 14px;font-weight:600;color:var(--text3);white-space:nowrap;">출시일</th>
+              <th style="text-align:left;padding:11px 14px;font-weight:600;color:var(--text3);white-space:nowrap;">구분</th>
+              <th style="text-align:left;padding:11px 14px;font-weight:600;color:var(--text3);white-space:nowrap;">브랜드</th>
+              <th style="text-align:left;padding:11px 14px;font-weight:600;color:var(--text3);">모델명</th>
+              <th style="text-align:left;padding:11px 14px;font-weight:600;color:var(--text3);white-space:nowrap;">차종</th>
+              <th style="text-align:left;padding:11px 14px;font-weight:600;color:var(--text3);white-space:nowrap;">차량가</th>
+              <th style="text-align:center;padding:11px 14px;font-weight:600;color:var(--text3);white-space:nowrap;">원문</th>
+            </tr>
+          </thead>
+          <tbody id="cn_tbody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3);">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 <style>input[type="date"],input[type="date"]::-webkit-datetime-edit,input[type="date"]::-webkit-inner-spin-button{color-scheme:dark !important}input[type="date"]::-webkit-calendar-picker-indicator{filter:brightness(0) invert(1) !important;cursor:pointer !important;opacity:1 !important;width:16px !important;height:16px !important;padding:0 2px !important}</style>
@@ -3361,6 +3435,72 @@
 </div>
 <script>
 const SB_URL  = 'https://enlwenuqztgpflmbicdf.supabase.co';
+/* ===== 신차뉴스 (car_news) ===== */
+let _carNews = [];
+async function loadCarNews(){
+  const tb = document.getElementById('cn_tbody');
+  if(tb) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3);">불러오는 중...</td></tr>';
+  try{
+    const res = await fetch(SB_URL+'/rest/v1/car_news?select=*&order=release_date.desc', {
+      headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY }
+    });
+    _carNews = await res.json();
+    if(!Array.isArray(_carNews)) _carNews = [];
+    // 브랜드 드롭다운 채우기
+    const sel = document.getElementById('cn_brand');
+    if(sel){
+      const cur = sel.value;
+      const brands = [...new Set(_carNews.map(r=>r.brand).filter(Boolean))].sort();
+      sel.innerHTML = '<option value="">전체 브랜드</option>' + brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+      sel.value = cur;
+    }
+    renderCarNews();
+  }catch(e){
+    if(tb) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--red);">불러오기 실패: '+e+'</td></tr>';
+  }
+}
+function renderCarNews(){
+  const origin = document.getElementById('cn_origin')?.value || '';
+  const brand  = document.getElementById('cn_brand')?.value || '';
+  const period = +(document.getElementById('cn_period')?.value || 0);
+  const sort   = document.getElementById('cn_sort')?.value || 'date_desc';
+  const q      = (document.getElementById('cn_search')?.value || '').trim().toLowerCase();
+
+  let rows = _carNews.slice();
+  if(origin) rows = rows.filter(r=>r.origin===origin);
+  if(brand)  rows = rows.filter(r=>r.brand===brand);
+  if(period){
+    const cut = new Date(); cut.setDate(cut.getDate()-period);
+    rows = rows.filter(r=> r.release_date && new Date(r.release_date) >= cut);
+  }
+  if(q) rows = rows.filter(r=> ((r.model||'')+' '+(r.title||'')).toLowerCase().includes(q));
+
+  if(sort==='date_asc') rows.sort((a,b)=> (a.release_date||'').localeCompare(b.release_date||''));
+  else if(sort==='brand') rows.sort((a,b)=> (a.brand||'').localeCompare(b.brand||'') || (b.release_date||'').localeCompare(a.release_date||''));
+  else rows.sort((a,b)=> (b.release_date||'').localeCompare(a.release_date||''));
+
+  const cnt = document.getElementById('cn_count');
+  if(cnt) cnt.textContent = rows.length + '건';
+
+  const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const tb = document.getElementById('cn_tbody');
+  if(!tb) return;
+  if(rows.length===0){ tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3);">해당 조건의 신차 소식이 없습니다.</td></tr>'; return; }
+  tb.innerHTML = rows.map(r=>{
+    const badge = r.origin==='국산'
+      ? '<span style="background:rgba(68,136,255,.14);color:var(--blue);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">국산</span>'
+      : '<span style="background:rgba(180,140,255,.14);color:#b48cff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">외산</span>';
+    return `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:10px 14px;white-space:nowrap;color:var(--text2);font-family:JetBrains Mono,monospace;">${esc(r.release_date)}</td>
+      <td style="padding:10px 14px;">${badge}</td>
+      <td style="padding:10px 14px;white-space:nowrap;font-weight:600;">${esc(r.brand)}</td>
+      <td style="padding:10px 14px;">${esc(r.model)}</td>
+      <td style="padding:10px 14px;white-space:nowrap;color:var(--text2);">${esc(r.body_type)}</td>
+      <td style="padding:10px 14px;white-space:nowrap;color:${r.price?'var(--text)':'var(--text3)'};">${r.price?esc(r.price):'-'}</td>
+      <td style="padding:10px 14px;text-align:center;"><a href="${esc(r.link)}" target="_blank" style="color:var(--blue);text-decoration:none;font-size:12px;">보기 ↗</a></td>
+    </tr>`;
+  }).join('');
+}
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVubHdlbnVxenRncGZsbWJpY2RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODk3MDEsImV4cCI6MjA5NDI2NTcwMX0.710F4DvgMZDjWVE2HJeCP40P-s8uZhTaOE0wgPSXaVM';
 async function sbFetch(path, method='GET', body=null, prefer=null) {
   const opts = {
@@ -3956,7 +4096,7 @@ function initApp(restorePage) {
   filterDB();
   if(typeof updateVstockBadge === 'function') updateVstockBadge();
   const targetPage = restorePage || 'dashboard';
-  const adminOnlyPages = ['users','settings','reclaim'];
+  const adminOnlyPages = ['users','settings','reclaim','carnews'];
   const safePage = (currentRole !== 'admin' && adminOnlyPages.includes(targetPage)) ? 'dashboard' : targetPage;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pageEl = document.getElementById('page-'+safePage);
@@ -3972,6 +4112,7 @@ function initApp(restorePage) {
     else if(safePage==='funding') renderFundingPage();
     else if(safePage==='dbstats') { setStatsPeriod(30); renderDBStats(); }
     else if(safePage==='reclaim') renderReclaimPage();
+    else if(safePage==='carnews') loadCarNews();
     else if(safePage==='users') showUserList(); // async
     else if(safePage==='settings') renderStatusOptionList();
   }));
