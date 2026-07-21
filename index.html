@@ -3678,7 +3678,7 @@ function rowToFunding(r) {
   };
 }
 async function sbLoadCustomers() {
-  const rows = await sbFetch('customers?order=id.asc&select=*');
+  const rows = await sbFetch('customers?order=id.asc&select=*&limit=100000');
   return rows.map(rowToCustomer);
 }
 async function sbSaveCustomer(c) {
