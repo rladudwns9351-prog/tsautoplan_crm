@@ -2798,7 +2798,7 @@
 
         <div style="margin-bottom:12px;">
           <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">🔗 기사 링크 <span style="color:var(--text3);font-weight:400;">(여러 개는 줄바꿈으로 구분)</span></label>
-          <textarea id="ac_link" rows="3" placeholder="https://n.news.naver.com/article/..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          <textarea id="ac_link" oninput="acSave();acRender();" rows="3" placeholder="https://n.news.naver.com/article/..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
         </div>
 
         <div style="margin-bottom:12px;">
@@ -2808,12 +2808,30 @@
 
         <div style="margin-bottom:12px;">
           <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">📄 기사 본문 백업 <span style="color:var(--text3);font-weight:400;">(선택 · AI가 링크를 못 읽을 때만 본문을 붙여넣으세요)</span></label>
-          <textarea id="ac_body" rows="4" placeholder="링크가 차단되는 경우에만 기사 본문을 붙여넣으세요." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          <textarea id="ac_body" oninput="acSave();acRender();" rows="4" placeholder="링크가 차단되는 경우에만 기사 본문을 붙여넣으세요." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
         </div>
 
         <div style="background:rgba(68,136,255,.08);border:1px solid rgba(68,136,255,.3);border-radius:6px;padding:12px 14px;margin-bottom:14px;">
           <div style="font-size:12px;color:var(--blue);font-weight:700;margin-bottom:4px;">🖼 이미지 안내</div>
           <div style="font-size:12px;color:var(--text2);line-height:1.7;">이미지는 CRM에 올리지 않습니다. 다음 단계에서 프롬프트를 복사한 뒤 <b style="color:var(--text);">챗gpt 입력창에 이미지를 직접 첨부</b>하세요. (최대 10장 권장)<br>프롬프트에 이미지 분석 지시가 이미 포함되어 있습니다.</div>
+        </div>
+
+        <div id="ac_warn" style="display:none;background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:6px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:var(--red);line-height:1.7;"></div>
+
+        <div onclick="acToggleFast()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:11px 14px;margin-bottom:14px;cursor:pointer;">
+          <span id="ac_fastBox" style="font-size:15px;">⬜</span>
+          <div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);">⚡ 빠른 모드</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.6;">참석자는 그대로 두고 <b style="color:var(--text2);">출력 문장만 압축</b>합니다. 분석 깊이는 유지되고, 장식·중복·서론이 빠져 답변이 빨라집니다.</div>
+          </div>
+        </div>
+
+        <div onclick="acToggleSplit()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:11px 14px;margin-bottom:14px;cursor:pointer;">
+          <span id="ac_splitBox" style="font-size:15px;">⬜</span>
+          <div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);">🔀 2분할 병렬 모드 <span style="font-size:10.5px;color:var(--text3);font-weight:500;">(가장 빠름 · 참석자 16명)</span></div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.6;">회의를 <b style="color:var(--text2);">마케팅본부 / 영업본부</b> 둘로 나눠 챗gpt 창 2개에서 동시에 돌립니다. 참석자를 오히려 늘리면서 대기시간은 절반 이하로 줄어듭니다. 복사·붙여넣기가 1회 늘어납니다.</div>
+          </div>
         </div>
 
         <div style="display:flex;gap:8px;justify-content:flex-end;">
@@ -2828,7 +2846,11 @@
             <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 2 · 회의 프롬프트</div>
             <div style="font-size:11px;color:var(--text3);">가상 마케팅본부 회의를 진행시키는 프롬프트입니다.</div>
           </div>
-          <button onclick="acShuffle()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;">🎲 참석자 재추첨</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button id="ac_splitBtn" onclick="acToggleSplit()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;"></button>
+          <button id="ac_fastBtn" onclick="acToggleFast()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;"></button>
+          <button id="ac_shuffleBtn" onclick="acShuffle()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;">🎲 참석자 재추첨</button>
+          </div>
         </div>
 
         <div id="ac_topic2" style="margin-bottom:12px;"></div>
@@ -2838,22 +2860,7 @@
           💡 아래 프롬프트를 복사해 <b>챗gpt(또는 클로드)</b>에 붙여넣으세요. 이미지가 있으면 함께 첨부하세요.
         </div>
 
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <div style="flex:1;min-width:300px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:12px;font-weight:700;color:var(--text);">🤖 ChatGPT용</span>
-              <button onclick="acCopy('ac_prompt_gpt')" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
-            </div>
-            <textarea id="ac_prompt_gpt" readonly rows="14" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
-          </div>
-          <div style="flex:1;min-width:300px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:12px;font-weight:700;color:var(--text);">🧠 Claude용</span>
-              <button onclick="acCopy('ac_prompt_claude')" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
-            </div>
-            <textarea id="ac_prompt_claude" readonly rows="14" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
-          </div>
-        </div>
+        <div id="ac_promptArea"></div>
 
         <div style="display:flex;gap:8px;justify-content:space-between;margin-top:14px;">
           <button onclick="acGoStep(1)" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 자료 수정</button>
@@ -2866,6 +2873,7 @@
         <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 3 · 회의록 검토</div>
         <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">AI가 출력한 회의록 전체를 그대로 붙여넣으세요.</div>
 
+        <div id="ac_splitArea"></div>
         <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">
           💡 챗gpt가 만든 회의록을 아래 칸에 붙여넣고 <b>[회의록 저장]</b>을 누르세요.
         </div>
@@ -13268,7 +13276,7 @@ const AC_PRODS = [
 let acS = null;
 
 function acDefault(){
-  return {step:1, link:'', point:'', body:'', roster:null, minutes:'', feedback:'', brief:'',
+  return {step:1, fast:true, split:false, mA:'', mB:'', link:'', point:'', body:'', roster:null, minutes:'', feedback:'', brief:'',
           approved:false, briefOpen:false, prodIdx:0,
           qty:{img:'10', cust:'20~25', meta:'15~20', call:'', card:'4'},
           results:{img:'', cust:'', meta:'', call:'', card:''}};
@@ -13294,6 +13302,10 @@ function acShuffle(){
   acS.roster = AC_FIXED.concat(pick(AC_POOL_MK,3)).concat(pick(AC_POOL_SALES,2));
   acSave(); acRender();
 }
+function acToggleFast(){ acS.fast = !acS.fast; acSave(); acRender(); }
+function acToggleSplit(){ acS.split = !acS.split; acSave(); acRender(); }
+function acIsGNews(){ return /news\.google\.com/i.test(acS.link||''); }
+function acHasBody(){ return !!(acS.body||'').trim(); }
 function acReset(){
   if(!confirm('현재 작업 내용을 모두 삭제하고 새 주제를 시작합니다.\n계속하시겠습니까?')) return;
   acS = acDefault();
@@ -13397,8 +13409,13 @@ function acProdJump(i){ acSaveResult(); acS.prodIdx = i; acS.step = 4; acSave();
 function acSrcBlock(){
   let s = '';
   const links = (acS.link || '').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  if(links.length) s += '[분석 대상 기사 링크]\n' + links.map(l=>'▶ ' + l).join('\n') + '\n위 링크를 직접 열어 기사 전체 내용을 읽고 분석하라.\n\n';
-  if((acS.body||'').trim()) s += '[기사 본문]\n' + acS.body.trim() + '\n\n';
+  const hasBody = acHasBody();
+  if(hasBody){
+    s += '[기사 본문 — 이미 제공되었으니 웹 접속하지 말고 아래 본문만 근거로 분석하라. 속도가 중요하다.]\n' + acS.body.trim() + '\n\n';
+    if(links.length) s += '[참고 출처 — 열어볼 필요 없음]\n' + links.map(l=>'▶ ' + l).join('\n') + '\n\n';
+  } else if(links.length){
+    s += '[분석 대상 기사 링크]\n' + links.map(l=>'▶ ' + l).join('\n') + '\n위 링크를 직접 열어 기사 전체 내용을 읽고 분석하라.\n\n';
+  }
   s += '[첨부 이미지]\n이 메시지에 이미지가 첨부되어 있다면 이미지에 담긴 정보(차량, 가격표, 조건표, 광고 시안 등)도 함께 분석에 반영하라.\n\n';
   if((acS.point||'').trim()) s += '[대표 강조 지시 — 반드시 반영]\n' + acS.point.trim() + '\n\n';
   return s;
@@ -13411,28 +13428,83 @@ function acRule(){
     '- 추정이 불가피하면 문장 끝에 (추정) 을 붙여라.\n' +
     '- 허위·과장 광고 표현은 배제하라.\n';
 }
-function acMeetingPrompt(forClaude){
-  const roster = (acS.roster || AC_FIXED.concat(AC_POOL_MK.slice(0,3)).concat(AC_POOL_SALES.slice(0,2)));
-  let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 마케팅본부 회의를 시뮬레이션한다.\n';
-  s += '아래 참석자 각각의 전문 분야 관점에서 발언하고, 마지막에 광고 소재 제작 방향을 확정하라.\n\n';
+function acTeam(kind){
+  if(kind==='mk')    return ['차우진 · 마케팅 총괄팀장 (회의 진행 · 결론 정리)','서윤도 · 브랜드/크리에이티브 디렉터 (톤앤매너 · 비주얼 컨셉 · 컬러)','임하늘 · 광고 카피라이터 (후킹멘트 · 문구 톤)'].concat(AC_POOL_MK);
+  if(kind==='sales') return ['강태식 · 영업총괄 부장 (회의 진행 · 세일즈 훅 전환)'].concat(AC_POOL_SALES);
+  return acS.roster || AC_FIXED.concat(AC_POOL_MK.slice(0,3)).concat(AC_POOL_SALES.slice(0,2));
+}
+function acSpeed(){
+  if(!acS.fast) return '';
+  return '\n[속도 우선 · 출력 압축 지시]\n'
+    + '- 내부적으로는 충분히 깊게 검토하되, 화면에 쓰는 문장만 압축하라.\n'
+    + '- 표, 굵은글씨, 구분선 등 마크다운 장식을 쓰지 마라.\n'
+    + '- 서론·인사말·마지막 요약 반복을 쓰지 마라. 곧바로 지정된 형식만 출력하라.\n'
+    + '- 같은 내용을 다른 표현으로 되풀이하지 마라.\n';
+}
+function acWebNote(forClaude){
+  if(acHasBody()) return '\n※ 본문이 이미 제공되었으므로 웹 접속·검색을 하지 마라.\n';
+  return forClaude ? '\n※ 링크를 직접 열 수 없다면 웹 검색 도구를 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n'
+                   : '\n※ 링크를 직접 열 수 없다면 웹 브라우징 기능을 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n';
+}
+function acMeetingPrompt(forClaude, kind){
+  const roster = acTeam(kind);
+  const label = kind==='mk' ? '마케팅본부' : (kind==='sales' ? '영업본부' : '마케팅본부');
+  let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 ' + label + ' 회의를 시뮬레이션한다.\n';
+  s += '아래 참석자 각각의 전문 분야 관점에서 발언하고, 광고 소재 제작 방향을 정리하라.\n\n';
   s += '[참석자]\n' + roster.map(r=>'- ' + r).join('\n') + '\n\n';
   s += acSrcBlock();
+  s += acRule() + '\n';
+  s += '[출력 형식 — 순서를 반드시 지켜라]\n';
+  if(kind){
+    s += '■ ' + label + ' 결론\n';
+    s += '  1) 핵심 판단 3줄\n';
+    s += '  2) 이 부서 관점에서 밀어야 할 방향\n';
+    s += '  3) 이 부서 관점에서 위험한 지점 · 쓰면 안 되는 표현\n\n';
+    s += '■ 참석자별 발언\n';
+    s += acS.fast ? '  - 1인당 1~2줄로 결론만. 자기 전문 분야 관점만 말할 것.\n'
+                  : '  - 1인당 2~3줄. 자기 전문 분야 관점만 말할 것.\n';
+    if(kind==='sales') s += '  - 배도현(악마의 변호인)은 반드시 반대 논리를 제시할 것.\n';
+    s += '  - 진행자가 마지막에 부서 의견을 한 문단으로 정리할 것.\n\n';
+    s += '■ ' + label + ' 브리프 초안\n';
+    s += '  - 타깃 / 핵심 메시지 / 강조할 장점 / 주의할 점\n';
+  } else {
+    s += '■ 최종 피드백 · 방향 제안   ← 반드시 이 블록을 가장 먼저 출력\n';
+    s += '  1) 핵심 결론 3줄\n';
+    s += '  2) 추천 광고 방향 (누구에게 / 무엇을 / 어떤 톤으로)\n';
+    s += '  3) 주의사항 · 쓰면 안 되는 표현\n';
+    s += '  4) 대표 확인 필요 사항 (있으면)\n\n';
+    s += '■ 참석자별 발언\n';
+    s += acS.fast ? '  - 각 참석자 1인당 1~2줄로 결론만. 자기 전문 분야 관점만 말할 것.\n'
+                  : '  - 각 참석자 1인당 2~3줄로 짧게. 자기 전문 분야 관점만 말할 것.\n';
+    s += '  - 배도현(악마의 변호인)이 참석했다면 반드시 반대 논리를 제시할 것.\n';
+    s += '  - 차우진 총괄팀장이 마지막에 논의를 정리할 것.\n\n';
+    s += '■ 광고 브리프\n';
+    s += '  - 타깃 / 핵심 메시지 1문장 / 강조할 장점 3~5개 / 톤앤매너 / 비주얼 컨셉·컬러 방향 / 후킹 소재 키워드\n';
+    s += '  - 이 브리프만 보고도 광고물을 만들 수 있을 만큼 구체적으로 쓸 것.\n';
+  }
+  s += acSpeed();
+  s += acWebNote(forClaude);
+  return s;
+}
+function acMergePrompt(forClaude){
+  let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 마케팅 총괄팀장 차우진이다.\n';
+  s += '두 부서가 각각 진행한 회의 결과를 받았다. 이를 종합해 최종 방향을 확정하라.\n\n';
+  s += '[마케팅본부 회의 결과]\n' + (acS.mA||'').trim() + '\n\n';
+  s += '[영업본부 회의 결과]\n' + (acS.mB||'').trim() + '\n\n';
+  if((acS.point||'').trim()) s += '[대표 강조 지시 — 반드시 반영]\n' + acS.point.trim() + '\n\n';
   s += acRule() + '\n';
   s += '[출력 형식 — 순서를 반드시 지켜라]\n';
   s += '■ 최종 피드백 · 방향 제안   ← 반드시 이 블록을 가장 먼저 출력\n';
   s += '  1) 핵심 결론 3줄\n';
   s += '  2) 추천 광고 방향 (누구에게 / 무엇을 / 어떤 톤으로)\n';
-  s += '  3) 주의사항 · 쓰면 안 되는 표현\n';
-  s += '  4) 대표 확인 필요 사항 (있으면)\n\n';
-  s += '■ 참석자별 발언\n';
-  s += '  - 각 참석자 1인당 2~3줄로 짧게. 자기 전문 분야 관점만 말할 것.\n';
-  s += '  - 배도현(악마의 변호인)은 반드시 반대 논리를 제시할 것.\n';
-  s += '  - 차우진 총괄팀장이 마지막에 논의를 정리할 것.\n\n';
+  s += '  3) 두 부서 의견이 충돌한 지점과 총괄팀장의 판단\n';
+  s += '  4) 주의사항 · 쓰면 안 되는 표현\n';
+  s += '  5) 대표 확인 필요 사항 (있으면)\n\n';
   s += '■ 광고 브리프\n';
   s += '  - 타깃 / 핵심 메시지 1문장 / 강조할 장점 3~5개 / 톤앤매너 / 비주얼 컨셉·컬러 방향 / 후킹 소재 키워드\n';
   s += '  - 이 브리프만 보고도 광고물을 만들 수 있을 만큼 구체적으로 쓸 것.\n';
-  if(forClaude) s += '\n※ 링크를 직접 열 수 없다면 웹 검색 도구를 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n';
-  else s += '\n※ 링크를 직접 열 수 없다면 웹 브라우징 기능을 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n';
+  s += acSpeed();
+  s += '\n※ 위에 제공된 두 회의 결과만 근거로 하라. 웹 접속·검색을 하지 마라.\n';
   return s;
 }
 function acProdPrompt(forClaude){
@@ -13482,6 +13554,7 @@ function acProdPrompt(forClaude){
     s += '- 각 장마다: ① 헤드라인 ② 본문 문구 ③ 비주얼 지시(구도·컬러·요소) ④ 디자이너 전달 메모 를 적을 것.\n';
   }
   s += '\n다른 설명 없이 요청한 결과물만 출력하라.\n';
+  if(acS.fast) s += '서론·요약·마무리 코멘트 없이 결과물만 바로 쓰라. 웹 검색은 하지 마라.\n';
   if(forClaude) s += '※ 결과물은 복사해 바로 사용할 수 있도록 마크다운 장식을 최소화하라.\n';
   return s;
 }
@@ -13502,12 +13575,88 @@ function acTopicHTML(){
   h += pt ? '<span style="color:var(--text);white-space:pre-wrap;">'+acEsc(pt)+'</span>' : '<span style="color:var(--text3);">(없음)</span>';
   h += '</div>';
   h += '<div><span style="color:var(--text3);font-weight:700;">📄 기사 본문 백업</span> ';
-  h += bd ? '<span style="color:var(--text);">첨부됨 ('+bd.length.toLocaleString()+'자)</span>' : '<span style="color:var(--text3);">미입력</span>';
+  h += bd ? '<span style="color:var(--green);">첨부됨 ('+bd.length.toLocaleString()+'자) · 웹 접속 생략 → 빠름</span>' : '<span style="color:var(--yellow);">미입력 · AI가 링크를 열어야 해서 느려질 수 있음</span>';
+  h += '</div>';
+  h += '<div style="margin-top:9px;"><span style="color:var(--text3);font-weight:700;">⚡ 빠른 모드</span> ' + (acS.fast ? '<span style="color:var(--green);">ON · 출력 압축</span>' : '<span style="color:var(--text3);">OFF</span>')
+     + ' &nbsp;|&nbsp; <span style="color:var(--text3);font-weight:700;">🔀 2분할</span> ' + (acS.split ? '<span style="color:var(--blue);">ON · 참석 ' + (acTeam('mk').length + acTeam('sales').length) + '명 (병렬)</span>' : '<span style="color:var(--text3);">OFF · 참석 ' + acTeam(null).length + '명</span>');
   h += '</div>';
   h += '</div>';
   h += '<div style="padding:8px 14px;background:var(--bg3);border-top:1px solid var(--border);text-align:right;"><button onclick="acGoStep(1)" style="background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;">✏️ 자료 수정</button></div>';
   h += '</div>';
   return h;
+}
+function acBox(title, id, val, rows){
+  const isC = id.indexOf('claude') >= 0;
+  const col = isC ? 'var(--blue)' : 'var(--green)';
+  const bg  = isC ? 'rgba(68,136,255,.12)' : 'rgba(68,255,136,.12)';
+  return '<div style="flex:1;min-width:300px;">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;">'
+    + '<span style="font-size:12px;font-weight:700;color:var(--text);">' + title + '</span>'
+    + '<button onclick="acCopy(\'' + id + '\')" style="background:' + bg + ';border:1px solid ' + col + ';color:' + col + ';font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>'
+    + '</div>'
+    + '<textarea id="' + id + '" readonly rows="' + rows + '" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;">' + acEsc(val) + '</textarea>'
+    + '</div>';
+}
+function acRenderPromptArea(){
+  const el = document.getElementById('ac_promptArea');
+  if(!el) return;
+  let h = '';
+  if(acS.split){
+    h += '<div style="background:rgba(68,136,255,.08);border:1px solid rgba(68,136,255,.35);border-radius:6px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.75;">'
+      + '<b style="color:var(--blue);">🔀 2분할 병렬 모드</b><br>'
+      + '챗gpt 창(또는 탭) <b style="color:var(--text);">2개를 열고</b> 아래 A·B를 각각 붙여넣어 <b style="color:var(--text);">동시에</b> 돌리세요. 두 회의가 병렬로 진행돼 대기시간이 절반 이하로 줄어듭니다.'
+      + '</div>';
+    h += '<div style="font-size:12.5px;font-weight:800;color:var(--green);margin:0 0 8px;">A · 마케팅본부 회의 (참석 ' + acTeam('mk').length + '명)</div>';
+    h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;">'
+      + acBox('🤖 ChatGPT용', 'ac_pa_gpt', acMeetingPrompt(false,'mk'), 11)
+      + acBox('🧠 Claude용', 'ac_pa_claude', acMeetingPrompt(true,'mk'), 11)
+      + '</div>';
+    h += '<div style="font-size:12.5px;font-weight:800;color:var(--yellow);margin:0 0 8px;">B · 영업본부 회의 (참석 ' + acTeam('sales').length + '명)</div>';
+    h += '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+      + acBox('🤖 ChatGPT용', 'ac_pb_gpt', acMeetingPrompt(false,'sales'), 11)
+      + acBox('🧠 Claude용', 'ac_pb_claude', acMeetingPrompt(true,'sales'), 11)
+      + '</div>';
+  } else {
+    h += '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+      + acBox('🤖 ChatGPT용', 'ac_prompt_gpt', acMeetingPrompt(false,null), 14)
+      + acBox('🧠 Claude용', 'ac_prompt_claude', acMeetingPrompt(true,null), 14)
+      + '</div>';
+  }
+  el.innerHTML = h;
+}
+function acSaveSplit(){
+  const a=document.getElementById('ac_mA'), b=document.getElementById('ac_mB');
+  if(a) acS.mA=a.value; if(b) acS.mB=b.value;
+  acSave();
+  const ready = !!(acS.mA||'').trim() && !!(acS.mB||'').trim();
+  const w=document.getElementById('ac_mergeWrap');
+  if(w && w.dataset.ready !== String(ready)) acRenderSplitArea();
+}
+function acRenderSplitArea(){
+  const el=document.getElementById('ac_splitArea');
+  if(!el) return;
+  if(!acS.split){ el.innerHTML=''; return; }
+  const ready = !!(acS.mA||'').trim() && !!(acS.mB||'').trim();
+  let h = '<div style="background:rgba(68,136,255,.08);border:1px solid rgba(68,136,255,.35);border-radius:6px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.75;">'
+    + '<b style="color:var(--blue);">🔀 2분할 병렬 모드</b><br>A·B 회의 결과를 각각 붙여넣으면 종합 프롬프트가 자동으로 만들어집니다.</div>';
+  h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">';
+  h += '<div style="flex:1;min-width:300px;"><div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:6px;">A · 마케팅본부 회의 결과</div>'
+    + '<textarea id="ac_mA" rows="8" oninput="acSaveSplit()" placeholder="A 결과를 붙여넣으세요." style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;">' + acEsc(acS.mA||'') + '</textarea></div>';
+  h += '<div style="flex:1;min-width:300px;"><div style="font-size:12px;font-weight:800;color:var(--yellow);margin-bottom:6px;">B · 영업본부 회의 결과</div>'
+    + '<textarea id="ac_mB" rows="8" oninput="acSaveSplit()" placeholder="B 결과를 붙여넣으세요." style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;">' + acEsc(acS.mB||'') + '</textarea></div>';
+  h += '</div>';
+  h += '<div id="ac_mergeWrap" data-ready="' + ready + '">';
+  if(ready){
+    h += '<div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">💡 마지막 단계입니다. 아래 <b>종합 프롬프트</b>를 챗gpt에 넣고, 나온 결과를 맨 아래 칸에 붙여넣으세요.</div>';
+    h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">'
+      + acBox('🤖 종합 · ChatGPT용', 'ac_merge_gpt', acMergePrompt(false), 9)
+      + acBox('🧠 종합 · Claude용', 'ac_merge_claude', acMergePrompt(true), 9)
+      + '</div>';
+  } else {
+    h += '<div style="background:var(--bg3);border:1px dashed var(--border2);border-radius:6px;padding:14px;text-align:center;font-size:12px;color:var(--text3);margin-bottom:14px;">A·B 결과를 모두 붙여넣으면 종합 프롬프트가 여기에 나타납니다.</div>';
+  }
+  h += '</div>';
+  el.innerHTML = h;
 }
 function acRenderTopic(){
   ['ac_topic2','ac_topic3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML = acTopicHTML(); });
@@ -13543,15 +13692,51 @@ function acRender(){
   sv('ac_link', acS.link); sv('ac_point', acS.point); sv('ac_body', acS.body);
 
   acRenderTopic();
+  const fb2 = document.getElementById('ac_fastBox');
+  if(fb2) fb2.textContent = acS.fast ? '✅' : '⬜';
+  const sb2 = document.getElementById('ac_splitBox');
+  if(sb2) sb2.textContent = acS.split ? '✅' : '⬜';
+  const shb = document.getElementById('ac_shuffleBtn');
+  if(shb) shb.style.display = acS.split ? 'none' : '';
+  const sbn = document.getElementById('ac_splitBtn');
+  if(sbn){
+    sbn.textContent = acS.split ? '🔀 2분할 ON' : '🔀 2분할 OFF';
+    sbn.style.color = acS.split ? 'var(--blue)' : 'var(--text3)';
+    sbn.style.borderColor = acS.split ? 'var(--blue)' : 'var(--border2)';
+  }
+  const fbn = document.getElementById('ac_fastBtn');
+  if(fbn){
+    fbn.textContent = acS.fast ? '⚡ 빠른 모드 ON' : '🐢 빠른 모드 OFF';
+    fbn.style.color = acS.fast ? 'var(--green)' : 'var(--text3)';
+    fbn.style.borderColor = acS.fast ? 'var(--green)' : 'var(--border2)';
+  }
+  const wn = document.getElementById('ac_warn');
+  if(wn){
+    const msg = [];
+    if(acIsGNews()) msg.push('⚠️ <b>구글뉴스 링크는 실제 기사 주소가 아닙니다.</b><br>AI가 열지 못해 매우 느려지거나 실패합니다. 구글뉴스에서 기사 제목을 클릭해 이동한 뒤, 주소창의 <b>언론사 실제 주소</b>를 복사해 넣으세요.');
+    if(!acHasBody() && (acS.link||'').trim()) msg.push('💡 답변 속도를 크게 높이려면 <b>기사 본문을 직접 붙여넣으세요.</b> 본문이 있으면 AI가 웹 접속을 건너뜁니다.');
+    wn.innerHTML = msg.join('<hr style="border:none;border-top:1px solid rgba(255,68,68,.3);margin:9px 0;">');
+    wn.style.display = msg.length ? 'block' : 'none';
+    wn.style.color = acIsGNews() ? 'var(--red)' : 'var(--yellow)';
+    wn.style.borderColor = acIsGNews() ? 'var(--red)' : 'var(--yellow)';
+    wn.style.background = acIsGNews() ? 'rgba(255,68,68,.1)' : 'rgba(255,204,68,.1)';
+  }
   if(acS.step === 2){
     if(!acS.roster) acShuffle();
+    acRenderPromptArea();
     const r = document.getElementById('ac_roster');
-    if(r) r.innerHTML = '<b style="color:var(--text);">오늘 회의 참석자 ' + acS.roster.length + '명</b><br>' + acS.roster.map(x=>'· ' + acEsc(x)).join('<br>');
-    sv('ac_prompt_gpt', acMeetingPrompt(false));
-    sv('ac_prompt_claude', acMeetingPrompt(true));
+    if(r){
+      if(acS.split){
+        r.innerHTML = '<b style="color:var(--green);">A · 마케팅본부 ' + acTeam('mk').length + '명</b><br>' + acTeam('mk').map(x=>'· ' + acEsc(x)).join('<br>')
+          + '<div style="height:8px;"></div><b style="color:var(--yellow);">B · 영업본부 ' + acTeam('sales').length + '명</b><br>' + acTeam('sales').map(x=>'· ' + acEsc(x)).join('<br>');
+      } else {
+        r.innerHTML = '<b style="color:var(--text);">오늘 회의 참석자 ' + acS.roster.length + '명</b><br>' + acS.roster.map(x=>'· ' + acEsc(x)).join('<br>');
+      }
+    }
   }
 
   if(acS.step === 3){
+    acRenderSplitArea();
     sv('ac_minutes', acS.minutes);
     const view = document.getElementById('ac_minutesView');
     const has = !!(acS.minutes||'').trim() && !!(acS.feedback||'').trim();
