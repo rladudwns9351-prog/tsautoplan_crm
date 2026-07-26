@@ -2778,18 +2778,20 @@
       <div class="page-header">
         <div>
           <div class="page-title">📢 광고소재ai</div>
-          <div class="page-sub">기사·이미지·강조포인트 → 가상 마케팅본부 회의 → 광고 결과물 5종 <span class="admin-only" style="color:var(--text3);">(관리자 전용)</span></div>
+          <div class="page-sub">기사·이미지·강조포인트 → 가상 마케팅본부 회의 → 분석 회의록 <span class="admin-only" style="color:var(--text3);">(관리자 전용)</span></div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <span id="ac_stepbadge" style="font-size:12px;color:var(--text3);"></span>
+          <button id="ac_histBtn" onclick="acHistToggle()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;font-weight:600;">📁 이력</button>
           <button onclick="acReset()" style="background:rgba(255,68,68,.12);border:1px solid var(--red);color:var(--red);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;font-weight:600;">🔄 초기화</button>
         </div>
       </div>
 
-      <!-- 진행바 -->
       <div class="section-card" style="padding:14px 16px;margin-bottom:14px;">
         <div id="ac_progress" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"></div>
       </div>
+
+      <div class="section-card" id="ac_histPanel" style="padding:16px;margin-bottom:14px;display:none;"></div>
 
       <!-- STEP 1 -->
       <div class="section-card" id="ac_s1" style="padding:18px;margin-bottom:14px;">
@@ -2798,31 +2800,32 @@
 
         <div style="margin-bottom:12px;">
           <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">🔗 기사 링크 <span style="color:var(--text3);font-weight:400;">(여러 개는 줄바꿈으로 구분)</span></label>
-          <textarea id="ac_link" oninput="acSave();acRender();" rows="3" placeholder="https://n.news.naver.com/article/..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          <textarea id="ac_link" oninput="acSave();acRender();" rows="3" placeholder="https://www.motorgraph.com/news/..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
         </div>
 
         <div style="margin-bottom:12px;">
-          <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">📝 강조 포인트 <span style="color:var(--red);">*</span> <span style="color:var(--text3);font-weight:400;">(대표 지시사항 · 회의와 모든 결과물에 반영됩니다)</span></label>
-          <textarea id="ac_point" rows="4" placeholder="예) 초기비용 부담 없다는 점을 가장 강하게 강조&#10;예) 법인 비용처리 이점 포함&#10;예) 20~30대 첫차 고객 타깃" style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">📝 강조 포인트 <span style="color:var(--red);">*</span> <span style="color:var(--text3);font-weight:400;">(대표 지시사항 · 회의 전체에 반영됩니다)</span></label>
+          <div id="ac_preBar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:7px;"></div>
+          <textarea id="ac_point" oninput="acSave();" rows="4" placeholder="예) 저렴한 EV 차량을 강조&#10;예) 초기비용 부담 없다는 점 강조&#10;예) 20~30대 첫차 고객 타깃" style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
         </div>
 
         <div style="margin-bottom:12px;">
-          <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">📄 기사 본문 백업 <span style="color:var(--text3);font-weight:400;">(선택 · AI가 링크를 못 읽을 때만 본문을 붙여넣으세요)</span></label>
-          <textarea id="ac_body" oninput="acSave();acRender();" rows="4" placeholder="링크가 차단되는 경우에만 기사 본문을 붙여넣으세요." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">📄 기사 본문 <span style="color:var(--text3);font-weight:400;">(붙여넣으면 AI가 웹 접속을 건너뛰어 훨씬 빨라집니다)</span></label>
+          <textarea id="ac_body" oninput="acSave();acRender();" rows="5" placeholder="기사 본문을 복사해 붙여넣으세요." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
         </div>
 
         <div style="background:rgba(68,136,255,.08);border:1px solid rgba(68,136,255,.3);border-radius:6px;padding:12px 14px;margin-bottom:14px;">
           <div style="font-size:12px;color:var(--blue);font-weight:700;margin-bottom:4px;">🖼 이미지 안내</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.7;">이미지는 CRM에 올리지 않습니다. 다음 단계에서 프롬프트를 복사한 뒤 <b style="color:var(--text);">챗gpt 입력창에 이미지를 직접 첨부</b>하세요. (최대 10장 권장)<br>프롬프트에 이미지 분석 지시가 이미 포함되어 있습니다.</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.7;">이미지는 CRM에 올리지 않습니다. 다음 단계에서 프롬프트를 복사한 뒤 <b style="color:var(--text);">챗gpt 입력창에 직접 첨부</b>하세요. 프롬프트에 이미지 분석 지시가 포함되어 있습니다.</div>
         </div>
 
-        <div id="ac_warn" style="display:none;background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:6px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:var(--red);line-height:1.7;"></div>
+        <div id="ac_warn" style="display:none;border-radius:6px;padding:11px 14px;margin-bottom:12px;font-size:12px;line-height:1.7;"></div>
 
-        <div onclick="acToggleFast()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:11px 14px;margin-bottom:14px;cursor:pointer;">
+        <div onclick="acToggleFast()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:11px 14px;margin-bottom:10px;cursor:pointer;">
           <span id="ac_fastBox" style="font-size:15px;">⬜</span>
           <div>
             <div style="font-size:12.5px;font-weight:700;color:var(--text);">⚡ 빠른 모드</div>
-            <div style="font-size:11px;color:var(--text3);line-height:1.6;">참석자는 그대로 두고 <b style="color:var(--text2);">출력 문장만 압축</b>합니다. 분석 깊이는 유지되고, 장식·중복·서론이 빠져 답변이 빨라집니다.</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.6;">참석자는 그대로 두고 <b style="color:var(--text2);">출력 문장만 압축</b>합니다. 분석 깊이는 유지되고 답변이 빨라집니다.</div>
           </div>
         </div>
 
@@ -2830,8 +2833,22 @@
           <span id="ac_splitBox" style="font-size:15px;">⬜</span>
           <div>
             <div style="font-size:12.5px;font-weight:700;color:var(--text);">🔀 2분할 병렬 모드 <span style="font-size:10.5px;color:var(--text3);font-weight:500;">(가장 빠름 · 참석자 16명)</span></div>
-            <div style="font-size:11px;color:var(--text3);line-height:1.6;">회의를 <b style="color:var(--text2);">마케팅본부 / 영업본부</b> 둘로 나눠 챗gpt 창 2개에서 동시에 돌립니다. 참석자를 오히려 늘리면서 대기시간은 절반 이하로 줄어듭니다. 복사·붙여넣기가 1회 늘어납니다.</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.6;">회의를 <b style="color:var(--text2);">마케팅본부 / 영업본부</b>로 나눠 챗gpt 창 2개에서 동시에 돌립니다. 참석자는 늘고 대기시간은 절반 이하로 줄어듭니다.</div>
           </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:11px 14px;margin-bottom:14px;">
+          <span id="ac_histBox" onclick="acToggleHistRef()" style="font-size:15px;cursor:pointer;">⬜</span>
+          <div style="flex:1;min-width:200px;" onclick="acToggleHistRef()">
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;">📚 과거 회의록 참조 <span style="font-size:10.5px;color:var(--text3);font-weight:500;">(기록가 유서기 · 실무자 진현우가 사용)</span></div>
+            <div id="ac_histRefSub" style="font-size:11px;color:var(--text3);line-height:1.6;"></div>
+          </div>
+          <select id="ac_histN" onchange="acSetHistN(this.value)" style="padding:6px 9px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:11.5px;outline:none;">
+            <option value="3">최근 3건</option>
+            <option value="5">최근 5건</option>
+            <option value="10">최근 10건</option>
+            <option value="50">전체</option>
+          </select>
         </div>
 
         <div style="display:flex;gap:8px;justify-content:flex-end;">
@@ -2847,12 +2864,14 @@
             <div style="font-size:11px;color:var(--text3);">가상 마케팅본부 회의를 진행시키는 프롬프트입니다.</div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button id="ac_splitBtn" onclick="acToggleSplit()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;"></button>
-          <button id="ac_fastBtn" onclick="acToggleFast()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;"></button>
-          <button id="ac_shuffleBtn" onclick="acShuffle()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;">🎲 참석자 재추첨</button>
+            <button id="ac_splitBtn" onclick="acToggleSplit()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;"></button>
+            <button id="ac_fastBtn" onclick="acToggleFast()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;"></button>
+            <button onclick="acTplToggle()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;">⚙️ 프롬프트 편집</button>
+            <button id="ac_shuffleBtn" onclick="acShuffle()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;">🎲 참석자 재추첨</button>
           </div>
         </div>
 
+        <div id="ac_tplPanel" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:16px;margin-bottom:14px;"></div>
         <div id="ac_topic2" style="margin-bottom:12px;"></div>
         <div id="ac_roster" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.9;"></div>
 
@@ -2870,25 +2889,31 @@
 
       <!-- STEP 3 -->
       <div class="section-card" id="ac_s3" style="padding:18px;margin-bottom:14px;display:none;">
-        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 3 · 회의록 검토</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">AI가 출력한 회의록 전체를 그대로 붙여넣으세요.</div>
-
-        <div id="ac_splitArea"></div>
-        <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">
-          💡 챗gpt가 만든 회의록을 아래 칸에 붙여넣고 <b>[회의록 저장]</b>을 누르세요.
-        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 3 · 회의록</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">AI가 출력한 회의록을 그대로 붙여넣으면 정리해서 보여주고 PDF로 저장할 수 있습니다.</div>
 
         <div id="ac_topic3" style="margin-bottom:12px;"></div>
+        <div id="ac_splitArea"></div>
+
+        <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">
+          💡 회의록 전체를 아래 칸에 붙여넣고 <b>[회의록 저장]</b>을 누르세요.
+        </div>
+
         <textarea id="ac_minutes" rows="10" placeholder="회의록 전체를 붙여넣으세요." oninput="acSave()" style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;"></textarea>
 
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
           <button onclick="acSaveMinutes()" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">💾 회의록 저장</button>
         </div>
 
-        <div id="ac_minutesView" style="display:none;margin-top:16px;">
+        <div id="ac_minutesView" style="display:none;margin-top:18px;">
           <div style="border:2px solid var(--red);border-radius:8px;padding:16px;background:rgba(255,68,68,.06);margin-bottom:12px;">
             <div style="font-size:12px;font-weight:800;color:var(--red);letter-spacing:1px;margin-bottom:10px;">🔴 최종 피드백 · 방향 제안</div>
             <div id="ac_feedback" style="font-size:13px;color:var(--text);line-height:1.85;white-space:pre-wrap;"></div>
+          </div>
+
+          <div id="ac_briefCard" style="display:none;border:1px solid var(--green);border-radius:8px;padding:16px;background:rgba(68,255,136,.05);margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:800;color:var(--green);letter-spacing:1px;margin-bottom:10px;">🟢 광고 브리프</div>
+            <div id="ac_briefView" style="font-size:12.5px;color:var(--text2);line-height:1.85;white-space:pre-wrap;"></div>
           </div>
 
           <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;">
@@ -2901,77 +2926,15 @@
             </div>
           </div>
 
-          <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:12px 14px;margin-bottom:12px;">
-            <div style="font-size:12.5px;color:var(--yellow);font-weight:700;">⚠️ 이 방향으로 결과물 제작을 진행하시겠습니까?</div>
-            <div style="font-size:11.5px;color:var(--text2);margin-top:5px;line-height:1.6;">「방향 수정」을 누르면 아래 브리프를 직접 고칠 수 있고, 수정한 내용이 이후 5종 프롬프트에 그대로 반영됩니다.</div>
-          </div>
-
-          <div id="ac_briefWrap" style="display:none;margin-bottom:12px;">
-            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">✏️ 광고 브리프 (직접 수정 가능)</label>
-            <textarea id="ac_brief" rows="8" oninput="acSave()" style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;"></textarea>
-          </div>
-
-          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;">
             <button onclick="acGoStep(2)" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 회의 다시</button>
-            <button onclick="acToggleBrief()" style="background:rgba(255,204,68,.12);border:1px solid var(--yellow);color:var(--yellow);font-size:13px;font-weight:600;padding:10px 18px;border-radius:6px;cursor:pointer;">✏️ 방향 수정</button>
-            <button onclick="acApprove()" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">✅ 이 방향으로 진행</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 4 -->
-      <div class="section-card" id="ac_s4" style="padding:18px;margin-bottom:14px;display:none;">
-        <div id="ac_prodHead" style="margin-bottom:14px;"></div>
-
-        <div id="ac_qtyWrap" style="margin-bottom:14px;"></div>
-
-        <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">
-          💡 아래 프롬프트를 복사해 <b>챗gpt</b>에 붙여넣으세요.
-        </div>
-
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
-          <div style="flex:1;min-width:300px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:12px;font-weight:700;color:var(--text);">🤖 ChatGPT용</span>
-              <button onclick="acCopy('ac_pprompt_gpt')" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button onclick="acHistSave()" style="background:rgba(255,204,68,.12);border:1px solid var(--yellow);color:var(--yellow);font-size:13px;font-weight:700;padding:10px 18px;border-radius:6px;cursor:pointer;">📁 이력에 저장</button>
+              <button onclick="acCopyMinutes()" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:13px;font-weight:700;padding:10px 18px;border-radius:6px;cursor:pointer;">📋 회의록 복사</button>
+              <button onclick="acPrintMinutes()" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:13px;font-weight:700;padding:10px 20px;border-radius:6px;cursor:pointer;">📄 PDF 저장</button>
             </div>
-            <textarea id="ac_pprompt_gpt" readonly rows="12" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
           </div>
-          <div style="flex:1;min-width:300px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:12px;font-weight:700;color:var(--text);">🧠 Claude용</span>
-              <button onclick="acCopy('ac_pprompt_claude')" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
-            </div>
-            <textarea id="ac_pprompt_claude" readonly rows="12" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
-          </div>
-        </div>
-
-        <div style="background:rgba(68,255,136,.08);border:1px solid rgba(68,255,136,.3);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--green);font-weight:600;">
-          💾 AI가 만들어준 결과물을 아래 칸에 붙여넣고 다음으로 넘어가세요.
-        </div>
-
-        <textarea id="ac_result" rows="10" placeholder="AI 결과물을 붙여넣으세요." oninput="acSaveResult()" style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;"></textarea>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;margin-top:12px;">
-          <button onclick="acProdPrev()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 이전</button>
-          <div style="display:flex;gap:8px;">
-            <button onclick="acProdNext(true)" style="background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:13px;padding:10px 16px;border-radius:6px;cursor:pointer;">건너뛰기</button>
-            <button id="ac_nextBtn" onclick="acProdNext(false)" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">💾 저장 후 다음 →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 5 -->
-      <div class="section-card" id="ac_s5" style="padding:18px;margin-bottom:14px;display:none;">
-        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 5 · 완료</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">결과물이 이 페이지에 보관됩니다. 새로고침해도 유지되며, 새 주제를 시작하려면 상단 「초기화」를 누르세요.</div>
-        <div id="ac_summary"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;margin-top:14px;">
-          <button onclick="acGoStep(4)" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 제작 단계로</button>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button onclick="acPrint('call')" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:13px;font-weight:700;padding:10px 18px;border-radius:6px;cursor:pointer;">📄 콜 스크립트 PDF</button>
-            <button onclick="acPrint('all')" style="background:rgba(255,204,68,.12);border:1px solid var(--yellow);color:var(--yellow);font-size:13px;font-weight:700;padding:10px 18px;border-radius:6px;cursor:pointer;">📄 전체 PDF</button>
-          </div>
+          <textarea id="ac_copybuf" style="position:absolute;left:-9999px;top:-9999px;"></textarea>
         </div>
       </div>
 
@@ -13238,14 +13201,17 @@ const AC_FIXED = [
   '차우진 · 마케팅 총괄팀장 (회의 진행 · 최종 결론 정리)',
   '강태식 · 영업총괄 부장 (세일즈 훅 전환)',
   '서윤도 · 브랜드/크리에이티브 디렉터 (톤앤매너 · 비주얼 컨셉 · 컬러)',
-  '임하늘 · 광고 카피라이터 (후킹멘트 · 문구 톤)'
+  '임하늘 · 광고 카피라이터 (후킹멘트 · 문구 톤)',
+  '유서기 · 회의 기록가/비서 (과거 회의 전체 기억 · 중복·모순·연속성 점검)',
+  '진현우 · 현장 영업 실무자 (실제 상담 경험 기준 현실성 검증)'
 ];
 const AC_POOL_MK = [
   '노현재 · 퍼포먼스/미디어 파트장 (광고 소재 각도 · 매체 적합성)',
   '유가온 · 콘텐츠/영상 파트장 (카드뉴스 구성 · 숏폼 전환)',
   '백서준 · SNS/인플루언서 파트장 (채널별 노출 방식)',
   '민채원 · SEO/바이럴 파트장 (검색 키워드 · 커뮤니티 반응)',
-  '조은결 · CRM/CRO 파트장 (상담 전환 동선)'
+  '조은결 · CRM/CRO 파트장 (상담 전환 동선)',
+  '소하람 · 데이터/그로스 분석 (검증 지표 · 성과 판단 기준)'
 ];
 const AC_POOL_SALES = [
   '윤서진 · 금융심사 과장 (금리 · 한도 · 승인 난이도)',
@@ -13254,58 +13220,42 @@ const AC_POOL_SALES = [
   '배도현 · 악마의 변호인 팀장 (불리한 지점 · 과장광고 경계)',
   '문세라 · 법인/세무 과장 (비용처리 · 부가세 · 법인차)',
   '정민혁 · 경쟁사/시장 대리 (캐피탈사 프로모션 · 업계 동향)',
-  '신아름 · 규제/컴플라이언스 주임 (광고규정 · 법개정 이슈)'
-];
-const AC_PRODS = [
-  {key:'img', icon:'🎨', name:'메타 광고 이미지 프롬프트 (1:1)',
-   desc:'정사각형 1:1 비율 메타 광고 이미지를 만들기 위한 이미지 생성 프롬프트입니다. 각 장마다 디자인과 컬러가 모두 다르게 나옵니다.',
-   qLabel:'몇 장 만들까요?', qDefault:'10', qUnit:'장'},
-  {key:'cust', icon:'💬', name:'고객 제공용 스크립트',
-   desc:'고객에게 바로 보낼 수 있는 안내 스크립트입니다. 5줄에 하나 정도 이모지가 들어가고, 마지막은 문의 유도 후킹멘트로 끝납니다.',
-   qLabel:'몇 줄 분량으로?', qDefault:'20~25', qUnit:'줄'},
-  {key:'meta', icon:'📢', name:'메타 광고용 멘트',
-   desc:'광고 소재에 넣을 카피입니다. 후킹멘트 → 강조 장점 정리 → 상담 유도 후킹 순서로 구성됩니다.',
-   qLabel:'몇 줄 분량으로?', qDefault:'15~20', qUnit:'줄'},
-  {key:'call', icon:'📞', name:'상담 콜 스크립트',
-   desc:'담당자가 실제 통화에서 쓰는 문답형 스크립트입니다. 부드러운 상담 톤으로 작성되며 PDF로 저장할 수 있습니다.',
-   qLabel:'이 통화에서 특별히 강조할 포인트 (선택 · 수기 입력)', qDefault:'', qUnit:'', qText:true},
-  {key:'card', icon:'🗂', name:'카드뉴스 기획안',
-   desc:'첫 장 후킹 → 중간 장 비교·안내 → 마지막 장 정리 + 상담 후킹 구성의 기획안입니다.',
-   qLabel:'몇 장 구성으로?', qDefault:'4', qUnit:'장'}
+  '신아름 · 규제/컴플라이언스 주임 (광고규정 · 법개정 이슈)',
+  '하도윤 · 보험/유지비 과장 (보험료 포함 · 정비 소모품 · 사고 처리)',
+  '권시우 · 출고/차량수급 팀장 (재고 · 출고 대기 · 즉시출고 가능 차종)'
 ];
 let acS = null;
 
 function acDefault(){
-  return {step:1, fast:true, split:false, mA:'', mB:'', link:'', point:'', body:'', roster:null, minutes:'', feedback:'', brief:'',
-          approved:false, briefOpen:false, prodIdx:0,
-          qty:{img:'10', cust:'20~25', meta:'15~20', call:'', card:'4'},
-          results:{img:'', cust:'', meta:'', call:'', card:''}};
+  return {step:1, fast:true, split:false, useHist:true, histN:5, histId:'', link:'', point:'', body:'',
+          roster:null, mA:'', mB:'', minutes:'', feedback:'', brief:''};
 }
 function acLoad(){
   try { const r = localStorage.getItem(AC_LS); acS = r ? Object.assign(acDefault(), JSON.parse(r)) : acDefault(); }
   catch(e){ acS = acDefault(); }
-  if(!acS.qty) acS.qty = acDefault().qty;
-  if(!acS.results) acS.results = acDefault().results;
+  if(acS.step > 3) acS.step = 3;
 }
 function acSave(){
   if(!acS) return;
-  const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
-  if(document.getElementById('ac_link')) acS.link = g('ac_link');
-  if(document.getElementById('ac_point')) acS.point = g('ac_point');
-  if(document.getElementById('ac_body')) acS.body = g('ac_body');
-  if(document.getElementById('ac_minutes')) acS.minutes = g('ac_minutes');
-  if(document.getElementById('ac_brief') && acS.briefOpen) acS.brief = g('ac_brief');
+  const g = id => { const el = document.getElementById(id); return el ? el.value : null; };
+  const v1 = g('ac_link');    if(v1 !== null) acS.link = v1;
+  const v2 = g('ac_point');   if(v2 !== null) acS.point = v2;
+  const v3 = g('ac_body');    if(v3 !== null) acS.body = v3;
+  const v4 = g('ac_minutes'); if(v4 !== null) acS.minutes = v4;
   try { localStorage.setItem(AC_LS, JSON.stringify(acS)); } catch(e){}
 }
+function acEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function acHasBody(){ return !!(acS.body||'').trim(); }
+function acIsGNews(){ return /news\.google\.com/i.test(acS.link||''); }
 function acShuffle(){
-  const pick = (arr,n) => arr.slice().sort(()=>Math.random()-0.5).slice(0,n);
+  const pick = (a,n) => a.slice().sort(()=>Math.random()-0.5).slice(0,n);
   acS.roster = AC_FIXED.concat(pick(AC_POOL_MK,3)).concat(pick(AC_POOL_SALES,2));
   acSave(); acRender();
 }
 function acToggleFast(){ acS.fast = !acS.fast; acSave(); acRender(); }
 function acToggleSplit(){ acS.split = !acS.split; acSave(); acRender(); }
-function acIsGNews(){ return /news\.google\.com/i.test(acS.link||''); }
-function acHasBody(){ return !!(acS.body||'').trim(); }
+function acToggleHistRef(){ acS.useHist = !acS.useHist; acSave(); acRender(); }
+function acSetHistN(v){ acS.histN = parseInt(v,10)||5; acSave(); acRender(); }
 function acReset(){
   if(!confirm('현재 작업 내용을 모두 삭제하고 새 주제를 시작합니다.\n계속하시겠습니까?')) return;
   acS = acDefault();
@@ -13321,17 +13271,32 @@ function acCopy(id){
   try { ok = document.execCommand('copy'); } catch(e){}
   if(!ok && navigator.clipboard) navigator.clipboard.writeText(el.value).catch(()=>{});
   window.getSelection && window.getSelection().removeAllRanges();
-  if(typeof showGlobalToast === 'function') showGlobalToast('복사되었습니다 · 챗gpt에 붙여넣으세요');
+  if(typeof showGlobalToast === 'function') showGlobalToast('복사되었습니다');
+}
+function acCopyMinutes(){
+  const b = document.getElementById('ac_copybuf');
+  if(!b) return;
+  b.value = acMinutesText();
+  acCopy('ac_copybuf');
+}
+function acMinutesText(){
+  let t = '[TS AUTO PLAN 광고 회의록]\n';
+  t += '작성일: ' + new Date().toLocaleDateString('ko-KR') + '\n\n';
+  if((acS.point||'').trim()) t += '[강조 포인트]\n' + acS.point.trim() + '\n\n';
+  if((acS.link||'').trim())  t += '[참고 기사]\n' + acS.link.trim() + '\n\n';
+  if((acS.feedback||'').trim()) t += '[최종 피드백 · 방향 제안]\n' + acS.feedback.trim() + '\n\n';
+  if((acS.brief||'').trim())    t += '[광고 브리프]\n' + acS.brief.trim() + '\n\n';
+  t += '[전체 회의록]\n' + (acS.minutes||'').trim() + '\n';
+  return t;
 }
 function acGoStep(n){
   acSave();
-  if(n >= 2 && !acS.point.trim() && !acS.link.trim() && !acS.body.trim()){
+  if(n >= 2 && !(acS.point||'').trim() && !(acS.link||'').trim() && !(acS.body||'').trim()){
     alert('기사 링크 또는 강조 포인트를 먼저 입력하세요.'); return;
   }
-  if(n >= 4 && !acS.approved){ alert('회의록 검토 후 「이 방향으로 진행」을 먼저 눌러주세요.'); return; }
   acS.step = n; acSave(); acRender();
-  const wrap = document.getElementById('page-adcreative');
-  if(wrap) wrap.scrollIntoView({behavior:'smooth', block:'start'});
+  const w = document.getElementById('page-adcreative');
+  if(w) w.scrollIntoView({behavior:'smooth', block:'start'});
 }
 function acToggleFull(){
   const w = document.getElementById('ac_fullWrap'), a = document.getElementById('ac_fullArrow');
@@ -13340,99 +13305,164 @@ function acToggleFull(){
   w.style.display = open ? 'block' : 'none';
   if(a) a.textContent = open ? '▲' : '▼';
 }
-function acToggleBrief(){
-  acS.briefOpen = !acS.briefOpen;
-  if(acS.briefOpen && !acS.brief) acS.brief = acS.feedback || acS.minutes.slice(0,800);
-  acSave(); acRender();
-}
-function acSaveMinutes(){
-  acSave();
-  const t = (acS.minutes || '').trim();
-  if(!t){ alert('회의록을 붙여넣어 주세요.'); return; }
-  const p = acParseMinutes(t);
-  acS.feedback = p.feedback; if(!acS.brief) acS.brief = p.brief;
-  acSave(); acRender();
-  if(typeof showGlobalToast === 'function') showGlobalToast('회의록이 저장되었습니다');
-}
-function acParseMinutes(t){
-  const lines = t.split(/\r?\n/);
-  let fbStart = -1, fbEnd = lines.length, brStart = -1;
-  const isFb = s => /최종\s*피드백|최종피드백|final\s*feedback/i.test(s);
-  const isNext = s => /참석자별|발언|전체\s*회의록|회의\s*내용|광고\s*브리프|브리프/.test(s);
-  const isBr = s => /광고\s*브리프|브리프/.test(s);
-  for(let i=0;i<lines.length;i++){
-    if(fbStart < 0 && isFb(lines[i])){ fbStart = i; continue; }
-    if(fbStart >= 0 && fbEnd === lines.length && isNext(lines[i]) && lines[i].trim().length < 40){ fbEnd = i; }
-    if(brStart < 0 && isBr(lines[i]) && lines[i].trim().length < 40) brStart = i;
-  }
-  const feedback = fbStart >= 0 ? lines.slice(fbStart+1, fbEnd).join('\n').trim() : lines.slice(0, 14).join('\n').trim();
-  const brief = brStart >= 0 ? lines.slice(brStart+1).join('\n').trim() : (feedback || t.slice(0,800));
-  return {feedback: feedback || t.slice(0,600), brief: brief || t.slice(0,800)};
-}
-function acApprove(){
-  acSave();
-  if(!(acS.minutes || '').trim()){ alert('회의록을 먼저 저장하세요.'); return; }
-  acS.approved = true; acS.step = 4;
-  if(!acS.brief) acS.brief = acS.feedback || acS.minutes.slice(0,800);
-  acSave(); acRender();
-  if(typeof showGlobalToast === 'function') showGlobalToast('승인 완료 · 결과물 제작을 시작합니다');
-}
-function acQtyChange(v){
-  const p = AC_PRODS[acS.prodIdx]; if(!p) return;
-  acS.qty[p.key] = v; acSave();
-  acRenderProdPrompt();
-}
-function acSaveResult(){
-  const p = AC_PRODS[acS.prodIdx]; if(!p) return;
-  const el = document.getElementById('ac_result');
-  if(el) acS.results[p.key] = el.value;
-  acSave();
-}
-function acProdNext(skip){
-  acSaveResult();
-  if(!skip && !(acS.results[AC_PRODS[acS.prodIdx].key] || '').trim()){
-    if(!confirm('결과물이 비어 있습니다. 그래도 다음으로 넘어가시겠습니까?')) return;
-  }
-  if(acS.prodIdx >= AC_PRODS.length - 1){ acS.step = 5; acSave(); acRender(); return; }
-  acS.prodIdx++; acSave(); acRender();
-  const h = document.getElementById('ac_prodHead');
-  if(h) h.scrollIntoView({behavior:'smooth', block:'center'});
-}
-function acProdPrev(){
-  acSaveResult();
-  if(acS.prodIdx <= 0){ acS.step = 3; acSave(); acRender(); return; }
-  acS.prodIdx--; acSave(); acRender();
-}
-function acProdJump(i){ acSaveResult(); acS.prodIdx = i; acS.step = 4; acSave(); acRender(); }
 
-/* ---- 프롬프트 생성 ---- */
+/* ---- 프롬프트 ---- */
 function acSrcBlock(){
   let s = '';
-  const links = (acS.link || '').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  const hasBody = acHasBody();
-  if(hasBody){
-    s += '[기사 본문 — 이미 제공되었으니 웹 접속하지 말고 아래 본문만 근거로 분석하라. 속도가 중요하다.]\n' + acS.body.trim() + '\n\n';
-    if(links.length) s += '[참고 출처 — 열어볼 필요 없음]\n' + links.map(l=>'▶ ' + l).join('\n') + '\n\n';
+  const links = (acS.link||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(acHasBody()){
+    s += '[기사 본문 — 이미 제공되었으니 웹 접속하지 말고 아래 본문만 근거로 분석하라.]\n' + acS.body.trim() + '\n\n';
+    if(links.length) s += '[참고 출처 — 열어볼 필요 없음]\n' + links.map(l=>'▶ '+l).join('\n') + '\n\n';
   } else if(links.length){
-    s += '[분석 대상 기사 링크]\n' + links.map(l=>'▶ ' + l).join('\n') + '\n위 링크를 직접 열어 기사 전체 내용을 읽고 분석하라.\n\n';
+    s += '[분석 대상 기사 링크]\n' + links.map(l=>'▶ '+l).join('\n') + '\n위 링크를 직접 열어 기사 전체 내용을 읽고 분석하라.\n\n';
   }
   s += '[첨부 이미지]\n이 메시지에 이미지가 첨부되어 있다면 이미지에 담긴 정보(차량, 가격표, 조건표, 광고 시안 등)도 함께 분석에 반영하라.\n\n';
   if((acS.point||'').trim()) s += '[대표 강조 지시 — 반드시 반영]\n' + acS.point.trim() + '\n\n';
   return s;
 }
-function acRule(){
-  return '[작성 규칙]\n' +
-    '- 우리 회사는 TS AUTO PLAN, 신차 장기렌트/리스 판매사다.\n' +
-    '- 최종 목적은 고객이 장기렌트/리스를 선택하도록 설득하고 상담 문의를 유도하는 것이다.\n' +
-    '- 구체적인 수치(DB 단가, 전환율, CPC, 시장점유율, 금리 %, 월 렌트료 등)를 임의로 만들어내지 마라. 기사나 첨부자료에 명시된 수치만 인용하고, 없으면 수치 없이 방향성만 서술하라.\n' +
-    '- 추정이 불가피하면 문장 끝에 (추정) 을 붙여라.\n' +
-    '- 허위·과장 광고 표현은 배제하라.\n';
+const AC_TPL_LS = 'crm_adcreative_tpl_v1';
+const AC_TPL_DEF = {
+  rule:
+'[작성 규칙]\n' +
+'- 우리 회사는 TS AUTO PLAN, 신차 장기렌트/리스 판매사다.\n' +
+'- 최종 목적은 고객이 장기렌트/리스를 선택하도록 설득하고 상담 문의를 유도하는 것이다.\n' +
+'- 구체적인 수치(DB 단가, 전환율, CPC, 시장점유율, 금리 %, 월 렌트료 등)를 임의로 만들어내지 마라. 기사나 첨부자료에 명시된 수치만 인용하고, 없으면 수치 없이 방향성만 서술하라.\n' +
+'- 추정이 불가피하면 문장 끝에 (추정) 을 붙여라.\n' +
+'- 허위·과장 광고 표현은 배제하라.\n',
+  fmt:
+'[출력 형식 — 순서를 반드시 지켜라]\n' +
+'■ 최종 피드백 · 방향 제안   ← 반드시 이 블록을 가장 먼저 출력\n' +
+'  1) 핵심 결론 3줄\n' +
+'  2) 이 기사에서 우리가 끌어올 수 있는 세일즈 포인트\n' +
+'  3) 고객에게 강조해야 할 장점과 그 근거\n' +
+'  4) 주의사항 · 쓰면 안 되는 표현\n' +
+'  5) 대표 확인 필요 사항 (있으면)\n\n' +
+'■ 참석자별 발언\n' +
+'  - 각 참석자 1인당 {LEN}. 자기 전문 분야 관점만 말할 것.\n' +
+'  - 배도현(악마의 변호인)이 참석했다면 반드시 반대 논리를 제시할 것.\n' +
+'  - 차우진 총괄팀장이 마지막에 논의를 정리할 것.\n\n' +
+'■ 광고 브리프\n' +
+'  · 타깃 / 핵심 메시지 1문장 / 강조할 장점 3~5개 / 톤앤매너 / 후킹 소재 키워드\n' +
+'  · 채널 적합도 — 메타(인스타·페이스북) / 네이버 블로그·카페 / 카카오톡·문자 / 유튜브 숏폼 각각에 이 소재가 맞는지 판정하고, 맞다면 어떤 형태로 풀지 한 줄씩 쓸 것\n' +
+'  · 후킹 각도 2~3안 — 각 안마다 [각도명] / [한 줄 후킹 문구 예시] / [이 각도로 갈 때 근거로 쓸 내용] 을 제시할 것\n' +
+'  · 각 안의 예상 반응 — 어떤 고객층이 반응할지, 예상되는 반론과 그 대응을 한 줄씩 쓸 것\n' +
+'  · 추천안 — 위 후킹 각도 중 무엇을 먼저 집행할지와 그 이유\n',
+  fmtTeam:
+'[출력 형식 — 순서를 반드시 지켜라]\n' +
+'■ {LABEL} 결론\n' +
+'  1) 핵심 판단 3줄\n' +
+'  2) 이 부서 관점에서 밀어야 할 방향\n' +
+'  3) 이 부서 관점에서 위험한 지점 · 쓰면 안 되는 표현\n\n' +
+'■ 참석자별 발언\n' +
+'  - 1인당 {LEN}. 자기 전문 분야 관점만 말할 것.\n' +
+'  - 배도현(악마의 변호인)이 참석했다면 반드시 반대 논리를 제시할 것.\n' +
+'  - 진행자가 마지막에 부서 의견을 한 문단으로 정리할 것.\n\n' +
+'■ {LABEL} 브리프 초안\n' +
+'  - 타깃 / 핵심 메시지 / 강조할 장점 / 주의할 점 / 이 부서가 보기에 유효한 후킹 각도 1~2개\n',
+  fmtMerge:
+'[출력 형식 — 순서를 반드시 지켜라]\n' +
+'■ 최종 피드백 · 방향 제안   ← 반드시 이 블록을 가장 먼저 출력\n' +
+'  1) 핵심 결론 3줄\n' +
+'  2) 이 기사에서 우리가 끌어올 수 있는 세일즈 포인트\n' +
+'  3) 고객에게 강조해야 할 장점과 그 근거\n' +
+'  4) 두 부서 의견이 충돌한 지점과 총괄팀장의 판단\n' +
+'  5) 주의사항 · 쓰면 안 되는 표현\n' +
+'  6) 대표 확인 필요 사항 (있으면)\n\n' +
+'■ 광고 브리프\n' +
+'  · 타깃 / 핵심 메시지 1문장 / 강조할 장점 3~5개 / 톤앤매너 / 후킹 소재 키워드\n' +
+'  · 채널 적합도 — 메타(인스타·페이스북) / 네이버 블로그·카페 / 카카오톡·문자 / 유튜브 숏폼 각각에 이 소재가 맞는지 판정하고, 맞다면 어떤 형태로 풀지 한 줄씩 쓸 것\n' +
+'  · 후킹 각도 2~3안 — 각 안마다 [각도명] / [한 줄 후킹 문구 예시] / [이 각도로 갈 때 근거로 쓸 내용] 을 제시할 것\n' +
+'  · 각 안의 예상 반응 — 어떤 고객층이 반응할지, 예상되는 반론과 그 대응을 한 줄씩 쓸 것\n' +
+'  · 추천안 — 위 후킹 각도 중 무엇을 먼저 집행할지와 그 이유\n',
+  roles:
+'- 유서기(회의 기록가): 위 [과거 회의 기록]을 근거로, 이번 안건이 과거 논의와 겹치는지·모순되는지·이어지는지 점검하고 첨언하라. 이미 결론 난 내용을 반복하지 말고 달라진 점을 짚어라. 과거 기록이 없으면 그 사실을 명확히 밝혀라. 기록에 없는 과거 사실을 지어내지 마라.\n' +
+'|||' +
+'- 진현우(현장 영업 실무자): 실제 상담 현장 기준으로 이 방향이 통할지 판단하라. 고객이 실제로 어떤 반응과 질문을 하는지, 어디서 계약이 막히는지, 과거 회의에서 정한 방향이 현장에서 먹혔는지를 [과거 회의 기록]과 대조해 말하라. 이론이 아니라 실제 통화·상담 장면 기준으로 구체적으로 말하라.\n'
+};
+let acTPL = null;
+function acTplLoad(){
+  try { const r = localStorage.getItem(AC_TPL_LS); acTPL = r ? Object.assign({}, AC_TPL_DEF, JSON.parse(r)) : Object.assign({}, AC_TPL_DEF); }
+  catch(e){ acTPL = Object.assign({}, AC_TPL_DEF); }
 }
-function acTeam(kind){
-  if(kind==='mk')    return ['차우진 · 마케팅 총괄팀장 (회의 진행 · 결론 정리)','서윤도 · 브랜드/크리에이티브 디렉터 (톤앤매너 · 비주얼 컨셉 · 컬러)','임하늘 · 광고 카피라이터 (후킹멘트 · 문구 톤)'].concat(AC_POOL_MK);
-  if(kind==='sales') return ['강태식 · 영업총괄 부장 (회의 진행 · 세일즈 훅 전환)'].concat(AC_POOL_SALES);
-  return acS.roster || AC_FIXED.concat(AC_POOL_MK.slice(0,3)).concat(AC_POOL_SALES.slice(0,2));
+function acTplSave(){
+  if(!acTPL) acTplLoad();
+  ['rule','fmt','fmtTeam','fmtMerge','roles'].forEach(k=>{
+    const el = document.getElementById('ac_tpl_'+k);
+    if(el) acTPL[k] = el.value;
+  });
+  try { localStorage.setItem(AC_TPL_LS, JSON.stringify(acTPL)); } catch(e){}
+  acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast('프롬프트가 저장되었습니다');
 }
+function acTplReset(){
+  if(!confirm('프롬프트를 기본값으로 되돌립니다. 계속할까요?')) return;
+  acTPL = Object.assign({}, AC_TPL_DEF);
+  try { localStorage.removeItem(AC_TPL_LS); } catch(e){}
+  acRenderTplPanel(); acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast('기본값으로 복원되었습니다');
+}
+function acTplToggle(){
+  const w = document.getElementById('ac_tplPanel');
+  if(!w) return;
+  const open = w.style.display === 'none';
+  w.style.display = open ? 'block' : 'none';
+  if(open) acRenderTplPanel();
+}
+function acRenderTplPanel(){
+  const w = document.getElementById('ac_tplPanel');
+  if(!w) return;
+  if(!acTPL) acTplLoad();
+  const F = [
+    ['rule','작성 규칙','회사 소개·금지사항 등 공통 규칙'],
+    ['fmt','출력 형식 · 통합 회의','{LEN} 은 빠른모드 여부에 따라 자동 치환됩니다'],
+    ['fmtTeam','출력 형식 · 부서 회의(2분할)','{LABEL} 은 마케팅본부/영업본부로 자동 치환됩니다'],
+    ['fmtMerge','출력 형식 · 종합(2분할 마무리)','두 부서 결과를 합칠 때 쓰는 형식'],
+    ['roles','특별 역할 지시 (기록가 · 영업 실무자)','||| 로 구분됩니다. 앞=기록가(유서기), 뒤=영업 실무자(진현우). 구분자를 지우지 마세요']
+  ];
+  let h = '<div style="font-size:11.5px;color:var(--text3);line-height:1.7;margin-bottom:12px;">프롬프트 문구를 직접 고쳐 저장하면 이후 모든 회의에 적용됩니다. 자료·참석자 목록은 자동으로 삽입되므로 여기에 쓸 필요 없습니다.</div>';
+  F.forEach(([k,t,d])=>{
+    h += '<div style="margin-bottom:12px;">'
+      + '<label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:3px;">' + t + '</label>'
+      + '<div style="font-size:10.5px;color:var(--text3);margin-bottom:5px;">' + d + '</div>'
+      + '<textarea id="ac_tpl_' + k + '" rows="8" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;">' + acEsc(acTPL[k]) + '</textarea>'
+      + '</div>';
+  });
+  h += '<div style="display:flex;gap:8px;justify-content:flex-end;">'
+    + '<button onclick="acTplReset()" style="background:var(--bg);border:1px solid var(--border2);color:var(--text3);font-size:12px;padding:9px 16px;border-radius:6px;cursor:pointer;">↺ 기본값 복원</button>'
+    + '<button onclick="acTplSave()" style="background:var(--green);border:none;color:#000;font-size:12px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;">💾 저장</button>'
+    + '</div>';
+  w.innerHTML = h;
+}
+function acRule(){ if(!acTPL) acTplLoad(); return acTPL.rule; }
+function acHistBlock(){
+  if(!acS.useHist) return '';
+  const a = (typeof acHistLoad === 'function') ? acHistLoad() : [];
+  const list = a.filter(r=>r.id !== acS.histId).slice(0, acS.histN||5);
+  if(!list.length) return '[과거 회의 기록]\n(저장된 과거 회의록이 없다. 기록가는 이 사실을 밝히고 이번이 첫 회의임을 전제로 발언하라.)\n\n';
+  let s = '[과거 회의 기록 — 최근 ' + list.length + '건, 최신순]\n';
+  list.forEach((r,i)=>{
+    const d = new Date(r.ts);
+    s += '\n(' + (i+1) + ') ' + d.toLocaleDateString('ko-KR') + ' · ' + (r.title||'제목 없음') + '\n';
+    const p = (r.point||'').trim();
+    if(p) s += '  · 당시 강조 지시: ' + p.split(/\r?\n/).join(' / ').slice(0,120) + '\n';
+    const f = (r.feedback||'').trim().replace(/\s+/g,' ');
+    if(f) s += '  · 당시 결론: ' + f.slice(0,420) + (f.length>420?'…':'') + '\n';
+    const b = (r.brief||'').trim().replace(/\s+/g,' ');
+    if(b) s += '  · 당시 브리프: ' + b.slice(0,220) + (b.length>220?'…':'') + '\n';
+  });
+  return s + '\n';
+}
+function acRolesBlock(kind){
+  if(!acTPL) acTplLoad();
+  const lines = [];
+  const t = acTPL.roles || AC_TPL_DEF.roles;
+  const parts = t.split('|||');
+  if(!kind || kind==='mk')    lines.push(parts[0]||'');
+  if(!kind || kind==='sales') lines.push(parts[1]||'');
+  const body = lines.filter(x=>x.trim()).join('\n');
+  return body ? '[특별 역할 지시]\n' + body + '\n\n' : '';
+}
+function acLen(){ return acS.fast ? '1~2줄로 결론만' : '2~3줄'; }
 function acSpeed(){
   if(!acS.fast) return '';
   return '\n[속도 우선 · 출력 압축 지시]\n'
@@ -13446,167 +13476,71 @@ function acWebNote(forClaude){
   return forClaude ? '\n※ 링크를 직접 열 수 없다면 웹 검색 도구를 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n'
                    : '\n※ 링크를 직접 열 수 없다면 웹 브라우징 기능을 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n';
 }
+function acTeam(kind){
+  if(kind==='mk')    return ['차우진 · 마케팅 총괄팀장 (회의 진행 · 결론 정리)','서윤도 · 브랜드/크리에이티브 디렉터 (톤앤매너 · 비주얼 컨셉 · 컬러)','임하늘 · 광고 카피라이터 (후킹멘트 · 문구 톤)','유서기 · 회의 기록가/비서 (과거 회의 전체 기억 · 중복·모순·연속성 점검)'].concat(AC_POOL_MK);
+  if(kind==='sales') return ['강태식 · 영업총괄 부장 (회의 진행 · 세일즈 훅 전환)','진현우 · 현장 영업 실무자 (실제 상담 경험 기준 현실성 검증)'].concat(AC_POOL_SALES);
+  return acS.roster || AC_FIXED.concat(AC_POOL_MK.slice(0,3)).concat(AC_POOL_SALES.slice(0,2));
+}
 function acMeetingPrompt(forClaude, kind){
+  if(!acTPL) acTplLoad();
   const roster = acTeam(kind);
-  const label = kind==='mk' ? '마케팅본부' : (kind==='sales' ? '영업본부' : '마케팅본부');
+  const label = kind==='sales' ? '영업본부' : '마케팅본부';
   let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 ' + label + ' 회의를 시뮬레이션한다.\n';
-  s += '아래 참석자 각각의 전문 분야 관점에서 발언하고, 광고 소재 제작 방향을 정리하라.\n\n';
-  s += '[참석자]\n' + roster.map(r=>'- ' + r).join('\n') + '\n\n';
+  s += '아래 참석자 각각의 전문 분야 관점에서 발언하고, 우리가 고객에게 무엇을 어떻게 강조해야 하는지 방향을 정리하라.\n\n';
+  s += '[참석자]\n' + roster.map(r=>'- '+r).join('\n') + '\n\n';
   s += acSrcBlock();
+  s += acHistBlock();
+  s += acRolesBlock(kind);
   s += acRule() + '\n';
-  s += '[출력 형식 — 순서를 반드시 지켜라]\n';
-  if(kind){
-    s += '■ ' + label + ' 결론\n';
-    s += '  1) 핵심 판단 3줄\n';
-    s += '  2) 이 부서 관점에서 밀어야 할 방향\n';
-    s += '  3) 이 부서 관점에서 위험한 지점 · 쓰면 안 되는 표현\n\n';
-    s += '■ 참석자별 발언\n';
-    s += acS.fast ? '  - 1인당 1~2줄로 결론만. 자기 전문 분야 관점만 말할 것.\n'
-                  : '  - 1인당 2~3줄. 자기 전문 분야 관점만 말할 것.\n';
-    if(kind==='sales') s += '  - 배도현(악마의 변호인)은 반드시 반대 논리를 제시할 것.\n';
-    s += '  - 진행자가 마지막에 부서 의견을 한 문단으로 정리할 것.\n\n';
-    s += '■ ' + label + ' 브리프 초안\n';
-    s += '  - 타깃 / 핵심 메시지 / 강조할 장점 / 주의할 점\n';
-  } else {
-    s += '■ 최종 피드백 · 방향 제안   ← 반드시 이 블록을 가장 먼저 출력\n';
-    s += '  1) 핵심 결론 3줄\n';
-    s += '  2) 추천 광고 방향 (누구에게 / 무엇을 / 어떤 톤으로)\n';
-    s += '  3) 주의사항 · 쓰면 안 되는 표현\n';
-    s += '  4) 대표 확인 필요 사항 (있으면)\n\n';
-    s += '■ 참석자별 발언\n';
-    s += acS.fast ? '  - 각 참석자 1인당 1~2줄로 결론만. 자기 전문 분야 관점만 말할 것.\n'
-                  : '  - 각 참석자 1인당 2~3줄로 짧게. 자기 전문 분야 관점만 말할 것.\n';
-    s += '  - 배도현(악마의 변호인)이 참석했다면 반드시 반대 논리를 제시할 것.\n';
-    s += '  - 차우진 총괄팀장이 마지막에 논의를 정리할 것.\n\n';
-    s += '■ 광고 브리프\n';
-    s += '  - 타깃 / 핵심 메시지 1문장 / 강조할 장점 3~5개 / 톤앤매너 / 비주얼 컨셉·컬러 방향 / 후킹 소재 키워드\n';
-    s += '  - 이 브리프만 보고도 광고물을 만들 수 있을 만큼 구체적으로 쓸 것.\n';
-  }
+  s += (kind ? acTPL.fmtTeam : acTPL.fmt).split('{LABEL}').join(label).split('{LEN}').join(acLen());
   s += acSpeed();
   s += acWebNote(forClaude);
   return s;
 }
 function acMergePrompt(forClaude){
+  if(!acTPL) acTplLoad();
   let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 마케팅 총괄팀장 차우진이다.\n';
   s += '두 부서가 각각 진행한 회의 결과를 받았다. 이를 종합해 최종 방향을 확정하라.\n\n';
   s += '[마케팅본부 회의 결과]\n' + (acS.mA||'').trim() + '\n\n';
   s += '[영업본부 회의 결과]\n' + (acS.mB||'').trim() + '\n\n';
   if((acS.point||'').trim()) s += '[대표 강조 지시 — 반드시 반영]\n' + acS.point.trim() + '\n\n';
+  s += acHistBlock();
   s += acRule() + '\n';
-  s += '[출력 형식 — 순서를 반드시 지켜라]\n';
-  s += '■ 최종 피드백 · 방향 제안   ← 반드시 이 블록을 가장 먼저 출력\n';
-  s += '  1) 핵심 결론 3줄\n';
-  s += '  2) 추천 광고 방향 (누구에게 / 무엇을 / 어떤 톤으로)\n';
-  s += '  3) 두 부서 의견이 충돌한 지점과 총괄팀장의 판단\n';
-  s += '  4) 주의사항 · 쓰면 안 되는 표현\n';
-  s += '  5) 대표 확인 필요 사항 (있으면)\n\n';
-  s += '■ 광고 브리프\n';
-  s += '  - 타깃 / 핵심 메시지 1문장 / 강조할 장점 3~5개 / 톤앤매너 / 비주얼 컨셉·컬러 방향 / 후킹 소재 키워드\n';
-  s += '  - 이 브리프만 보고도 광고물을 만들 수 있을 만큼 구체적으로 쓸 것.\n';
+  s += acTPL.fmtMerge.split('{LEN}').join(acLen());
   s += acSpeed();
   s += '\n※ 위에 제공된 두 회의 결과만 근거로 하라. 웹 접속·검색을 하지 마라.\n';
   return s;
 }
-function acProdPrompt(forClaude){
-  const p = AC_PRODS[acS.prodIdx]; if(!p) return '';
-  const q = (acS.qty[p.key] || p.qDefault || '').trim();
-  let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 광고 제작 담당이다.\n';
-  s += '아래는 우리 마케팅본부 회의에서 확정된 광고 브리프다. 이 브리프에 충실하게 결과물을 만들어라.\n\n';
-  s += '[확정 광고 브리프]\n' + (acS.brief || acS.feedback || '').trim() + '\n\n';
-  if((acS.point||'').trim()) s += '[대표 강조 지시]\n' + acS.point.trim() + '\n\n';
-  s += acRule() + '\n';
 
-  if(p.key === 'img'){
-    const n = q || '10';
-    s += '[요청 결과물] 메타(페이스북·인스타그램) 광고용 이미지 생성 프롬프트 — 바로 집행 가능한 완성형 광고 시안\n';
-    s += '- ' + n + '장을 만들어라.\n';
-    s += '- 전부 정사각형 1:1 비율(1080x1080).\n';
-    s += '- ★ 가장 중요: 각 장은 그 자체로 완성된 광고 이미지여야 한다. 한글 카피(헤드라인·서브·혜택·CTA)가 이미지 안에 실제로 렌더링되도록 프롬프트를 작성하라.\n';
-    s += '- 차량 사진만 있고 글자가 없는 배경 이미지는 절대 만들지 마라. 국내 자동차 프로모션 포스터/상세페이지 배너 스타일이 기준이다.\n';
-    s += '- ' + n + '장 전부 레이아웃 구조·컬러 팔레트·표현 스타일이 서로 완전히 달라야 한다. 비슷한 시안 반복 금지.\n\n';
-    s += '[각 장마다 아래 4개를 모두 출력하라]\n';
-    s += '① 카피 세트 — 이미지 안에 실제로 들어갈 한글 문구\n';
-    s += '   · 메인 헤드라인: 1~2줄, 한 줄 8~14자. 질문형·대비형·숫자 활용으로 시선을 잡을 것\n';
-    s += '   · 서브 헤드라인: 1줄, 헤드라인을 보완\n';
-    s += '   · 하단 혜택 박스 3개: 각각 [제목 6자 이내] + [설명 한 줄]\n';
-    s += '   · CTA 문구: 1줄 (상담 유도)\n';
-    s += '   · 하단 고지 문구: 1줄 (조건·유의사항)\n';
-    s += '② 레이아웃 설계 — 상단/중앙/하단 배치, 차량 위치와 각도, 시선 흐름, 여백 비율\n';
-    s += '③ 컬러 팔레트 — 배경/메인/강조/텍스트 HEX 4~5개 (장마다 완전히 다르게)\n';
-    s += '④ 이미지 생성 프롬프트 — 그대로 복사해 붙여넣을 완성형 지시문\n';
-    s += '   · 위 ①의 한글 문구를 큰따옴표 안에 그대로 넣고, 각 문구의 위치·크기·굵기·색을 지정할 것\n';
-    s += '   · 문구를 임의로 바꾸거나 번역하지 말고 한글 그대로 렌더링하라는 지시를 반드시 포함할 것\n';
-    s += '   · 오탈자 없이 정확히 렌더링하라는 지시를 반드시 포함할 것\n';
-    s += '   · 차량은 기사·강조지시에 맞는 차종으로 구체적으로 지정할 것\n';
-    s += '   · 표현 스타일을 장마다 다르게 지정할 것 (실사 합성 / 그래픽 포스터 / 3D 렌더 / 플랫 일러스트 / 스튜디오 컷 등)\n';
-    s += '   · 한국 소비자 대상 광고임을 명시할 것\n\n';
-    s += '[카피 작성 기준]\n';
-    s += '- 카피는 위 [확정 광고 브리프]와 [대표 강조 지시]에서만 뽑아라.\n';
-    s += '- 기사에 없는 금액·금리·할인율·기간을 지어내지 마라. 수치가 필요하면 대표가 채울 수 있도록 [ ] 로 비워둘 것.\n';
-    s += '- 최저가, 100%, 무조건 같은 단정적 표현은 쓰지 마라.\n\n';
-    s += '[마지막에 1개만 추가]\n';
-    s += '- ⚠️ 텍스트 깨짐 대비용: 글자 없이 배경만 뽑고 디자이너가 문구를 얹는 방식의 프롬프트 1개.\n';
-  } else if(p.key === 'cust'){
-    s += '[요청 결과물] 고객에게 바로 보낼 안내 스크립트\n';
-    s += '- 분량: ' + (q || '20~25') + '줄.\n';
-    s += '- 기사 내용을 근거로 장기렌트/리스를 이용해야 하는 장점과 이유를 강조.\n';
-    s += '- 이모지는 5줄에 하나 정도만 자연스럽게 사용. 과하게 쓰지 말 것.\n';
-    s += '- 딱딱한 설명문이 아니라 고객이 읽기 편한 대화체로.\n';
-    s += '- 마지막 줄은 반드시 문의를 유도하는 후킹멘트로 마무리.\n';
-  } else if(p.key === 'meta'){
-    s += '[요청 결과물] 메타 광고용 카피\n';
-    s += '- 분량: ' + (q || '15~20') + '줄.\n';
-    s += '- 구성 순서: ① 도입 후킹멘트 → ② 강조할 장점 정리 → ③ 상담을 받아보라는 마무리 후킹멘트.\n';
-    s += '- 각 줄이 독립적으로도 읽히게, 짧고 힘있게.\n';
-    s += '- 광고 심의에 걸릴 수 있는 단정적 표현(최저가, 100%, 무조건 등)은 사용 금지.\n';
-  } else if(p.key === 'call'){
-    s += '[요청 결과물] 담당자용 상담 콜 스크립트\n';
-    if(q) s += '- 이번 통화에서 특별히 강조할 포인트: ' + q + '\n';
-    s += '- 실제 문답(Q&A) 형식으로 작성. 「담당자:」 / 「고객:」 으로 화자를 표시.\n';
-    s += '- 부드럽고 편안한 상담 톤. 압박하거나 밀어붙이는 표현 금지.\n';
-    s += '- 구성: 인사·아이스브레이킹 → 고객 상황 파악 질문 → 기사 근거로 장점 설명 → 예상 반론 3가지와 대응 → 클로징(상담 예약 유도).\n';
-    s += '- 고객이 실제로 할 만한 반론(비싸다 / 내 차가 아니다 / 나중에 하겠다 등)을 넣고 각각의 대응 답변을 함께 제시.\n';
-    s += '- 담당자가 그대로 읽어도 자연스럽게 들리도록 구어체로.\n';
-  } else if(p.key === 'card'){
-    s += '[요청 결과물] 카드뉴스 기획안\n';
-    s += '- 총 ' + (q || '4') + '장 구성.\n';
-    s += '- 1장: 시선을 잡는 후킹 이미지 + 후킹 문구.\n';
-    s += '- 중간 장: 기사 정보를 비교·안내하는 내용 (표·대비 구조 권장).\n';
-    s += '- 마지막 장: 내용 정리 + 상담 유도 후킹멘트.\n';
-    s += '- 각 장마다: ① 헤드라인 ② 본문 문구 ③ 비주얼 지시(구도·컬러·요소) ④ 디자이너 전달 메모 를 적을 것.\n';
+/* ---- 회의록 파싱 ---- */
+function acSaveMinutes(){
+  acSave();
+  const t = (acS.minutes||'').trim();
+  if(!t){ alert('회의록을 붙여넣어 주세요.'); return; }
+  const p = acParseMinutes(t);
+  acS.feedback = p.feedback; acS.brief = p.brief;
+  acSave(); acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast('회의록이 정리되었습니다');
+}
+function acParseMinutes(t){
+  const lines = t.split(/\r?\n/);
+  const isFb = s => /최종\s*피드백/.test(s) && s.trim().length < 45;
+  const isSp = s => /참석자별|발언/.test(s) && s.trim().length < 45;
+  const isBr = s => /브리프/.test(s) && s.trim().length < 45;
+  let fb=-1, sp=-1, br=-1;
+  for(let i=0;i<lines.length;i++){
+    if(fb<0 && isFb(lines[i])) fb=i;
+    if(sp<0 && isSp(lines[i])) sp=i;
+    if(br<0 && isBr(lines[i])) br=i;
   }
-  s += '\n다른 설명 없이 요청한 결과물만 출력하라.\n';
-  if(acS.fast) s += '서론·요약·마무리 코멘트 없이 결과물만 바로 쓰라. 웹 검색은 하지 마라.\n';
-  if(forClaude) s += '※ 결과물은 복사해 바로 사용할 수 있도록 마크다운 장식을 최소화하라.\n';
-  return s;
+  let fbEnd = lines.length;
+  if(fb>=0){ [sp,br].forEach(x=>{ if(x>fb && x<fbEnd) fbEnd=x; }); }
+  const feedback = fb>=0 ? lines.slice(fb+1,fbEnd).join('\n').trim() : lines.slice(0,16).join('\n').trim();
+  const brief = br>=0 ? lines.slice(br+1).join('\n').trim() : '';
+  return {feedback: feedback || t.slice(0,700), brief: brief};
 }
 
 /* ---- 렌더 ---- */
-function acEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function acTopicHTML(){
-  const links = (acS.link||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  const pt = (acS.point||'').trim();
-  const bd = (acS.body||'').trim();
-  let h = '<div style="border:1px solid var(--green);border-radius:8px;overflow:hidden;">';
-  h += '<div style="padding:9px 14px;background:rgba(68,255,136,.1);font-size:12px;font-weight:800;color:var(--green);">🧾 이번 회의 주제 (내가 입력한 자료)</div>';
-  h += '<div style="padding:13px 15px;background:var(--bg3);font-size:12.5px;color:var(--text2);line-height:1.8;">';
-  h += '<div style="margin-bottom:9px;"><span style="color:var(--text3);font-weight:700;">🔗 기사 링크</span><br>';
-  h += links.length ? links.map(l=>'<a href="'+acEsc(l)+'" target="_blank" rel="noopener noreferrer" style="color:var(--blue);word-break:break-all;">'+acEsc(l)+'</a>').join('<br>') : '<span style="color:var(--text3);">(없음)</span>';
-  h += '</div>';
-  h += '<div style="margin-bottom:9px;"><span style="color:var(--text3);font-weight:700;">📝 강조 포인트</span><br>';
-  h += pt ? '<span style="color:var(--text);white-space:pre-wrap;">'+acEsc(pt)+'</span>' : '<span style="color:var(--text3);">(없음)</span>';
-  h += '</div>';
-  h += '<div><span style="color:var(--text3);font-weight:700;">📄 기사 본문 백업</span> ';
-  h += bd ? '<span style="color:var(--green);">첨부됨 ('+bd.length.toLocaleString()+'자) · 웹 접속 생략 → 빠름</span>' : '<span style="color:var(--yellow);">미입력 · AI가 링크를 열어야 해서 느려질 수 있음</span>';
-  h += '</div>';
-  h += '<div style="margin-top:9px;"><span style="color:var(--text3);font-weight:700;">⚡ 빠른 모드</span> ' + (acS.fast ? '<span style="color:var(--green);">ON · 출력 압축</span>' : '<span style="color:var(--text3);">OFF</span>')
-     + ' &nbsp;|&nbsp; <span style="color:var(--text3);font-weight:700;">🔀 2분할</span> ' + (acS.split ? '<span style="color:var(--blue);">ON · 참석 ' + (acTeam('mk').length + acTeam('sales').length) + '명 (병렬)</span>' : '<span style="color:var(--text3);">OFF · 참석 ' + acTeam(null).length + '명</span>');
-  h += '</div>';
-  h += '</div>';
-  h += '<div style="padding:8px 14px;background:var(--bg3);border-top:1px solid var(--border);text-align:right;"><button onclick="acGoStep(1)" style="background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;">✏️ 자료 수정</button></div>';
-  h += '</div>';
-  return h;
-}
 function acBox(title, id, val, rows){
   const isC = id.indexOf('claude') >= 0;
   const col = isC ? 'var(--blue)' : 'var(--green)';
@@ -13619,30 +13553,48 @@ function acBox(title, id, val, rows){
     + '<textarea id="' + id + '" readonly rows="' + rows + '" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;">' + acEsc(val) + '</textarea>'
     + '</div>';
 }
+function acTopicHTML(){
+  const links = (acS.link||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const pt = (acS.point||'').trim(), bd = (acS.body||'').trim();
+  let h = '<div style="border:1px solid var(--green);border-radius:8px;overflow:hidden;">';
+  h += '<div style="padding:9px 14px;background:rgba(68,255,136,.1);font-size:12px;font-weight:800;color:var(--green);">🧾 이번 회의 주제 (내가 입력한 자료)</div>';
+  h += '<div style="padding:13px 15px;background:var(--bg3);font-size:12.5px;color:var(--text2);line-height:1.8;">';
+  h += '<div style="margin-bottom:9px;"><span style="color:var(--text3);font-weight:700;">🔗 기사 링크</span><br>';
+  h += links.length ? links.map(l=>'<a href="'+acEsc(l)+'" target="_blank" rel="noopener noreferrer" style="color:var(--blue);word-break:break-all;">'+acEsc(l)+'</a>').join('<br>') : '<span style="color:var(--text3);">(없음)</span>';
+  h += '</div>';
+  h += '<div style="margin-bottom:9px;"><span style="color:var(--text3);font-weight:700;">📝 강조 포인트</span><br>';
+  h += pt ? '<span style="color:var(--text);white-space:pre-wrap;">'+acEsc(pt)+'</span>' : '<span style="color:var(--text3);">(없음)</span>';
+  h += '</div>';
+  h += '<div><span style="color:var(--text3);font-weight:700;">📄 기사 본문</span> ';
+  h += bd ? '<span style="color:var(--green);">첨부됨 ('+bd.length.toLocaleString()+'자) · 웹 접속 생략 → 빠름</span>' : '<span style="color:var(--yellow);">미입력 · AI가 링크를 열어야 해서 느려질 수 있음</span>';
+  h += '</div>';
+  h += '<div style="margin-top:9px;"><span style="color:var(--text3);font-weight:700;">⚡ 빠른 모드</span> ' + (acS.fast ? '<span style="color:var(--green);">ON</span>' : '<span style="color:var(--text3);">OFF</span>')
+     + ' &nbsp;|&nbsp; <span style="color:var(--text3);font-weight:700;">📚 과거참조</span> ' + (acS.useHist ? '<span style="color:var(--green);">ON · ' + Math.min(acHistLoad().filter(r=>r.id!==acS.histId).length, acS.histN||5) + '건</span>' : '<span style="color:var(--text3);">OFF</span>')
+     + ' &nbsp;|&nbsp; <span style="color:var(--text3);font-weight:700;">🔀 2분할</span> ' + (acS.split ? '<span style="color:var(--blue);">ON · 참석 '+(acTeam('mk').length+acTeam('sales').length)+'명</span>' : '<span style="color:var(--text3);">OFF · 참석 '+acTeam(null).length+'명</span>');
+  h += '</div></div>';
+  h += '<div style="padding:8px 14px;background:var(--bg3);border-top:1px solid var(--border);text-align:right;"><button onclick="acGoStep(1)" style="background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;">✏️ 자료 수정</button></div>';
+  h += '</div>';
+  return h;
+}
 function acRenderPromptArea(){
   const el = document.getElementById('ac_promptArea');
   if(!el) return;
   let h = '';
   if(acS.split){
     h += '<div style="background:rgba(68,136,255,.08);border:1px solid rgba(68,136,255,.35);border-radius:6px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.75;">'
-      + '<b style="color:var(--blue);">🔀 2분할 병렬 모드</b><br>'
-      + '챗gpt 창(또는 탭) <b style="color:var(--text);">2개를 열고</b> 아래 A·B를 각각 붙여넣어 <b style="color:var(--text);">동시에</b> 돌리세요. 두 회의가 병렬로 진행돼 대기시간이 절반 이하로 줄어듭니다.'
-      + '</div>';
-    h += '<div style="font-size:12.5px;font-weight:800;color:var(--green);margin:0 0 8px;">A · 마케팅본부 회의 (참석 ' + acTeam('mk').length + '명)</div>';
+      + '<b style="color:var(--blue);">🔀 2분할 병렬 모드</b><br>챗gpt 창 <b style="color:var(--text);">2개를 열고</b> 아래 A·B를 각각 붙여넣어 <b style="color:var(--text);">동시에</b> 돌리세요.</div>';
+    h += '<div style="font-size:12.5px;font-weight:800;color:var(--green);margin:0 0 8px;">A · 마케팅본부 회의 (참석 '+acTeam('mk').length+'명)</div>';
     h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;">'
-      + acBox('🤖 ChatGPT용', 'ac_pa_gpt', acMeetingPrompt(false,'mk'), 11)
-      + acBox('🧠 Claude용', 'ac_pa_claude', acMeetingPrompt(true,'mk'), 11)
-      + '</div>';
-    h += '<div style="font-size:12.5px;font-weight:800;color:var(--yellow);margin:0 0 8px;">B · 영업본부 회의 (참석 ' + acTeam('sales').length + '명)</div>';
+      + acBox('🤖 ChatGPT용','ac_pa_gpt',acMeetingPrompt(false,'mk'),11)
+      + acBox('🧠 Claude용','ac_pa_claude',acMeetingPrompt(true,'mk'),11) + '</div>';
+    h += '<div style="font-size:12.5px;font-weight:800;color:var(--yellow);margin:0 0 8px;">B · 영업본부 회의 (참석 '+acTeam('sales').length+'명)</div>';
     h += '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
-      + acBox('🤖 ChatGPT용', 'ac_pb_gpt', acMeetingPrompt(false,'sales'), 11)
-      + acBox('🧠 Claude용', 'ac_pb_claude', acMeetingPrompt(true,'sales'), 11)
-      + '</div>';
+      + acBox('🤖 ChatGPT용','ac_pb_gpt',acMeetingPrompt(false,'sales'),11)
+      + acBox('🧠 Claude용','ac_pb_claude',acMeetingPrompt(true,'sales'),11) + '</div>';
   } else {
     h += '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
-      + acBox('🤖 ChatGPT용', 'ac_prompt_gpt', acMeetingPrompt(false,null), 14)
-      + acBox('🧠 Claude용', 'ac_prompt_claude', acMeetingPrompt(true,null), 14)
-      + '</div>';
+      + acBox('🤖 ChatGPT용','ac_prompt_gpt',acMeetingPrompt(false,null),14)
+      + acBox('🧠 Claude용','ac_prompt_claude',acMeetingPrompt(true,null),14) + '</div>';
   }
   el.innerHTML = h;
 }
@@ -13663,198 +13615,311 @@ function acRenderSplitArea(){
     + '<b style="color:var(--blue);">🔀 2분할 병렬 모드</b><br>A·B 회의 결과를 각각 붙여넣으면 종합 프롬프트가 자동으로 만들어집니다.</div>';
   h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">';
   h += '<div style="flex:1;min-width:300px;"><div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:6px;">A · 마케팅본부 회의 결과</div>'
-    + '<textarea id="ac_mA" rows="8" oninput="acSaveSplit()" placeholder="A 결과를 붙여넣으세요." style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;">' + acEsc(acS.mA||'') + '</textarea></div>';
+    + '<textarea id="ac_mA" rows="8" oninput="acSaveSplit()" placeholder="A 결과를 붙여넣으세요." style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;">'+acEsc(acS.mA||'')+'</textarea></div>';
   h += '<div style="flex:1;min-width:300px;"><div style="font-size:12px;font-weight:800;color:var(--yellow);margin-bottom:6px;">B · 영업본부 회의 결과</div>'
-    + '<textarea id="ac_mB" rows="8" oninput="acSaveSplit()" placeholder="B 결과를 붙여넣으세요." style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;">' + acEsc(acS.mB||'') + '</textarea></div>';
-  h += '</div>';
-  h += '<div id="ac_mergeWrap" data-ready="' + ready + '">';
+    + '<textarea id="ac_mB" rows="8" oninput="acSaveSplit()" placeholder="B 결과를 붙여넣으세요." style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;">'+acEsc(acS.mB||'')+'</textarea></div>';
+  h += '</div><div id="ac_mergeWrap" data-ready="'+ready+'">';
   if(ready){
     h += '<div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">💡 마지막 단계입니다. 아래 <b>종합 프롬프트</b>를 챗gpt에 넣고, 나온 결과를 맨 아래 칸에 붙여넣으세요.</div>';
     h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">'
-      + acBox('🤖 종합 · ChatGPT용', 'ac_merge_gpt', acMergePrompt(false), 9)
-      + acBox('🧠 종합 · Claude용', 'ac_merge_claude', acMergePrompt(true), 9)
-      + '</div>';
+      + acBox('🤖 종합 · ChatGPT용','ac_merge_gpt',acMergePrompt(false),9)
+      + acBox('🧠 종합 · Claude용','ac_merge_claude',acMergePrompt(true),9) + '</div>';
   } else {
     h += '<div style="background:var(--bg3);border:1px dashed var(--border2);border-radius:6px;padding:14px;text-align:center;font-size:12px;color:var(--text3);margin-bottom:14px;">A·B 결과를 모두 붙여넣으면 종합 프롬프트가 여기에 나타납니다.</div>';
   }
   h += '</div>';
   el.innerHTML = h;
 }
-function acRenderTopic(){
-  ['ac_topic2','ac_topic3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML = acTopicHTML(); });
-}
-function acRenderProdPrompt(){
-  const g = document.getElementById('ac_pprompt_gpt'), c = document.getElementById('ac_pprompt_claude');
-  if(g) g.value = acProdPrompt(false);
-  if(c) c.value = acProdPrompt(true);
-}
 function acRender(){
   if(!acS) acLoad();
-  const stepNames = ['자료 입력','회의 프롬프트','회의록 검토','결과물 제작','완료'];
+  const names = ['자료 입력','회의 프롬프트','회의록'];
   const pr = document.getElementById('ac_progress');
   if(pr){
-    pr.innerHTML = stepNames.map((n,i)=>{
-      const num = i+1, cur = acS.step === num, done = acS.step > num;
-      const bg = cur ? 'var(--green)' : (done ? 'rgba(68,255,136,.15)' : 'var(--bg3)');
-      const col = cur ? '#000' : (done ? 'var(--green)' : 'var(--text3)');
-      const bd = cur||done ? 'var(--green)' : 'var(--border2)';
+    pr.innerHTML = names.map((n,i)=>{
+      const num=i+1, cur=acS.step===num, done=acS.step>num;
+      const bg = cur?'var(--green)':(done?'rgba(68,255,136,.15)':'var(--bg3)');
+      const col= cur?'#000':(done?'var(--green)':'var(--text3)');
+      const bd = (cur||done)?'var(--green)':'var(--border2)';
       return '<div onclick="acGoStep('+num+')" style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 12px;background:'+bg+';border:1px solid '+bd+';border-radius:20px;font-size:11.5px;font-weight:700;color:'+col+';">'+num+'. '+n+'</div>'
-        + (i < stepNames.length-1 ? '<span style="color:var(--text3);font-size:11px;">→</span>' : '');
+        + (i<names.length-1?'<span style="color:var(--text3);font-size:11px;">→</span>':'');
     }).join('');
   }
   const badge = document.getElementById('ac_stepbadge');
-  if(badge) badge.textContent = 'STEP ' + acS.step + ' / 5';
+  if(badge) badge.textContent = 'STEP ' + acS.step + ' / 3';
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('ac_s'+i);
+    if(el) el.style.display = (acS.step===i)?'block':'none';
+  }
+  const sv=(id,v)=>{ const el=document.getElementById(id); if(el) el.value = v||''; };
+  sv('ac_link',acS.link); sv('ac_point',acS.point); sv('ac_body',acS.body);
+  acRenderPre();
+  const hb=document.getElementById('ac_histBtn');
+  if(hb) hb.textContent = '📁 이력 ' + acHistLoad().length;
 
-  for(let i=1;i<=5;i++){
-    const el = document.getElementById('ac_s'+i);
-    if(el) el.style.display = (acS.step === i) ? 'block' : 'none';
+  ['ac_topic2','ac_topic3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=acTopicHTML(); });
+
+  const fb2=document.getElementById('ac_fastBox');   if(fb2) fb2.textContent = acS.fast?'✅':'⬜';
+  const sb2=document.getElementById('ac_splitBox');  if(sb2) sb2.textContent = acS.split?'✅':'⬜';
+  const fbn=document.getElementById('ac_fastBtn');
+  if(fbn){ fbn.textContent = acS.fast?'⚡ 빠른 모드 ON':'🐢 빠른 모드 OFF';
+           fbn.style.color = acS.fast?'var(--green)':'var(--text3)';
+           fbn.style.borderColor = acS.fast?'var(--green)':'var(--border2)'; }
+  const sbn=document.getElementById('ac_splitBtn');
+  if(sbn){ sbn.textContent = acS.split?'🔀 2분할 ON':'🔀 2분할 OFF';
+           sbn.style.color = acS.split?'var(--blue)':'var(--text3)';
+           sbn.style.borderColor = acS.split?'var(--blue)':'var(--border2)'; }
+  const shb=document.getElementById('ac_shuffleBtn'); if(shb) shb.style.display = acS.split?'none':'';
+  const hbx=document.getElementById('ac_histBox'); if(hbx) hbx.textContent = acS.useHist?'✅':'⬜';
+  const hsel=document.getElementById('ac_histN'); if(hsel){ hsel.value=String(acS.histN||5); hsel.disabled=!acS.useHist; hsel.style.opacity=acS.useHist?'1':'.4'; }
+  const hsub=document.getElementById('ac_histRefSub');
+  if(hsub){
+    const cnt = acHistLoad().filter(r=>r.id!==acS.histId).length;
+    hsub.innerHTML = acS.useHist
+      ? (cnt ? '저장된 회의록 <b style="color:var(--green);">' + cnt + '건</b> 중 최근 ' + Math.min(cnt, acS.histN||5) + '건을 프롬프트에 함께 넣습니다.'
+             : '<span style="color:var(--yellow);">아직 저장된 회의록이 없습니다. STEP 3에서 이력에 저장하면 다음 회의부터 참조됩니다.</span>')
+      : '<span style="color:var(--text3);">OFF · 과거 기록 없이 이번 자료만으로 회의합니다.</span>';
   }
 
-  const sv = (id,v)=>{ const el = document.getElementById(id); if(el) el.value = v || ''; };
-  sv('ac_link', acS.link); sv('ac_point', acS.point); sv('ac_body', acS.body);
-
-  acRenderTopic();
-  const fb2 = document.getElementById('ac_fastBox');
-  if(fb2) fb2.textContent = acS.fast ? '✅' : '⬜';
-  const sb2 = document.getElementById('ac_splitBox');
-  if(sb2) sb2.textContent = acS.split ? '✅' : '⬜';
-  const shb = document.getElementById('ac_shuffleBtn');
-  if(shb) shb.style.display = acS.split ? 'none' : '';
-  const sbn = document.getElementById('ac_splitBtn');
-  if(sbn){
-    sbn.textContent = acS.split ? '🔀 2분할 ON' : '🔀 2분할 OFF';
-    sbn.style.color = acS.split ? 'var(--blue)' : 'var(--text3)';
-    sbn.style.borderColor = acS.split ? 'var(--blue)' : 'var(--border2)';
-  }
-  const fbn = document.getElementById('ac_fastBtn');
-  if(fbn){
-    fbn.textContent = acS.fast ? '⚡ 빠른 모드 ON' : '🐢 빠른 모드 OFF';
-    fbn.style.color = acS.fast ? 'var(--green)' : 'var(--text3)';
-    fbn.style.borderColor = acS.fast ? 'var(--green)' : 'var(--border2)';
-  }
-  const wn = document.getElementById('ac_warn');
+  const wn=document.getElementById('ac_warn');
   if(wn){
-    const msg = [];
-    if(acIsGNews()) msg.push('⚠️ <b>구글뉴스 링크는 실제 기사 주소가 아닙니다.</b><br>AI가 열지 못해 매우 느려지거나 실패합니다. 구글뉴스에서 기사 제목을 클릭해 이동한 뒤, 주소창의 <b>언론사 실제 주소</b>를 복사해 넣으세요.');
-    if(!acHasBody() && (acS.link||'').trim()) msg.push('💡 답변 속도를 크게 높이려면 <b>기사 본문을 직접 붙여넣으세요.</b> 본문이 있으면 AI가 웹 접속을 건너뜁니다.');
-    wn.innerHTML = msg.join('<hr style="border:none;border-top:1px solid rgba(255,68,68,.3);margin:9px 0;">');
-    wn.style.display = msg.length ? 'block' : 'none';
-    wn.style.color = acIsGNews() ? 'var(--red)' : 'var(--yellow)';
-    wn.style.borderColor = acIsGNews() ? 'var(--red)' : 'var(--yellow)';
-    wn.style.background = acIsGNews() ? 'rgba(255,68,68,.1)' : 'rgba(255,204,68,.1)';
+    const msg=[];
+    if(acIsGNews()) msg.push('⚠️ <b>구글뉴스 링크는 실제 기사 주소가 아닙니다.</b><br>AI가 열지 못해 매우 느려지거나 실패합니다. 기사 제목을 클릭해 이동한 뒤 주소창의 <b>언론사 실제 주소</b>를 넣으세요.');
+    if(!acHasBody() && (acS.link||'').trim()) msg.push('💡 답변 속도를 크게 높이려면 <b>기사 본문을 직접 붙여넣으세요.</b>');
+    wn.innerHTML = msg.join('<hr style="border:none;border-top:1px solid rgba(255,255,255,.15);margin:9px 0;">');
+    wn.style.display = msg.length?'block':'none';
+    const dan = acIsGNews();
+    wn.style.color = dan?'var(--red)':'var(--yellow)';
+    wn.style.border = '1px solid ' + (dan?'var(--red)':'var(--yellow)');
+    wn.style.background = dan?'rgba(255,68,68,.1)':'rgba(255,204,68,.1)';
   }
-  if(acS.step === 2){
-    if(!acS.roster) acShuffle();
-    acRenderPromptArea();
-    const r = document.getElementById('ac_roster');
+
+  if(acS.step===2){
+    if(!acS.roster) { acShuffle(); return; }
+    const r=document.getElementById('ac_roster');
     if(r){
       if(acS.split){
-        r.innerHTML = '<b style="color:var(--green);">A · 마케팅본부 ' + acTeam('mk').length + '명</b><br>' + acTeam('mk').map(x=>'· ' + acEsc(x)).join('<br>')
-          + '<div style="height:8px;"></div><b style="color:var(--yellow);">B · 영업본부 ' + acTeam('sales').length + '명</b><br>' + acTeam('sales').map(x=>'· ' + acEsc(x)).join('<br>');
+        r.innerHTML = '<b style="color:var(--green);">A · 마케팅본부 '+acTeam('mk').length+'명</b><br>'+acTeam('mk').map(x=>'· '+acEsc(x)).join('<br>')
+          + '<div style="height:8px;"></div><b style="color:var(--yellow);">B · 영업본부 '+acTeam('sales').length+'명</b><br>'+acTeam('sales').map(x=>'· '+acEsc(x)).join('<br>');
       } else {
-        r.innerHTML = '<b style="color:var(--text);">오늘 회의 참석자 ' + acS.roster.length + '명</b><br>' + acS.roster.map(x=>'· ' + acEsc(x)).join('<br>');
+        r.innerHTML = '<b style="color:var(--text);">오늘 회의 참석자 '+acS.roster.length+'명</b><br>'+acS.roster.map(x=>'· '+acEsc(x)).join('<br>');
       }
     }
+    acRenderPromptArea();
   }
 
-  if(acS.step === 3){
+  if(acS.step===3){
     acRenderSplitArea();
     sv('ac_minutes', acS.minutes);
-    const view = document.getElementById('ac_minutesView');
+    const view=document.getElementById('ac_minutesView');
     const has = !!(acS.minutes||'').trim() && !!(acS.feedback||'').trim();
-    if(view) view.style.display = has ? 'block' : 'none';
+    if(view) view.style.display = has?'block':'none';
     if(has){
-      const fb = document.getElementById('ac_feedback'); if(fb) fb.textContent = acS.feedback;
-      const fu = document.getElementById('ac_full'); if(fu) fu.textContent = acS.minutes;
-      const bw = document.getElementById('ac_briefWrap');
-      if(bw){ bw.style.display = acS.briefOpen ? 'block' : 'none'; }
-      const bt = document.getElementById('ac_brief'); if(bt) bt.value = acS.brief || '';
-    }
-  }
-
-  if(acS.step === 4){
-    const p = AC_PRODS[acS.prodIdx];
-    const head = document.getElementById('ac_prodHead');
-    if(head){
-      head.innerHTML =
-        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
-        + '<span style="background:var(--green);color:#000;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;">' + (acS.prodIdx+1) + ' / ' + AC_PRODS.length + '</span>'
-        + '<span style="font-size:15px;font-weight:800;color:var(--text);">' + p.icon + ' ' + acEsc(p.name) + '</span>'
-        + '</div>'
-        + '<div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;">' + acEsc(p.desc) + '</div>'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + AC_PRODS.map((x,i)=>{
-            const cur = i === acS.prodIdx, done = !!(acS.results[x.key]||'').trim();
-            const bg = cur ? 'rgba(68,255,136,.18)' : (done ? 'rgba(68,136,255,.12)' : 'var(--bg3)');
-            const bd = cur ? 'var(--green)' : (done ? 'var(--blue)' : 'var(--border2)');
-            const cl = cur ? 'var(--green)' : (done ? 'var(--blue)' : 'var(--text3)');
-            return '<div onclick="acProdJump('+i+')" style="cursor:pointer;padding:5px 10px;background:'+bg+';border:1px solid '+bd+';border-radius:5px;font-size:11px;font-weight:600;color:'+cl+';">' + x.icon + ' ' + (done?'✓':'') + '</div>';
-          }).join('') + '</div>';
-    }
-    const qw = document.getElementById('ac_qtyWrap');
-    if(qw){
-      const val = acS.qty[p.key] != null ? acS.qty[p.key] : p.qDefault;
-      qw.innerHTML = '<label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">' + acEsc(p.qLabel) + '</label>'
-        + (p.qText
-          ? '<textarea id="ac_qty" rows="2" oninput="acQtyChange(this.value)" placeholder="예) 초기비용 없이 시작 가능하다는 점" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;">' + acEsc(val) + '</textarea>'
-          : '<div style="display:flex;align-items:center;gap:8px;"><input id="ac_qty" type="text" value="' + acEsc(val) + '" oninput="acQtyChange(this.value)" style="width:120px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;"><span style="font-size:12px;color:var(--text3);">' + acEsc(p.qUnit) + '</span></div>');
-    }
-    acRenderProdPrompt();
-    sv('ac_result', acS.results[p.key]);
-    const nb = document.getElementById('ac_nextBtn');
-    if(nb) nb.textContent = (acS.prodIdx >= AC_PRODS.length-1) ? '💾 저장 후 완료 →' : '💾 저장 후 다음 →';
-  }
-
-  if(acS.step === 5){
-    const sm = document.getElementById('ac_summary');
-    if(sm){
-      sm.innerHTML = AC_PRODS.map((x,i)=>{
-        const v = (acS.results[x.key]||'').trim();
-        const ok = !!v;
-        return '<div style="border:1px solid ' + (ok?'var(--border2)':'var(--border)') + ';border-radius:8px;margin-bottom:10px;overflow:hidden;">'
-          + '<div style="padding:11px 14px;background:var(--bg3);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">'
-          + '<span style="font-size:12.5px;font-weight:700;color:' + (ok?'var(--text)':'var(--text3)') + ';">' + x.icon + ' ' + acEsc(x.name) + (ok?'':' <span style="color:var(--red);font-size:11px;">(미입력)</span>') + '</span>'
-          + '<span style="display:flex;gap:6px;">'
-          + (ok ? '<button onclick="acCopyResult(\'' + x.key + '\')" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>' : '')
-          + '<button onclick="acProdJump(' + i + ')" style="background:var(--bg);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;">✏️ 수정</button>'
-          + '</span></div>'
-          + (ok ? '<div style="padding:13px 15px;background:var(--bg);font-size:12px;color:var(--text2);line-height:1.75;white-space:pre-wrap;max-height:220px;overflow:auto;">' + acEsc(v) + '</div>' : '')
-          + '<textarea id="ac_out_' + x.key + '" style="position:absolute;left:-9999px;top:-9999px;">' + acEsc(v) + '</textarea>'
-          + '</div>';
-      }).join('');
+      const f=document.getElementById('ac_feedback'); if(f) f.textContent=acS.feedback;
+      const fu=document.getElementById('ac_full');    if(fu) fu.textContent=acS.minutes;
+      const bc=document.getElementById('ac_briefCard');
+      const bv=document.getElementById('ac_briefView');
+      if(bc) bc.style.display = (acS.brief||'').trim()?'block':'none';
+      if(bv) bv.textContent = acS.brief||'';
     }
   }
 }
-function acCopyResult(key){ acCopy('ac_out_' + key); }
-function acPrint(mode){
-  const items = mode === 'call' ? AC_PRODS.filter(p=>p.key==='call') : AC_PRODS;
-  const body = items.map(p=>{
-    const v = (acS.results[p.key]||'').trim();
-    if(!v) return '';
-    return '<h2>' + acEsc(p.name) + '</h2><pre>' + acEsc(v) + '</pre>';
-  }).filter(Boolean).join('');
-  if(!body){ alert('출력할 결과물이 없습니다.'); return; }
-  const title = mode === 'call' ? '상담 콜 스크립트' : '광고소재 결과물 전체';
-  const today = new Date().toLocaleDateString('ko-KR');
-  const w = window.open('', '_blank');
+
+/* ---- PDF ---- */
+function acPrintMinutes(){
+  if(!(acS.minutes||'').trim()){ alert('회의록을 먼저 저장하세요.'); return; }
+  const w = window.open('','_blank');
   if(!w){ alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도하세요.'); return; }
-  w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>' + acEsc(title) + '</title>'
-    + '<style>'
-    + '@page{size:A4;margin:16mm 14mm;}'
-    + 'body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;color:#111;background:#fff;font-size:11.5pt;line-height:1.75;}'
-    + 'h1{font-size:17pt;margin:0 0 4px;border-bottom:2px solid #111;padding-bottom:8px;}'
-    + '.meta{font-size:9.5pt;color:#666;margin-bottom:18px;}'
-    + 'h2{font-size:13pt;margin:22px 0 8px;padding:7px 10px;background:#f0f0f0;border-left:4px solid #111;page-break-after:avoid;}'
-    + 'pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:11pt;margin:0 0 14px;}'
-    + '.pt{margin:0 0 16px;padding:10px 12px;background:#fafafa;border:1px solid #ddd;font-size:10.5pt;}'
-    + '</style></head><body>'
-    + '<h1>' + acEsc(title) + '</h1>'
-    + '<div class="meta">TS AUTO PLAN · 광고소재ai · ' + acEsc(today) + '</div>'
-    + ((acS.point||'').trim() ? '<div class="pt"><b>강조 포인트</b><br>' + acEsc(acS.point.trim()).replace(/\n/g,'<br>') + '</div>' : '')
-    + body + '</body></html>');
+  const d = new Date();
+  const today = d.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  const links = (acS.link||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const roster = acS.split ? acTeam('mk').concat(acTeam('sales')) : acTeam(null);
+  const br = (acS.brief||'').trim();
+  const E = acEsc;
+
+  let h = '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>광고 회의록 · ' + E(today) + '</title><style>'
+   + '@page{size:A4;margin:15mm 14mm;}'
+   + '*{box-sizing:border-box;}'
+   + 'body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:#1a1a1a;background:#fff;font-size:10.5pt;line-height:1.7;margin:0;}'
+   + '.hd{border-bottom:3px solid #111;padding-bottom:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-end;}'
+   + '.hd h1{font-size:19pt;margin:0;letter-spacing:-.5px;}'
+   + '.hd .co{font-size:9pt;color:#777;text-align:right;line-height:1.5;}'
+   + '.tags{margin:10px 0 18px;font-size:8.5pt;}'
+   + '.tag{display:inline-block;border:1px solid #bbb;border-radius:10px;padding:2px 9px;margin-right:5px;color:#555;}'
+   + 'h2{font-size:12pt;margin:20px 0 9px;padding:7px 11px;background:#1a1a1a;color:#fff;border-radius:3px;page-break-after:avoid;letter-spacing:-.3px;}'
+   + '.card{border:1px solid #d5d5d5;border-radius:5px;padding:13px 15px;margin-bottom:14px;page-break-inside:avoid;}'
+   + '.row{display:flex;gap:10px;margin-bottom:7px;font-size:10pt;}'
+   + '.row:last-child{margin-bottom:0;}'
+   + '.k{flex:0 0 88px;color:#666;font-weight:700;}'
+   + '.v{flex:1;word-break:break-all;}'
+   + '.hi{border:2px solid #1a1a1a;border-left:9px solid #1a1a1a;border-radius:4px;padding:15px 17px;margin-bottom:16px;background:#fafafa;page-break-inside:avoid;}'
+   + '.hi .lb{font-size:9pt;font-weight:800;letter-spacing:2px;color:#1a1a1a;margin-bottom:9px;}'
+   + '.br{border:1px solid #1a1a1a;border-radius:4px;padding:15px 17px;margin-bottom:16px;page-break-inside:avoid;}'
+   + '.br .lb{font-size:9pt;font-weight:800;letter-spacing:2px;color:#1a1a1a;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid #ddd;}'
+   + 'pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:10.5pt;margin:0;line-height:1.8;}'
+   + '.ppl{columns:2;column-gap:22px;font-size:9.5pt;color:#333;}'
+   + '.ppl div{break-inside:avoid;padding:2px 0;}'
+   + '.ft{margin-top:22px;padding-top:9px;border-top:1px solid #ccc;font-size:8pt;color:#999;text-align:center;}'
+   + '</style></head><body>';
+
+  h += '<div class="hd"><h1>광고 회의록</h1><div class="co"><b>TS AUTO PLAN</b><br>마케팅본부 · ' + E(today) + '</div></div>';
+  h += '<div class="tags"><span class="tag">' + (acS.split ? '2분할 병렬 회의' : '통합 회의') + '</span>'
+     + '<span class="tag">참석 ' + roster.length + '명</span>'
+     + '<span class="tag">' + (acHasBody() ? '본문 직접 제공' : '링크 분석') + '</span></div>';
+
+  h += '<h2>1. 회의 주제 · 입력 자료</h2><div class="card">';
+  h += '<div class="row"><div class="k">강조 포인트</div><div class="v">' + ((acS.point||'').trim() ? E(acS.point.trim()).replace(/\n/g,'<br>') : '<span style="color:#999">미입력</span>') + '</div></div>';
+  h += '<div class="row"><div class="k">참고 기사</div><div class="v">' + (links.length ? links.map(l=>E(l)).join('<br>') : '<span style="color:#999">없음</span>') + '</div></div>';
+  h += '<div class="row"><div class="k">기사 본문</div><div class="v">' + (acHasBody() ? '첨부됨 (' + acS.body.trim().length.toLocaleString() + '자)' : '<span style="color:#999">미첨부</span>') + '</div></div>';
+  h += '</div>';
+
+  h += '<h2>2. 최종 피드백 · 방향 제안</h2>';
+  h += '<div class="hi"><div class="lb">FINAL FEEDBACK</div><pre>' + E((acS.feedback||'').trim()) + '</pre></div>';
+
+  if(br){
+    h += '<h2>3. 광고 브리프</h2>';
+    h += '<div class="br"><div class="lb">CREATIVE BRIEF</div><pre>' + E(br) + '</pre></div>';
+  }
+
+  h += '<h2>' + (br?'4':'3') + '. 참석자</h2><div class="card"><div class="ppl">'
+     + roster.map(r=>'<div>· ' + E(r) + '</div>').join('') + '</div></div>';
+
+  h += '<h2>' + (br?'5':'4') + '. 전체 회의록</h2><div class="card"><pre>' + E((acS.minutes||'').trim()) + '</pre></div>';
+
+  if(acS.split && ((acS.mA||'').trim() || (acS.mB||'').trim())){
+    h += '<h2>' + (br?'6':'5') + '. 부록 · 부서별 원본 회의록</h2>';
+    if((acS.mA||'').trim()) h += '<div class="card"><div style="font-weight:800;font-size:10pt;margin-bottom:7px;">A · 마케팅본부</div><pre>' + E(acS.mA.trim()) + '</pre></div>';
+    if((acS.mB||'').trim()) h += '<div class="card"><div style="font-weight:800;font-size:10pt;margin-bottom:7px;">B · 영업본부</div><pre>' + E(acS.mB.trim()) + '</pre></div>';
+  }
+
+  h += '<div class="ft">TS AUTO PLAN CRM · 광고소재ai 자동 생성 · ' + E(d.toLocaleString('ko-KR')) + '</div>';
+  h += '</body></html>';
+
+  w.document.write(h);
   w.document.close();
-  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 350);
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 400);
 }
-function renderAdCreative(){ acLoad(); acRender(); }
+/* ---- ① 회의록 이력 ---- */
+const AC_HIST_LS = 'crm_adcreative_hist_v1';
+function acHistLoad(){
+  try { const r = localStorage.getItem(AC_HIST_LS); const a = r ? JSON.parse(r) : []; return Array.isArray(a) ? a : []; }
+  catch(e){ return []; }
+}
+function acHistWrite(a){ try { localStorage.setItem(AC_HIST_LS, JSON.stringify(a.slice(0,50))); } catch(e){} }
+function acHistTitle(){
+  const p = (acS.point||'').trim().split(/\r?\n/)[0];
+  if(p) return p.length > 40 ? p.slice(0,40)+'…' : p;
+  const l = (acS.link||'').trim().split(/\r?\n/)[0];
+  if(l){ try { return new URL(l).hostname.replace(/^www\./,''); } catch(e){ return l.slice(0,40); } }
+  return '제목 없음';
+}
+function acHistSave(){
+  if(!(acS.minutes||'').trim()){ alert('회의록을 먼저 저장하세요.'); return; }
+  const a = acHistLoad();
+  const rec = {
+    id: acS.histId || ('h'+Date.now()), ts: Date.now(), title: acHistTitle(),
+    link:acS.link, point:acS.point, body:acS.body, fast:acS.fast, split:acS.split,
+    roster:acS.roster, mA:acS.mA, mB:acS.mB, minutes:acS.minutes, feedback:acS.feedback, brief:acS.brief
+  };
+  const idx = a.findIndex(x=>x.id===rec.id);
+  if(idx >= 0) a[idx] = rec; else a.unshift(rec);
+  acHistWrite(a);
+  acS.histId = rec.id; acSave(); acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast(idx>=0 ? '이력이 갱신되었습니다' : '이력에 저장되었습니다');
+}
+function acHistOpen(id){
+  const r = acHistLoad().find(x=>x.id===id);
+  if(!r) return;
+  if(!confirm('현재 화면 내용을 이 이력으로 교체합니다. 계속할까요?')) return;
+  acS = Object.assign(acDefault(), {
+    step:3, histId:r.id, link:r.link, point:r.point, body:r.body, fast:r.fast, split:r.split,
+    roster:r.roster, mA:r.mA, mB:r.mB, minutes:r.minutes, feedback:r.feedback, brief:r.brief
+  });
+  acSave(); acHistToggle(true); acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast('이력을 불러왔습니다');
+}
+function acHistDel(id){
+  if(!confirm('이 이력을 삭제합니다. 되돌릴 수 없습니다.')) return;
+  acHistWrite(acHistLoad().filter(x=>x.id!==id));
+  acRenderHist();
+  if(typeof showGlobalToast === 'function') showGlobalToast('삭제되었습니다');
+}
+function acHistPrint(id){
+  const r = acHistLoad().find(x=>x.id===id);
+  if(!r) return;
+  const bak = acS;
+  acS = Object.assign(acDefault(), r);
+  try { acPrintMinutes(); } finally { acS = bak; }
+}
+function acHistToggle(forceClose){
+  const w = document.getElementById('ac_histPanel');
+  if(!w) return;
+  const open = (forceClose === true) ? false : (w.style.display === 'none');
+  w.style.display = open ? 'block' : 'none';
+  if(open) acRenderHist();
+}
+function acRenderHist(){
+  const w = document.getElementById('ac_histPanel');
+  if(!w) return;
+  const a = acHistLoad();
+  if(!a.length){ w.innerHTML = '<div style="padding:18px;text-align:center;font-size:12px;color:var(--text3);">저장된 회의록이 없습니다. STEP 3에서 [이력에 저장]을 눌러 보관하세요.</div>'; return; }
+  let h = '<div style="font-size:11.5px;color:var(--text3);margin-bottom:10px;">저장된 회의록 ' + a.length + '건 · 최대 50건까지 보관됩니다.</div>';
+  h += a.map(r=>{
+    const d = new Date(r.ts);
+    const cur = acS && acS.histId === r.id;
+    return '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid ' + (cur?'var(--green)':'var(--border)') + ';border-radius:6px;margin-bottom:7px;background:' + (cur?'rgba(68,255,136,.06)':'var(--bg3)') + ';">'
+      + '<div style="flex:1;min-width:180px;">'
+      + '<div style="font-size:12.5px;font-weight:700;color:var(--text);">' + acEsc(r.title||'제목 없음') + (cur?' <span style="color:var(--green);font-size:10px;">현재</span>':'') + '</div>'
+      + '<div style="font-size:10.5px;color:var(--text3);margin-top:2px;">' + d.toLocaleString('ko-KR') + ' · ' + (r.split?'2분할':'통합') + ' · ' + ((r.minutes||'').length.toLocaleString()) + '자</div>'
+      + '</div>'
+      + '<button onclick="acHistOpen(\'' + r.id + '\')" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;font-weight:600;">불러오기</button>'
+      + '<button onclick="acHistPrint(\'' + r.id + '\')" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;font-weight:600;">PDF</button>'
+      + '<button onclick="acHistDel(\'' + r.id + '\')" style="background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:11px;padding:5px 10px;border-radius:5px;cursor:pointer;">삭제</button>'
+      + '</div>';
+  }).join('');
+  w.innerHTML = h;
+}
+
+/* ---- ② 강조 포인트 프리셋 ---- */
+const AC_PRE_LS = 'crm_adcreative_presets_v1';
+const AC_PRE_DEF = ['초기비용 부담 없다는 점 강조','저렴한 EV 차량 강조','법인 비용처리·절세 이점 강조','신용 부담 없이 이용 가능한 점 강조','보험료·정비 포함 이점 강조','2~3년 주기 신차 교체 이점 강조'];
+function acPreLoad(){
+  try { const r = localStorage.getItem(AC_PRE_LS); const a = r ? JSON.parse(r) : null; return Array.isArray(a) ? a : AC_PRE_DEF.slice(); }
+  catch(e){ return AC_PRE_DEF.slice(); }
+}
+function acPreWrite(a){ try { localStorage.setItem(AC_PRE_LS, JSON.stringify(a.slice(0,30))); } catch(e){} }
+function acPreAdd(){
+  acSave();
+  const t = (acS.point||'').trim();
+  if(!t){ alert('강조 포인트 칸에 내용을 먼저 입력하세요.'); return; }
+  const a = acPreLoad();
+  if(a.indexOf(t) >= 0){ alert('이미 저장된 내용입니다.'); return; }
+  a.unshift(t); acPreWrite(a); acRenderPre();
+  if(typeof showGlobalToast === 'function') showGlobalToast('프리셋에 저장되었습니다');
+}
+function acPreUse(i){
+  const a = acPreLoad(); const v = a[i]; if(v == null) return;
+  const el = document.getElementById('ac_point');
+  if(!el) return;
+  const cur = el.value.trim();
+  el.value = cur ? (cur + '\n' + v) : v;
+  acSave(); acRender();
+}
+function acPreDel(i, ev){
+  if(ev) ev.stopPropagation();
+  const a = acPreLoad(); a.splice(i,1); acPreWrite(a); acRenderPre();
+}
+function acRenderPre(){
+  const w = document.getElementById('ac_preBar');
+  if(!w) return;
+  const a = acPreLoad();
+  let h = '<span style="font-size:10.5px;color:var(--text3);margin-right:4px;">⭐ 자주 쓰는 지시</span>';
+  h += a.map((v,i)=>'<span onclick="acPreUse(' + i + ')" title="클릭하면 강조 포인트에 추가됩니다" style="display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:4px 6px 4px 11px;font-size:11px;color:var(--text2);cursor:pointer;">'
+    + acEsc(v.length>26 ? v.slice(0,26)+'…' : v)
+    + '<span onclick="acPreDel(' + i + ',event)" style="color:var(--text3);font-size:12px;padding:0 3px;">×</span></span>').join('');
+  h += '<button onclick="acPreAdd()" style="background:rgba(68,255,136,.1);border:1px solid var(--green);color:var(--green);border-radius:14px;padding:4px 11px;font-size:11px;cursor:pointer;font-weight:600;">＋ 현재 내용 저장</button>';
+  w.innerHTML = h;
+}
+function renderAdCreative(){ acLoad(); acTplLoad(); acRender(); }
 
 </script>
 <script>
