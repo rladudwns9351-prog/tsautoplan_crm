@@ -107,6 +107,9 @@
       <div class="nav-item" onclick="goPage(&#39;carnews&#39;,this)">
         🚗 신차뉴스
       </div>
+      <div class="nav-item" onclick="goPage(&#39;adcreative&#39;,this)">
+        📢 광고소재ai
+      </div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">도구</div>
@@ -2773,6 +2776,199 @@
       </div>
     </div>
 
+    <div class="page" id="page-adcreative">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📢 광고소재ai</div>
+          <div class="page-sub">기사·이미지·강조포인트 → 가상 마케팅본부 회의 → 광고 결과물 5종 <span class="admin-only" style="color:var(--text3);">(관리자 전용)</span></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="ac_stepbadge" style="font-size:12px;color:var(--text3);"></span>
+          <button onclick="acReset()" style="background:rgba(255,68,68,.12);border:1px solid var(--red);color:var(--red);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;font-weight:600;">🔄 초기화</button>
+        </div>
+      </div>
+
+      <!-- 진행바 -->
+      <div class="section-card" style="padding:14px 16px;margin-bottom:14px;">
+        <div id="ac_progress" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="section-card" id="ac_s1" style="padding:18px;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 1 · 자료 입력</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">분석할 기사 링크와 강조하고 싶은 포인트를 입력하세요.</div>
+
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">🔗 기사 링크 <span style="color:var(--text3);font-weight:400;">(여러 개는 줄바꿈으로 구분)</span></label>
+          <textarea id="ac_link" rows="3" placeholder="https://n.news.naver.com/article/..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">📝 강조 포인트 <span style="color:var(--red);">*</span> <span style="color:var(--text3);font-weight:400;">(대표 지시사항 · 회의와 모든 결과물에 반영됩니다)</span></label>
+          <textarea id="ac_point" rows="4" placeholder="예) 초기비용 부담 없다는 점을 가장 강하게 강조&#10;예) 법인 비용처리 이점 포함&#10;예) 20~30대 첫차 고객 타깃" style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">📄 기사 본문 백업 <span style="color:var(--text3);font-weight:400;">(선택 · AI가 링크를 못 읽을 때만 본문을 붙여넣으세요)</span></label>
+          <textarea id="ac_body" rows="4" placeholder="링크가 차단되는 경우에만 기사 본문을 붙여넣으세요." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+        </div>
+
+        <div style="background:rgba(68,136,255,.08);border:1px solid rgba(68,136,255,.3);border-radius:6px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:12px;color:var(--blue);font-weight:700;margin-bottom:4px;">🖼 이미지 안내</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.7;">이미지는 CRM에 올리지 않습니다. 다음 단계에서 프롬프트를 복사한 뒤 <b style="color:var(--text);">챗gpt 입력창에 이미지를 직접 첨부</b>하세요. (최대 10장 권장)<br>프롬프트에 이미지 분석 지시가 이미 포함되어 있습니다.</div>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="acGoStep(2)" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">회의 프롬프트 생성 →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="section-card" id="ac_s2" style="padding:18px;margin-bottom:14px;display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 2 · 회의 프롬프트</div>
+            <div style="font-size:11px;color:var(--text3);">가상 마케팅본부 회의를 진행시키는 프롬프트입니다.</div>
+          </div>
+          <button onclick="acShuffle()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;">🎲 참석자 재추첨</button>
+        </div>
+
+        <div id="ac_roster" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.9;"></div>
+
+        <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">
+          💡 아래 프롬프트를 복사해 <b>챗gpt(또는 클로드)</b>에 붙여넣으세요. 이미지가 있으면 함께 첨부하세요.
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:300px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:700;color:var(--text);">🤖 ChatGPT용</span>
+              <button onclick="acCopy('ac_prompt_gpt')" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
+            </div>
+            <textarea id="ac_prompt_gpt" readonly rows="14" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
+          </div>
+          <div style="flex:1;min-width:300px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:700;color:var(--text);">🧠 Claude용</span>
+              <button onclick="acCopy('ac_prompt_claude')" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
+            </div>
+            <textarea id="ac_prompt_claude" readonly rows="14" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:space-between;margin-top:14px;">
+          <button onclick="acGoStep(1)" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 자료 수정</button>
+          <button onclick="acGoStep(3)" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">회의록 입력 →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="section-card" id="ac_s3" style="padding:18px;margin-bottom:14px;display:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 3 · 회의록 검토</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">AI가 출력한 회의록 전체를 그대로 붙여넣으세요.</div>
+
+        <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">
+          💡 챗gpt가 만든 회의록을 아래 칸에 붙여넣고 <b>[회의록 저장]</b>을 누르세요.
+        </div>
+
+        <textarea id="ac_minutes" rows="10" placeholder="회의록 전체를 붙여넣으세요." oninput="acSave()" style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;"></textarea>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
+          <button onclick="acSaveMinutes()" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">💾 회의록 저장</button>
+        </div>
+
+        <div id="ac_minutesView" style="display:none;margin-top:16px;">
+          <div style="border:2px solid var(--red);border-radius:8px;padding:16px;background:rgba(255,68,68,.06);margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:800;color:var(--red);letter-spacing:1px;margin-bottom:10px;">🔴 최종 피드백 · 방향 제안</div>
+            <div id="ac_feedback" style="font-size:13px;color:var(--text);line-height:1.85;white-space:pre-wrap;"></div>
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;">
+            <div onclick="acToggleFull()" style="padding:11px 14px;background:var(--bg3);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;font-weight:700;color:var(--text2);">📋 전체 회의록 보기</span>
+              <span id="ac_fullArrow" style="font-size:12px;color:var(--text3);">▼</span>
+            </div>
+            <div id="ac_fullWrap" style="display:none;padding:14px;background:var(--bg);">
+              <div id="ac_full" style="font-size:12.5px;color:var(--text2);line-height:1.8;white-space:pre-wrap;"></div>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:12px 14px;margin-bottom:12px;">
+            <div style="font-size:12.5px;color:var(--yellow);font-weight:700;">⚠️ 이 방향으로 결과물 제작을 진행하시겠습니까?</div>
+            <div style="font-size:11.5px;color:var(--text2);margin-top:5px;line-height:1.6;">「방향 수정」을 누르면 아래 브리프를 직접 고칠 수 있고, 수정한 내용이 이후 5종 프롬프트에 그대로 반영됩니다.</div>
+          </div>
+
+          <div id="ac_briefWrap" style="display:none;margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">✏️ 광고 브리프 (직접 수정 가능)</label>
+            <textarea id="ac_brief" rows="8" oninput="acSave()" style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;"></textarea>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+            <button onclick="acGoStep(2)" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 회의 다시</button>
+            <button onclick="acToggleBrief()" style="background:rgba(255,204,68,.12);border:1px solid var(--yellow);color:var(--yellow);font-size:13px;font-weight:600;padding:10px 18px;border-radius:6px;cursor:pointer;">✏️ 방향 수정</button>
+            <button onclick="acApprove()" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">✅ 이 방향으로 진행</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="section-card" id="ac_s4" style="padding:18px;margin-bottom:14px;display:none;">
+        <div id="ac_prodHead" style="margin-bottom:14px;"></div>
+
+        <div id="ac_qtyWrap" style="margin-bottom:14px;"></div>
+
+        <div style="background:rgba(255,204,68,.1);border:1px solid rgba(255,204,68,.35);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:600;">
+          💡 아래 프롬프트를 복사해 <b>챗gpt</b>에 붙여넣으세요.
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+          <div style="flex:1;min-width:300px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:700;color:var(--text);">🤖 ChatGPT용</span>
+              <button onclick="acCopy('ac_pprompt_gpt')" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
+            </div>
+            <textarea id="ac_pprompt_gpt" readonly rows="12" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
+          </div>
+          <div style="flex:1;min-width:300px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:700;color:var(--text);">🧠 Claude용</span>
+              <button onclick="acCopy('ac_pprompt_claude')" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>
+            </div>
+            <textarea id="ac_pprompt_claude" readonly rows="12" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:11.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
+          </div>
+        </div>
+
+        <div style="background:rgba(68,255,136,.08);border:1px solid rgba(68,255,136,.3);border-radius:6px;padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--green);font-weight:600;">
+          💾 AI가 만들어준 결과물을 아래 칸에 붙여넣고 다음으로 넘어가세요.
+        </div>
+
+        <textarea id="ac_result" rows="10" placeholder="AI 결과물을 붙여넣으세요." oninput="acSaveResult()" style="width:100%;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;"></textarea>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;margin-top:12px;">
+          <button onclick="acProdPrev()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 이전</button>
+          <div style="display:flex;gap:8px;">
+            <button onclick="acProdNext(true)" style="background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:13px;padding:10px 16px;border-radius:6px;cursor:pointer;">건너뛰기</button>
+            <button id="ac_nextBtn" onclick="acProdNext(false)" style="background:var(--green);border:none;color:#000;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;">💾 저장 후 다음 →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="section-card" id="ac_s5" style="padding:18px;margin-bottom:14px;display:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;">STEP 5 · 완료</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">결과물이 이 페이지에 보관됩니다. 새로고침해도 유지되며, 새 주제를 시작하려면 상단 「초기화」를 누르세요.</div>
+        <div id="ac_summary"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;margin-top:14px;">
+          <button onclick="acGoStep(4)" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;">← 제작 단계로</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="acPrint('call')" style="background:rgba(68,136,255,.12);border:1px solid var(--blue);color:var(--blue);font-size:13px;font-weight:700;padding:10px 18px;border-radius:6px;cursor:pointer;">📄 콜 스크립트 PDF</button>
+            <button onclick="acPrint('all')" style="background:rgba(255,204,68,.12);border:1px solid var(--yellow);color:var(--yellow);font-size:13px;font-weight:700;padding:10px 18px;border-radius:6px;cursor:pointer;">📄 전체 PDF</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 <style>input[type="date"],input[type="date"]::-webkit-datetime-edit,input[type="date"]::-webkit-inner-spin-button{color-scheme:dark !important}input[type="date"]::-webkit-calendar-picker-indicator{filter:brightness(0) invert(1) !important;cursor:pointer !important;opacity:1 !important;width:16px !important;height:16px !important;padding:0 2px !important}</style>
@@ -4068,6 +4264,7 @@ function goPage(id, navEl, keepDbPage) {
   if(id==='tracking')      {  }
   if(id==='feedback')      { renderFeedbackPage(); }
   if(id==='vehiclestock')  { renderVehicleStockPage(); }
+  if(id==='adcreative')    { renderAdCreative(); }
   if(id==='dbstats') {
     setStatsPeriod(30);
     if(currentRole==='admin') {
@@ -4096,7 +4293,7 @@ function initApp(restorePage) {
   filterDB();
   if(typeof updateVstockBadge === 'function') updateVstockBadge();
   const targetPage = restorePage || 'dashboard';
-  const adminOnlyPages = ['users','settings','reclaim','carnews'];
+  const adminOnlyPages = ['users','settings','reclaim','carnews','adcreative'];
   const safePage = (currentRole !== 'admin' && adminOnlyPages.includes(targetPage)) ? 'dashboard' : targetPage;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pageEl = document.getElementById('page-'+safePage);
@@ -4113,6 +4310,7 @@ function initApp(restorePage) {
     else if(safePage==='dbstats') { setStatsPeriod(30); renderDBStats(); }
     else if(safePage==='reclaim') renderReclaimPage();
     else if(safePage==='carnews') loadCarNews();
+    else if(safePage==='adcreative') renderAdCreative();
     else if(safePage==='users') showUserList(); // async
     else if(safePage==='settings') renderStatusOptionList();
   }));
@@ -13026,6 +13224,406 @@ async function confirmBulkImport(){
     alert(`일괄등록 완료: ${ok}명 성공${fail?`, ${fail}명 실패`:''}`);
   }
 }
+/* ===== 광고소재ai (adcreative) ===== */
+const AC_LS = 'crm_adcreative_v1';
+const AC_FIXED = [
+  '차우진 · 마케팅 총괄팀장 (회의 진행 · 최종 결론 정리)',
+  '강태식 · 영업총괄 부장 (세일즈 훅 전환)',
+  '서윤도 · 브랜드/크리에이티브 디렉터 (톤앤매너 · 비주얼 컨셉 · 컬러)',
+  '임하늘 · 광고 카피라이터 (후킹멘트 · 문구 톤)'
+];
+const AC_POOL_MK = [
+  '노현재 · 퍼포먼스/미디어 파트장 (광고 소재 각도 · 매체 적합성)',
+  '유가온 · 콘텐츠/영상 파트장 (카드뉴스 구성 · 숏폼 전환)',
+  '백서준 · SNS/인플루언서 파트장 (채널별 노출 방식)',
+  '민채원 · SEO/바이럴 파트장 (검색 키워드 · 커뮤니티 반응)',
+  '조은결 · CRM/CRO 파트장 (상담 전환 동선)'
+];
+const AC_POOL_SALES = [
+  '윤서진 · 금융심사 과장 (금리 · 한도 · 승인 난이도)',
+  '오정한 · 리스크/잔가 차장 (감가 · 중고시세 · 만기 반납)',
+  '한지우 · 고객심리 대리 (고객 걱정거리 · 예상 문의)',
+  '배도현 · 악마의 변호인 팀장 (불리한 지점 · 과장광고 경계)',
+  '문세라 · 법인/세무 과장 (비용처리 · 부가세 · 법인차)',
+  '정민혁 · 경쟁사/시장 대리 (캐피탈사 프로모션 · 업계 동향)',
+  '신아름 · 규제/컴플라이언스 주임 (광고규정 · 법개정 이슈)'
+];
+const AC_PRODS = [
+  {key:'img', icon:'🎨', name:'메타 광고 이미지 프롬프트 (1:1)',
+   desc:'정사각형 1:1 비율 메타 광고 이미지를 만들기 위한 이미지 생성 프롬프트입니다. 각 장마다 디자인과 컬러가 모두 다르게 나옵니다.',
+   qLabel:'몇 장 만들까요?', qDefault:'10', qUnit:'장'},
+  {key:'cust', icon:'💬', name:'고객 제공용 스크립트',
+   desc:'고객에게 바로 보낼 수 있는 안내 스크립트입니다. 5줄에 하나 정도 이모지가 들어가고, 마지막은 문의 유도 후킹멘트로 끝납니다.',
+   qLabel:'몇 줄 분량으로?', qDefault:'20~25', qUnit:'줄'},
+  {key:'meta', icon:'📢', name:'메타 광고용 멘트',
+   desc:'광고 소재에 넣을 카피입니다. 후킹멘트 → 강조 장점 정리 → 상담 유도 후킹 순서로 구성됩니다.',
+   qLabel:'몇 줄 분량으로?', qDefault:'15~20', qUnit:'줄'},
+  {key:'call', icon:'📞', name:'상담 콜 스크립트',
+   desc:'담당자가 실제 통화에서 쓰는 문답형 스크립트입니다. 부드러운 상담 톤으로 작성되며 PDF로 저장할 수 있습니다.',
+   qLabel:'이 통화에서 특별히 강조할 포인트 (선택 · 수기 입력)', qDefault:'', qUnit:'', qText:true},
+  {key:'card', icon:'🗂', name:'카드뉴스 기획안',
+   desc:'첫 장 후킹 → 중간 장 비교·안내 → 마지막 장 정리 + 상담 후킹 구성의 기획안입니다.',
+   qLabel:'몇 장 구성으로?', qDefault:'4', qUnit:'장'}
+];
+let acS = null;
+
+function acDefault(){
+  return {step:1, link:'', point:'', body:'', roster:null, minutes:'', feedback:'', brief:'',
+          approved:false, briefOpen:false, prodIdx:0,
+          qty:{img:'10', cust:'20~25', meta:'15~20', call:'', card:'4'},
+          results:{img:'', cust:'', meta:'', call:'', card:''}};
+}
+function acLoad(){
+  try { const r = localStorage.getItem(AC_LS); acS = r ? Object.assign(acDefault(), JSON.parse(r)) : acDefault(); }
+  catch(e){ acS = acDefault(); }
+  if(!acS.qty) acS.qty = acDefault().qty;
+  if(!acS.results) acS.results = acDefault().results;
+}
+function acSave(){
+  if(!acS) return;
+  const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+  if(document.getElementById('ac_link')) acS.link = g('ac_link');
+  if(document.getElementById('ac_point')) acS.point = g('ac_point');
+  if(document.getElementById('ac_body')) acS.body = g('ac_body');
+  if(document.getElementById('ac_minutes')) acS.minutes = g('ac_minutes');
+  if(document.getElementById('ac_brief') && acS.briefOpen) acS.brief = g('ac_brief');
+  try { localStorage.setItem(AC_LS, JSON.stringify(acS)); } catch(e){}
+}
+function acShuffle(){
+  const pick = (arr,n) => arr.slice().sort(()=>Math.random()-0.5).slice(0,n);
+  acS.roster = AC_FIXED.concat(pick(AC_POOL_MK,3)).concat(pick(AC_POOL_SALES,2));
+  acSave(); acRender();
+}
+function acReset(){
+  if(!confirm('현재 작업 내용을 모두 삭제하고 새 주제를 시작합니다.\n계속하시겠습니까?')) return;
+  acS = acDefault();
+  try { localStorage.removeItem(AC_LS); } catch(e){}
+  acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast('초기화되었습니다');
+}
+function acCopy(id){
+  const el = document.getElementById(id);
+  if(!el || !el.value.trim()) return;
+  el.select(); el.setSelectionRange(0, 999999);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch(e){}
+  if(!ok && navigator.clipboard) navigator.clipboard.writeText(el.value).catch(()=>{});
+  window.getSelection && window.getSelection().removeAllRanges();
+  if(typeof showGlobalToast === 'function') showGlobalToast('복사되었습니다 · 챗gpt에 붙여넣으세요');
+}
+function acGoStep(n){
+  acSave();
+  if(n >= 2 && !acS.point.trim() && !acS.link.trim() && !acS.body.trim()){
+    alert('기사 링크 또는 강조 포인트를 먼저 입력하세요.'); return;
+  }
+  if(n >= 4 && !acS.approved){ alert('회의록 검토 후 「이 방향으로 진행」을 먼저 눌러주세요.'); return; }
+  acS.step = n; acSave(); acRender();
+  const wrap = document.getElementById('page-adcreative');
+  if(wrap) wrap.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function acToggleFull(){
+  const w = document.getElementById('ac_fullWrap'), a = document.getElementById('ac_fullArrow');
+  if(!w) return;
+  const open = w.style.display === 'none';
+  w.style.display = open ? 'block' : 'none';
+  if(a) a.textContent = open ? '▲' : '▼';
+}
+function acToggleBrief(){
+  acS.briefOpen = !acS.briefOpen;
+  if(acS.briefOpen && !acS.brief) acS.brief = acS.feedback || acS.minutes.slice(0,800);
+  acSave(); acRender();
+}
+function acSaveMinutes(){
+  acSave();
+  const t = (acS.minutes || '').trim();
+  if(!t){ alert('회의록을 붙여넣어 주세요.'); return; }
+  const p = acParseMinutes(t);
+  acS.feedback = p.feedback; if(!acS.brief) acS.brief = p.brief;
+  acSave(); acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast('회의록이 저장되었습니다');
+}
+function acParseMinutes(t){
+  const lines = t.split(/\r?\n/);
+  let fbStart = -1, fbEnd = lines.length, brStart = -1;
+  const isFb = s => /최종\s*피드백|최종피드백|final\s*feedback/i.test(s);
+  const isNext = s => /참석자별|발언|전체\s*회의록|회의\s*내용|광고\s*브리프|브리프/.test(s);
+  const isBr = s => /광고\s*브리프|브리프/.test(s);
+  for(let i=0;i<lines.length;i++){
+    if(fbStart < 0 && isFb(lines[i])){ fbStart = i; continue; }
+    if(fbStart >= 0 && fbEnd === lines.length && isNext(lines[i]) && lines[i].trim().length < 40){ fbEnd = i; }
+    if(brStart < 0 && isBr(lines[i]) && lines[i].trim().length < 40) brStart = i;
+  }
+  const feedback = fbStart >= 0 ? lines.slice(fbStart+1, fbEnd).join('\n').trim() : lines.slice(0, 14).join('\n').trim();
+  const brief = brStart >= 0 ? lines.slice(brStart+1).join('\n').trim() : (feedback || t.slice(0,800));
+  return {feedback: feedback || t.slice(0,600), brief: brief || t.slice(0,800)};
+}
+function acApprove(){
+  acSave();
+  if(!(acS.minutes || '').trim()){ alert('회의록을 먼저 저장하세요.'); return; }
+  acS.approved = true; acS.step = 4;
+  if(!acS.brief) acS.brief = acS.feedback || acS.minutes.slice(0,800);
+  acSave(); acRender();
+  if(typeof showGlobalToast === 'function') showGlobalToast('승인 완료 · 결과물 제작을 시작합니다');
+}
+function acQtyChange(v){
+  const p = AC_PRODS[acS.prodIdx]; if(!p) return;
+  acS.qty[p.key] = v; acSave();
+  acRenderProdPrompt();
+}
+function acSaveResult(){
+  const p = AC_PRODS[acS.prodIdx]; if(!p) return;
+  const el = document.getElementById('ac_result');
+  if(el) acS.results[p.key] = el.value;
+  acSave();
+}
+function acProdNext(skip){
+  acSaveResult();
+  if(!skip && !(acS.results[AC_PRODS[acS.prodIdx].key] || '').trim()){
+    if(!confirm('결과물이 비어 있습니다. 그래도 다음으로 넘어가시겠습니까?')) return;
+  }
+  if(acS.prodIdx >= AC_PRODS.length - 1){ acS.step = 5; acSave(); acRender(); return; }
+  acS.prodIdx++; acSave(); acRender();
+  const h = document.getElementById('ac_prodHead');
+  if(h) h.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function acProdPrev(){
+  acSaveResult();
+  if(acS.prodIdx <= 0){ acS.step = 3; acSave(); acRender(); return; }
+  acS.prodIdx--; acSave(); acRender();
+}
+function acProdJump(i){ acSaveResult(); acS.prodIdx = i; acS.step = 4; acSave(); acRender(); }
+
+/* ---- 프롬프트 생성 ---- */
+function acSrcBlock(){
+  let s = '';
+  const links = (acS.link || '').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(links.length) s += '[분석 대상 기사 링크]\n' + links.map(l=>'▶ ' + l).join('\n') + '\n위 링크를 직접 열어 기사 전체 내용을 읽고 분석하라.\n\n';
+  if((acS.body||'').trim()) s += '[기사 본문]\n' + acS.body.trim() + '\n\n';
+  s += '[첨부 이미지]\n이 메시지에 이미지가 첨부되어 있다면 이미지에 담긴 정보(차량, 가격표, 조건표, 광고 시안 등)도 함께 분석에 반영하라.\n\n';
+  if((acS.point||'').trim()) s += '[대표 강조 지시 — 반드시 반영]\n' + acS.point.trim() + '\n\n';
+  return s;
+}
+function acRule(){
+  return '[작성 규칙]\n' +
+    '- 우리 회사는 TS AUTO PLAN, 신차 장기렌트/리스 판매사다.\n' +
+    '- 최종 목적은 고객이 장기렌트/리스를 선택하도록 설득하고 상담 문의를 유도하는 것이다.\n' +
+    '- 구체적인 수치(DB 단가, 전환율, CPC, 시장점유율, 금리 %, 월 렌트료 등)를 임의로 만들어내지 마라. 기사나 첨부자료에 명시된 수치만 인용하고, 없으면 수치 없이 방향성만 서술하라.\n' +
+    '- 추정이 불가피하면 문장 끝에 (추정) 을 붙여라.\n' +
+    '- 허위·과장 광고 표현은 배제하라.\n';
+}
+function acMeetingPrompt(forClaude){
+  const roster = (acS.roster || AC_FIXED.concat(AC_POOL_MK.slice(0,3)).concat(AC_POOL_SALES.slice(0,2)));
+  let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 마케팅본부 회의를 시뮬레이션한다.\n';
+  s += '아래 참석자 각각의 전문 분야 관점에서 발언하고, 마지막에 광고 소재 제작 방향을 확정하라.\n\n';
+  s += '[참석자]\n' + roster.map(r=>'- ' + r).join('\n') + '\n\n';
+  s += acSrcBlock();
+  s += acRule() + '\n';
+  s += '[출력 형식 — 순서를 반드시 지켜라]\n';
+  s += '■ 최종 피드백 · 방향 제안   ← 반드시 이 블록을 가장 먼저 출력\n';
+  s += '  1) 핵심 결론 3줄\n';
+  s += '  2) 추천 광고 방향 (누구에게 / 무엇을 / 어떤 톤으로)\n';
+  s += '  3) 주의사항 · 쓰면 안 되는 표현\n';
+  s += '  4) 대표 확인 필요 사항 (있으면)\n\n';
+  s += '■ 참석자별 발언\n';
+  s += '  - 각 참석자 1인당 2~3줄로 짧게. 자기 전문 분야 관점만 말할 것.\n';
+  s += '  - 배도현(악마의 변호인)은 반드시 반대 논리를 제시할 것.\n';
+  s += '  - 차우진 총괄팀장이 마지막에 논의를 정리할 것.\n\n';
+  s += '■ 광고 브리프\n';
+  s += '  - 타깃 / 핵심 메시지 1문장 / 강조할 장점 3~5개 / 톤앤매너 / 비주얼 컨셉·컬러 방향 / 후킹 소재 키워드\n';
+  s += '  - 이 브리프만 보고도 광고물을 만들 수 있을 만큼 구체적으로 쓸 것.\n';
+  if(forClaude) s += '\n※ 링크를 직접 열 수 없다면 웹 검색 도구를 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n';
+  else s += '\n※ 링크를 직접 열 수 없다면 웹 브라우징 기능을 사용하고, 그래도 접근이 불가하면 그 사실을 먼저 알려라.\n';
+  return s;
+}
+function acProdPrompt(forClaude){
+  const p = AC_PRODS[acS.prodIdx]; if(!p) return '';
+  const q = (acS.qty[p.key] || p.qDefault || '').trim();
+  let s = '너는 신차 장기렌트/리스 판매사 「TS AUTO PLAN」의 광고 제작 담당이다.\n';
+  s += '아래는 우리 마케팅본부 회의에서 확정된 광고 브리프다. 이 브리프에 충실하게 결과물을 만들어라.\n\n';
+  s += '[확정 광고 브리프]\n' + (acS.brief || acS.feedback || '').trim() + '\n\n';
+  if((acS.point||'').trim()) s += '[대표 강조 지시]\n' + acS.point.trim() + '\n\n';
+  s += acRule() + '\n';
+
+  if(p.key === 'img'){
+    s += '[요청 결과물] 메타(페이스북·인스타그램) 광고용 이미지 생성 프롬프트\n';
+    s += '- ' + (q || '10') + '장 분량의 프롬프트를 만들어라.\n';
+    s += '- 모든 이미지는 정사각형 1:1 비율(1080x1080) 기준으로 지정할 것.\n';
+    s += '- ' + (q || '10') + '장 전부 디자인 구성·배경·컬러 팔레트가 서로 완전히 다르게 할 것. 비슷한 시안 반복 금지.\n';
+    s += '- 각 장마다: ① 한글 후킹멘트(이미지에 얹을 문구) ② 이미지 생성 프롬프트(영문) ③ 컬러 팔레트 ④ 레이아웃 설명 을 함께 제시.\n';
+    s += '- 프롬프트는 그대로 복사해 이미지 생성 AI에 붙여넣을 수 있는 완성형 문장으로 작성.\n';
+    s += '- 이미지 안에 한글 텍스트를 직접 렌더링하면 깨질 수 있으므로, 문구가 들어갈 여백 영역을 프롬프트에 명시할 것.\n';
+  } else if(p.key === 'cust'){
+    s += '[요청 결과물] 고객에게 바로 보낼 안내 스크립트\n';
+    s += '- 분량: ' + (q || '20~25') + '줄.\n';
+    s += '- 기사 내용을 근거로 장기렌트/리스를 이용해야 하는 장점과 이유를 강조.\n';
+    s += '- 이모지는 5줄에 하나 정도만 자연스럽게 사용. 과하게 쓰지 말 것.\n';
+    s += '- 딱딱한 설명문이 아니라 고객이 읽기 편한 대화체로.\n';
+    s += '- 마지막 줄은 반드시 문의를 유도하는 후킹멘트로 마무리.\n';
+  } else if(p.key === 'meta'){
+    s += '[요청 결과물] 메타 광고용 카피\n';
+    s += '- 분량: ' + (q || '15~20') + '줄.\n';
+    s += '- 구성 순서: ① 도입 후킹멘트 → ② 강조할 장점 정리 → ③ 상담을 받아보라는 마무리 후킹멘트.\n';
+    s += '- 각 줄이 독립적으로도 읽히게, 짧고 힘있게.\n';
+    s += '- 광고 심의에 걸릴 수 있는 단정적 표현(최저가, 100%, 무조건 등)은 사용 금지.\n';
+  } else if(p.key === 'call'){
+    s += '[요청 결과물] 담당자용 상담 콜 스크립트\n';
+    if(q) s += '- 이번 통화에서 특별히 강조할 포인트: ' + q + '\n';
+    s += '- 실제 문답(Q&A) 형식으로 작성. 「담당자:」 / 「고객:」 으로 화자를 표시.\n';
+    s += '- 부드럽고 편안한 상담 톤. 압박하거나 밀어붙이는 표현 금지.\n';
+    s += '- 구성: 인사·아이스브레이킹 → 고객 상황 파악 질문 → 기사 근거로 장점 설명 → 예상 반론 3가지와 대응 → 클로징(상담 예약 유도).\n';
+    s += '- 고객이 실제로 할 만한 반론(비싸다 / 내 차가 아니다 / 나중에 하겠다 등)을 넣고 각각의 대응 답변을 함께 제시.\n';
+    s += '- 담당자가 그대로 읽어도 자연스럽게 들리도록 구어체로.\n';
+  } else if(p.key === 'card'){
+    s += '[요청 결과물] 카드뉴스 기획안\n';
+    s += '- 총 ' + (q || '4') + '장 구성.\n';
+    s += '- 1장: 시선을 잡는 후킹 이미지 + 후킹 문구.\n';
+    s += '- 중간 장: 기사 정보를 비교·안내하는 내용 (표·대비 구조 권장).\n';
+    s += '- 마지막 장: 내용 정리 + 상담 유도 후킹멘트.\n';
+    s += '- 각 장마다: ① 헤드라인 ② 본문 문구 ③ 비주얼 지시(구도·컬러·요소) ④ 디자이너 전달 메모 를 적을 것.\n';
+  }
+  s += '\n다른 설명 없이 요청한 결과물만 출력하라.\n';
+  if(forClaude) s += '※ 결과물은 복사해 바로 사용할 수 있도록 마크다운 장식을 최소화하라.\n';
+  return s;
+}
+
+/* ---- 렌더 ---- */
+function acEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function acRenderProdPrompt(){
+  const g = document.getElementById('ac_pprompt_gpt'), c = document.getElementById('ac_pprompt_claude');
+  if(g) g.value = acProdPrompt(false);
+  if(c) c.value = acProdPrompt(true);
+}
+function acRender(){
+  if(!acS) acLoad();
+  const stepNames = ['자료 입력','회의 프롬프트','회의록 검토','결과물 제작','완료'];
+  const pr = document.getElementById('ac_progress');
+  if(pr){
+    pr.innerHTML = stepNames.map((n,i)=>{
+      const num = i+1, cur = acS.step === num, done = acS.step > num;
+      const bg = cur ? 'var(--green)' : (done ? 'rgba(68,255,136,.15)' : 'var(--bg3)');
+      const col = cur ? '#000' : (done ? 'var(--green)' : 'var(--text3)');
+      const bd = cur||done ? 'var(--green)' : 'var(--border2)';
+      return '<div onclick="acGoStep('+num+')" style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 12px;background:'+bg+';border:1px solid '+bd+';border-radius:20px;font-size:11.5px;font-weight:700;color:'+col+';">'+num+'. '+n+'</div>'
+        + (i < stepNames.length-1 ? '<span style="color:var(--text3);font-size:11px;">→</span>' : '');
+    }).join('');
+  }
+  const badge = document.getElementById('ac_stepbadge');
+  if(badge) badge.textContent = 'STEP ' + acS.step + ' / 5';
+
+  for(let i=1;i<=5;i++){
+    const el = document.getElementById('ac_s'+i);
+    if(el) el.style.display = (acS.step === i) ? 'block' : 'none';
+  }
+
+  const sv = (id,v)=>{ const el = document.getElementById(id); if(el) el.value = v || ''; };
+  sv('ac_link', acS.link); sv('ac_point', acS.point); sv('ac_body', acS.body);
+
+  if(acS.step === 2){
+    if(!acS.roster) acShuffle();
+    const r = document.getElementById('ac_roster');
+    if(r) r.innerHTML = '<b style="color:var(--text);">오늘 회의 참석자 ' + acS.roster.length + '명</b><br>' + acS.roster.map(x=>'· ' + acEsc(x)).join('<br>');
+    sv('ac_prompt_gpt', acMeetingPrompt(false));
+    sv('ac_prompt_claude', acMeetingPrompt(true));
+  }
+
+  if(acS.step === 3){
+    sv('ac_minutes', acS.minutes);
+    const view = document.getElementById('ac_minutesView');
+    const has = !!(acS.minutes||'').trim() && !!(acS.feedback||'').trim();
+    if(view) view.style.display = has ? 'block' : 'none';
+    if(has){
+      const fb = document.getElementById('ac_feedback'); if(fb) fb.textContent = acS.feedback;
+      const fu = document.getElementById('ac_full'); if(fu) fu.textContent = acS.minutes;
+      const bw = document.getElementById('ac_briefWrap');
+      if(bw){ bw.style.display = acS.briefOpen ? 'block' : 'none'; }
+      const bt = document.getElementById('ac_brief'); if(bt) bt.value = acS.brief || '';
+    }
+  }
+
+  if(acS.step === 4){
+    const p = AC_PRODS[acS.prodIdx];
+    const head = document.getElementById('ac_prodHead');
+    if(head){
+      head.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+        + '<span style="background:var(--green);color:#000;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;">' + (acS.prodIdx+1) + ' / ' + AC_PRODS.length + '</span>'
+        + '<span style="font-size:15px;font-weight:800;color:var(--text);">' + p.icon + ' ' + acEsc(p.name) + '</span>'
+        + '</div>'
+        + '<div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;">' + acEsc(p.desc) + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + AC_PRODS.map((x,i)=>{
+            const cur = i === acS.prodIdx, done = !!(acS.results[x.key]||'').trim();
+            const bg = cur ? 'rgba(68,255,136,.18)' : (done ? 'rgba(68,136,255,.12)' : 'var(--bg3)');
+            const bd = cur ? 'var(--green)' : (done ? 'var(--blue)' : 'var(--border2)');
+            const cl = cur ? 'var(--green)' : (done ? 'var(--blue)' : 'var(--text3)');
+            return '<div onclick="acProdJump('+i+')" style="cursor:pointer;padding:5px 10px;background:'+bg+';border:1px solid '+bd+';border-radius:5px;font-size:11px;font-weight:600;color:'+cl+';">' + x.icon + ' ' + (done?'✓':'') + '</div>';
+          }).join('') + '</div>';
+    }
+    const qw = document.getElementById('ac_qtyWrap');
+    if(qw){
+      const val = acS.qty[p.key] != null ? acS.qty[p.key] : p.qDefault;
+      qw.innerHTML = '<label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;">' + acEsc(p.qLabel) + '</label>'
+        + (p.qText
+          ? '<textarea id="ac_qty" rows="2" oninput="acQtyChange(this.value)" placeholder="예) 초기비용 없이 시작 가능하다는 점" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;">' + acEsc(val) + '</textarea>'
+          : '<div style="display:flex;align-items:center;gap:8px;"><input id="ac_qty" type="text" value="' + acEsc(val) + '" oninput="acQtyChange(this.value)" style="width:120px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;"><span style="font-size:12px;color:var(--text3);">' + acEsc(p.qUnit) + '</span></div>');
+    }
+    acRenderProdPrompt();
+    sv('ac_result', acS.results[p.key]);
+    const nb = document.getElementById('ac_nextBtn');
+    if(nb) nb.textContent = (acS.prodIdx >= AC_PRODS.length-1) ? '💾 저장 후 완료 →' : '💾 저장 후 다음 →';
+  }
+
+  if(acS.step === 5){
+    const sm = document.getElementById('ac_summary');
+    if(sm){
+      sm.innerHTML = AC_PRODS.map((x,i)=>{
+        const v = (acS.results[x.key]||'').trim();
+        const ok = !!v;
+        return '<div style="border:1px solid ' + (ok?'var(--border2)':'var(--border)') + ';border-radius:8px;margin-bottom:10px;overflow:hidden;">'
+          + '<div style="padding:11px 14px;background:var(--bg3);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">'
+          + '<span style="font-size:12.5px;font-weight:700;color:' + (ok?'var(--text)':'var(--text3)') + ';">' + x.icon + ' ' + acEsc(x.name) + (ok?'':' <span style="color:var(--red);font-size:11px;">(미입력)</span>') + '</span>'
+          + '<span style="display:flex;gap:6px;">'
+          + (ok ? '<button onclick="acCopyResult(\'' + x.key + '\')" style="background:rgba(68,255,136,.12);border:1px solid var(--green);color:var(--green);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;font-weight:600;">📋 복사</button>' : '')
+          + '<button onclick="acProdJump(' + i + ')" style="background:var(--bg);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;">✏️ 수정</button>'
+          + '</span></div>'
+          + (ok ? '<div style="padding:13px 15px;background:var(--bg);font-size:12px;color:var(--text2);line-height:1.75;white-space:pre-wrap;max-height:220px;overflow:auto;">' + acEsc(v) + '</div>' : '')
+          + '<textarea id="ac_out_' + x.key + '" style="position:absolute;left:-9999px;top:-9999px;">' + acEsc(v) + '</textarea>'
+          + '</div>';
+      }).join('');
+    }
+  }
+}
+function acCopyResult(key){ acCopy('ac_out_' + key); }
+function acPrint(mode){
+  const items = mode === 'call' ? AC_PRODS.filter(p=>p.key==='call') : AC_PRODS;
+  const body = items.map(p=>{
+    const v = (acS.results[p.key]||'').trim();
+    if(!v) return '';
+    return '<h2>' + acEsc(p.name) + '</h2><pre>' + acEsc(v) + '</pre>';
+  }).filter(Boolean).join('');
+  if(!body){ alert('출력할 결과물이 없습니다.'); return; }
+  const title = mode === 'call' ? '상담 콜 스크립트' : '광고소재 결과물 전체';
+  const today = new Date().toLocaleDateString('ko-KR');
+  const w = window.open('', '_blank');
+  if(!w){ alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도하세요.'); return; }
+  w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>' + acEsc(title) + '</title>'
+    + '<style>'
+    + '@page{size:A4;margin:16mm 14mm;}'
+    + 'body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;color:#111;background:#fff;font-size:11.5pt;line-height:1.75;}'
+    + 'h1{font-size:17pt;margin:0 0 4px;border-bottom:2px solid #111;padding-bottom:8px;}'
+    + '.meta{font-size:9.5pt;color:#666;margin-bottom:18px;}'
+    + 'h2{font-size:13pt;margin:22px 0 8px;padding:7px 10px;background:#f0f0f0;border-left:4px solid #111;page-break-after:avoid;}'
+    + 'pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:11pt;margin:0 0 14px;}'
+    + '.pt{margin:0 0 16px;padding:10px 12px;background:#fafafa;border:1px solid #ddd;font-size:10.5pt;}'
+    + '</style></head><body>'
+    + '<h1>' + acEsc(title) + '</h1>'
+    + '<div class="meta">TS AUTO PLAN · 광고소재ai · ' + acEsc(today) + '</div>'
+    + ((acS.point||'').trim() ? '<div class="pt"><b>강조 포인트</b><br>' + acEsc(acS.point.trim()).replace(/\n/g,'<br>') + '</div>' : '')
+    + body + '</body></html>');
+  w.document.close();
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 350);
+}
+function renderAdCreative(){ acLoad(); acRender(); }
+
 </script>
 <script>
 /* ===== 법인 재무분석 (수기 입력, 올해/전년 2개년) ===== */
