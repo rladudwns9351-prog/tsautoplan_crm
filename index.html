@@ -2016,6 +2016,29 @@
             <th style="min-width:80px;white-space:nowrap;text-align:center;">인도</th>
             <th style="min-width:80px;white-space:nowrap;text-align:center;">최종확정</th>
             <th style="min-width:100px;white-space:nowrap;"></th>
+          </tr>
+          <tr id="fundingFilterRow" style="background:var(--bg3);">
+            <th></th>
+            <th style="text-align:center;"><button onclick="resetFundingFilters()" title="필터 초기화" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:0;">✕</button></th>
+            <th><input id="ff_name" oninput="onFundingFilterInput()" placeholder="고객명" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th><input id="ff_phone" oninput="onFundingFilterInput()" placeholder="연락처" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th><input id="ff_car" oninput="onFundingFilterInput()" placeholder="차량명" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th><input id="ff_assign" oninput="onFundingFilterInput()" placeholder="담당자" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th><input id="ff_type" oninput="onFundingFilterInput()" placeholder="유형" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th><input id="ff_bank" oninput="onFundingFilterInput()" placeholder="금융사" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th><input id="ff_status" oninput="onFundingFilterInput()" placeholder="상태" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
           </tr></thead>
           <tbody id="fundingBody"><tr style="cursor:pointer;" onclick="editFundingById(47)"><td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="funding-check" data-id="47" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);"></td><td style="text-align:center;font-size:12px;color:var(--text3);">3</td><td style="font-weight:600;white-space:nowrap;">디씨개발주식회사 <span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,153,68,.4);margin-left:4px;letter-spacing:.3px;">직영업</span><span onclick="event.stopPropagation();openFundingFilesModal(47)" title="서류 3건 보기" style="display:inline-flex;align-items:center;gap:3px;background:rgba(68,136,255,.15);border:1px solid rgba(68,136,255,.35);color:var(--blue);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:6px;cursor:pointer;font-family:JetBrains Mono,monospace;">📎 3</span></td><td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">010-5642-4499</td><td style="font-size:12px;white-space:nowrap;">그랜져2.5 <span style="color:var(--text3);font-size:10px;">어비스블랙펄/블랙모노톤</span></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">이성훈</td><td style="white-space:nowrap;"><span style="font-size:11px;background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px;">렌트</span></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">롯데렌터카</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">44,200,000원</td><td style="text-align:center;font-size:12px;color:var(--text2);">4.56%</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">2,015,520원</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">+221,000(0.5%)</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">-</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;font-weight:700;color:var(--green);">2,236,520원</td><td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:#44bbff22;color:#44bbff;">약정완료</span></td><td style="font-size:11px;color:var(--text2);">2026-07-07</td><td style="font-size:11px;font-weight:400;color:var(--text3);">-</td><td style="font-size:11px;color:var(--text2);">2026-05-28</td><td style="text-align:center;" onclick="event.stopPropagation()"><button class="btn btn-sm" onclick="event.stopPropagation();markDelivery(47)" style="font-size:10px;padding:3px 8px;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.35);color:var(--red);cursor:pointer;white-space:nowrap;">미인도</button></td><td style="text-align:center;"><button class="btn btn-sm" style="font-size:10px;padding:3px 8px;background:rgba(68,255,136,.1);border:1px solid rgba(68,255,136,.3);color:var(--green);cursor:pointer;" onclick="event.stopPropagation();confirmOneFunding(47)">확정</button></td><td onclick="event.stopPropagation()"><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editFundingById(47)" style="cursor:pointer;pointer-events:all;">수정</button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteFunding(47)" style="cursor:pointer;">삭제</button></div></td></tr><tr style="cursor:pointer;" onclick="editFundingById(46)"><td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="funding-check" data-id="46" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);"></td><td style="text-align:center;font-size:12px;color:var(--text3);">2</td><td style="font-weight:600;white-space:nowrap;">오세득(미담돈) <span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,153,68,.4);margin-left:4px;letter-spacing:.3px;">직영업</span><span onclick="event.stopPropagation();openFundingFilesModal(46)" title="서류 4건 보기" style="display:inline-flex;align-items:center;gap:3px;background:rgba(68,136,255,.15);border:1px solid rgba(68,136,255,.35);color:var(--blue);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:6px;cursor:pointer;font-family:JetBrains Mono,monospace;">📎 4</span></td><td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">010-9677-1199</td><td style="font-size:12px;white-space:nowrap;">모닝 <span style="color:var(--text3);font-size:10px;">밀키베이지/블랙</span></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">강해옥</td><td style="white-space:nowrap;"><span style="font-size:11px;background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px;">렌트</span></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">롯데렌터카</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">17,450,000원</td><td style="text-align:center;font-size:12px;color:var(--text2);">6%</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">1,047,000원</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">+87,250(0.5%)</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">-</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;font-weight:700;color:var(--green);">1,134,250원</td><td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:#44bbff22;color:#44bbff;">약정완료</span></td><td style="font-size:11px;color:var(--text2);">2026-05-29</td><td style="font-size:11px;font-weight:400;color:var(--text3);">-</td><td style="font-size:11px;color:var(--text2);">2026-05-28</td><td style="text-align:center;" onclick="event.stopPropagation()"><button class="btn btn-sm" onclick="event.stopPropagation();markDelivery(46)" style="font-size:10px;padding:3px 8px;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.35);color:var(--red);cursor:pointer;white-space:nowrap;">미인도</button></td><td style="text-align:center;"><button class="btn btn-sm" style="font-size:10px;padding:3px 8px;background:rgba(68,255,136,.1);border:1px solid rgba(68,255,136,.3);color:var(--green);cursor:pointer;" onclick="event.stopPropagation();confirmOneFunding(46)">확정</button></td><td onclick="event.stopPropagation()"><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editFundingById(46)" style="cursor:pointer;pointer-events:all;">수정</button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteFunding(46)" style="cursor:pointer;">삭제</button></div></td></tr><tr style="cursor:pointer;" onclick="editFundingById(45)"><td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="funding-check" data-id="45" onchange="onFundingCheck()" style="cursor:pointer;accent-color:var(--accent);"></td><td style="text-align:center;font-size:12px;color:var(--text3);">1</td><td style="font-weight:600;white-space:nowrap;">이혜영(우리홈푸드) <span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,153,68,.4);margin-left:4px;letter-spacing:.3px;">직영업</span><span onclick="event.stopPropagation();openFundingFilesModal(45)" title="서류 18건 보기" style="display:inline-flex;align-items:center;gap:3px;background:rgba(68,136,255,.15);border:1px solid rgba(68,136,255,.35);color:var(--blue);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:6px;cursor:pointer;font-family:JetBrains Mono,monospace;">📎 18</span></td><td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">010-2356-6308</td><td style="font-size:12px;white-space:nowrap;">EV4 <span style="color:var(--text3);font-size:10px;">아이보리 실버/브라운</span></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">박대원</td><td style="white-space:nowrap;"><span style="font-size:11px;background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px;">렌트</span></td><td style="font-size:12px;color:var(--text2);white-space:nowrap;">신한카드</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">47,000,000원</td><td style="text-align:center;font-size:12px;color:var(--text2);">0.65%</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">305,500원</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">+470,000(1%)</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;">+1,019,760</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;text-align:right;font-weight:700;color:var(--green);">795,260원</td><td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:#4488ff22;color:#4488ff;">최종심사진행</span></td><td style="font-size:11px;color:var(--text2);">2026-05-29</td><td style="font-size:11px;font-weight:400;color:var(--text3);">-</td><td style="font-size:11px;color:var(--text2);">2026-05-27</td><td style="text-align:center;" onclick="event.stopPropagation()"><button class="btn btn-sm" onclick="event.stopPropagation();markDelivery(45)" style="font-size:10px;padding:3px 8px;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.35);color:var(--red);cursor:pointer;white-space:nowrap;">미인도</button></td><td style="text-align:center;"><button class="btn btn-sm" style="font-size:10px;padding:3px 8px;background:rgba(68,255,136,.1);border:1px solid rgba(68,255,136,.3);color:var(--green);cursor:pointer;" onclick="event.stopPropagation();confirmOneFunding(45)">확정</button></td><td onclick="event.stopPropagation()"><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editFundingById(45)" style="cursor:pointer;pointer-events:all;">수정</button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteFunding(45)" style="cursor:pointer;">삭제</button></div></td></tr></tbody>
         </table>
@@ -3384,6 +3407,10 @@
         <label>고객군</label>
         <select id="vs_custDivisionInput" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;padding:9px 11px;font-family:inherit;outline:none;width:100%;"></select>
       </div>
+      <div class="form-field">
+        <label>상품구분</label>
+        <select id="vs_productType" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;padding:9px 11px;font-family:inherit;outline:none;width:100%;cursor:pointer;"><option value="">선택 안 함</option><option value="렌트">렌트</option><option value="리스">리스</option><option value="할부">할부</option></select>
+      </div>
       <div class="form-field full">
         <label>차량명 <span style="color:var(--red);">*</span></label>
         <input type="text" id="vs_carName" placeholder="예: 그랜저 하이브리드" maxlength="80">
@@ -3436,6 +3463,7 @@
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
       <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">차량명</div><div id="vsd_carName" class="vsd-v"></div></div>
+      <div class="vsd-cell"><div class="vsd-k">상품구분</div><div id="vsd_productType" class="vsd-v"></div></div>
       <div class="vsd-cell"><div class="vsd-k">등급</div><div id="vsd_grade" class="vsd-v"></div></div>
       <div class="vsd-cell"><div class="vsd-k">필요시기</div><div id="vsd_needTime" class="vsd-v"></div></div>
       <div class="vsd-cell"><div class="vsd-k">외장컬러</div><div id="vsd_colorExt" class="vsd-v"></div></div>
@@ -7229,6 +7257,11 @@ function setFundingMonthClear() {
   if(sel) sel.value = '';
   renderFundingPage();
 }
+function onFundingFilterInput() { setPage('funding', 1); renderFundingPage(); }
+function resetFundingFilters() {
+  ['ff_name','ff_phone','ff_car','ff_assign','ff_type','ff_bank','ff_status'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  setPage('funding', 1); renderFundingPage();
+}
 function renderFundingPage() {
   let myList = currentRole==='admin' ? fundingList : fundingList.filter(f=>f.assign===currentUser);
   // 월 옵션 동적 생성 (호환성 유지)
@@ -7244,6 +7277,22 @@ function renderFundingPage() {
       if(!d) return false;
       if(startDate && d < startDate) return false;
       if(endDate && d > endDate) return false;
+      return true;
+    });
+  }
+  // 항목별 수기 필터
+  const _ffv = id => (document.getElementById(id)?.value||'').trim().toLowerCase();
+  const _fName=_ffv('ff_name'), _fPhone=_ffv('ff_phone'), _fCar=_ffv('ff_car'), _fAssign=_ffv('ff_assign'), _fType=_ffv('ff_type'), _fBank=_ffv('ff_bank'), _fStatus=_ffv('ff_status');
+  if(_fName||_fPhone||_fCar||_fAssign||_fType||_fBank||_fStatus){
+    const _inc=(v,q)=>String(v||'').toLowerCase().includes(q);
+    myList = myList.filter(f=>{
+      if(_fName && !_inc(f.customerName,_fName)) return false;
+      if(_fPhone && !_inc(f.phone,_fPhone)) return false;
+      if(_fCar && !_inc(f.car,_fCar)) return false;
+      if(_fAssign && !_inc(f.assign,_fAssign)) return false;
+      if(_fType && !_inc(f.type,_fType)) return false;
+      if(_fBank && !_inc(f.bank,_fBank)) return false;
+      if(_fStatus && !_inc(f.status,_fStatus)) return false;
       return true;
     });
   }
@@ -12043,6 +12092,7 @@ async function sbSaveVehicleStock(item) {
     customer_name: item.customer_name || '',
     customer_phone: item.customer_phone || '',
     customer_division: item.customer_division || '',
+    product_type: item.product_type || '',
     car_name: item.car_name || '',
     grade: item.grade || '',
     options: item.options || '',
@@ -12071,7 +12121,7 @@ function openVehicleStockForm() {
   document.getElementById('vs_manualPhone').style.display = 'none';
   document.getElementById('vs_manualDivision').style.display = 'none';
   document.getElementById('vs_custName').textContent = currentCustomer.name || '';
-  ['vs_carName','vs_grade','vs_needTime','vs_colorExt','vs_colorInt','vs_options','vs_memo','vs_custNameInput','vs_custPhoneInput'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['vs_carName','vs_grade','vs_needTime','vs_colorExt','vs_colorInt','vs_options','vs_memo','vs_custNameInput','vs_custPhoneInput','vs_productType'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   // 관심차량 기본 채움
   const carEl = document.getElementById('vs_carName');
   if(carEl && currentCustomer.car) carEl.value = currentCustomer.car;
@@ -12084,7 +12134,7 @@ function openVehicleStockManual() {
   document.getElementById('vs_manualDivision').style.display = '';
   try { fillDivisionSelect(document.getElementById('vs_custDivisionInput'), ''); } catch(e){}
   document.getElementById('vs_custName').textContent = '(수기 등록)';
-  ['vs_carName','vs_grade','vs_needTime','vs_colorExt','vs_colorInt','vs_options','vs_memo','vs_custNameInput','vs_custPhoneInput'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['vs_carName','vs_grade','vs_needTime','vs_colorExt','vs_colorInt','vs_options','vs_memo','vs_custNameInput','vs_custPhoneInput','vs_productType'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('vehicleStockModal').classList.add('open');
 }
 async function submitVehicleStock() {
@@ -12110,6 +12160,7 @@ async function submitVehicleStock() {
       customer_name: custName,
       customer_phone: custPhone,
       customer_division: custDivision,
+      product_type: (document.getElementById('vs_productType').value||'').trim(),
       car_name: carName,
       grade: (document.getElementById('vs_grade').value||'').trim(),
       options: (document.getElementById('vs_options').value||'').trim(),
@@ -12174,7 +12225,7 @@ function renderVehicleStockList() {
   if(_vstockFilter !== 'all') list = list.filter(v => (v.status||'미완료') === _vstockFilter);
   // 검색
   const q = (document.getElementById('vstockSearch')?.value||'').trim().toLowerCase();
-  if(q) list = list.filter(v => [v.customer_name,v.customer_phone,v.car_name,v.author,v.grade,v.customer_division].some(x=>String(x||'').toLowerCase().includes(q)));
+  if(q) list = list.filter(v => [v.customer_name,v.customer_phone,v.car_name,v.author,v.grade,v.customer_division,v.product_type].some(x=>String(x||'').toLowerCase().includes(q)));
   // 정렬
   const sort = document.getElementById('vstockSort')?.value || 'desc';
   list.sort((a,b)=>{
@@ -12190,6 +12241,7 @@ function renderVehicleStockList() {
         <th style="width:130px;">요청일시</th>
         <th style="width:80px;">고객명</th>
         <th style="width:70px;">고객군</th>
+        <th style="width:64px;">상품구분</th>
         <th style="width:120px;">차량명</th>
         <th style="width:90px;">등급</th>
         <th>옵션</th>
@@ -12207,6 +12259,7 @@ function renderVehicleStockList() {
             <td style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);white-space:nowrap;">${formatFeedbackDate(v.created_at)}</td>
             <td style="font-weight:600;">${escapeHtml(v.customer_name||'-')}</td>
             <td>${escapeHtml(v.customer_division||'-')}</td>
+            <td>${v.product_type?`<span style="font-size:11px;background:rgba(255,255,255,.08);padding:2px 7px;border-radius:4px;">${escapeHtml(v.product_type)}</span>`:'-'}</td>
             <td>${escapeHtml(v.car_name||'-')}</td>
             <td>${escapeHtml(v.grade||'-')}</td>
             <td style="color:var(--text2);">${escapeHtml(v.options||'-')}</td>
@@ -12236,6 +12289,7 @@ function openVehicleStockDetail(id) {
   document.getElementById('vsd_date').textContent = formatFeedbackDate(v.created_at);
   document.getElementById('vsd_status').innerHTML = done?'<span class="badge badge-complete">완료</span>':'<span class="badge badge-consult">미완료</span>';
   document.getElementById('vsd_carName').textContent = v.car_name || '-';
+  document.getElementById('vsd_productType').textContent = v.product_type || '-';
   document.getElementById('vsd_grade').textContent = v.grade || '-';
   document.getElementById('vsd_needTime').textContent = v.need_time || '-';
   document.getElementById('vsd_colorExt').textContent = v.color_ext || '-';
