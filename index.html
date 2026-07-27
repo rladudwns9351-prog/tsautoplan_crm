@@ -3462,18 +3462,19 @@
       <div style="grid-column:1/-1;"><span style="color:var(--text3);">상태:</span> <span id="vsd_status"></span></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
-      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">차량명</div><div id="vsd_carName" class="vsd-v"></div></div>
-      <div class="vsd-cell"><div class="vsd-k">상품구분</div><div id="vsd_productType" class="vsd-v"></div></div>
-      <div class="vsd-cell"><div class="vsd-k">등급</div><div id="vsd_grade" class="vsd-v"></div></div>
-      <div class="vsd-cell"><div class="vsd-k">필요시기</div><div id="vsd_needTime" class="vsd-v"></div></div>
-      <div class="vsd-cell"><div class="vsd-k">외장컬러</div><div id="vsd_colorExt" class="vsd-v"></div></div>
-      <div class="vsd-cell"><div class="vsd-k">내장컬러</div><div id="vsd_colorInt" class="vsd-v"></div></div>
-      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">옵션</div><div id="vsd_options" class="vsd-v" style="white-space:pre-wrap;"></div></div>
-      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">기타메모</div><div id="vsd_memo" class="vsd-v" style="white-space:pre-wrap;"></div></div>
+      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">차량명</div><input id="vsd_carName" class="vsd-inp" maxlength="80"></div>
+      <div class="vsd-cell"><div class="vsd-k">상품구분</div><select id="vsd_productType" class="vsd-inp"><option value="">선택 안 함</option><option value="렌트">렌트</option><option value="리스">리스</option><option value="할부">할부</option></select></div>
+      <div class="vsd-cell"><div class="vsd-k">등급</div><input id="vsd_grade" class="vsd-inp" maxlength="60"></div>
+      <div class="vsd-cell"><div class="vsd-k">필요시기</div><input id="vsd_needTime" class="vsd-inp" maxlength="40"></div>
+      <div class="vsd-cell"><div class="vsd-k">외장컬러</div><input id="vsd_colorExt" class="vsd-inp" maxlength="40"></div>
+      <div class="vsd-cell"><div class="vsd-k">내장컬러</div><input id="vsd_colorInt" class="vsd-inp" maxlength="40"></div>
+      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">옵션</div><textarea id="vsd_options" class="vsd-inp" rows="2" style="resize:vertical;"></textarea></div>
+      <div class="vsd-cell" style="grid-column:1/-1;"><div class="vsd-k">기타메모</div><textarea id="vsd_memo" class="vsd-inp" rows="2" style="resize:vertical;"></textarea></div>
     </div>
-    <style>.vsd-cell{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:9px 11px;}.vsd-k{font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;}.vsd-v{font-size:13px;color:var(--text);min-height:16px;}</style>
+    <style>.vsd-cell{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:9px 11px;}.vsd-k{font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;}.vsd-inp{width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;padding:7px 9px;outline:none;}.vsd-inp:focus{border-color:var(--primary);}.vsd-inp:disabled{background:var(--bg3);color:var(--text2);cursor:default;border-color:var(--border);}</style>
     <div class="modal-actions">
       <button id="vsd_delBtn" class="btn btn-ghost" style="margin-right:auto;color:var(--red);display:none;" onclick="deleteVehicleStock()">🗑️ 삭제</button>
+      <button id="vsd_saveBtn" class="btn btn-ghost" style="display:none;" onclick="saveVehicleStockDetail()">💾 저장</button>
       <button id="vsd_completeBtn" class="btn btn-primary" onclick="toggleVehicleStockDone()">✅ 완료</button>
     </div>
   </div>
@@ -12288,16 +12289,21 @@ function openVehicleStockDetail(id) {
   document.getElementById('vsd_author').textContent = v.author || '-';
   document.getElementById('vsd_date').textContent = formatFeedbackDate(v.created_at);
   document.getElementById('vsd_status').innerHTML = done?'<span class="badge badge-complete">완료</span>':'<span class="badge badge-consult">미완료</span>';
-  document.getElementById('vsd_carName').textContent = v.car_name || '-';
-  document.getElementById('vsd_productType').textContent = v.product_type || '-';
-  document.getElementById('vsd_grade').textContent = v.grade || '-';
-  document.getElementById('vsd_needTime').textContent = v.need_time || '-';
-  document.getElementById('vsd_colorExt').textContent = v.color_ext || '-';
-  document.getElementById('vsd_colorInt').textContent = v.color_int || '-';
-  document.getElementById('vsd_options').textContent = v.options || '-';
-  document.getElementById('vsd_memo').textContent = v.memo || '-';
+  document.getElementById('vsd_carName').value = v.car_name || '';
+  document.getElementById('vsd_productType').value = v.product_type || '';
+  document.getElementById('vsd_grade').value = v.grade || '';
+  document.getElementById('vsd_needTime').value = v.need_time || '';
+  document.getElementById('vsd_colorExt').value = v.color_ext || '';
+  document.getElementById('vsd_colorInt').value = v.color_int || '';
+  document.getElementById('vsd_options').value = v.options || '';
+  document.getElementById('vsd_memo').value = v.memo || '';
   const isOwner = v.author_id === currentUserId || v.author === currentUser;
   const canAct = currentRole === 'admin' || isOwner;
+  // 편집 권한: 관리자/영업자(본인 요청) 모두 수정 가능
+  ['vsd_carName','vsd_productType','vsd_grade','vsd_needTime','vsd_colorExt','vsd_colorInt','vsd_options','vsd_memo'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.disabled = !canAct;
+  });
+  document.getElementById('vsd_saveBtn').style.display = canAct ? '' : 'none';
   const cBtn = document.getElementById('vsd_completeBtn');
   cBtn.style.display = canAct ? '' : 'none';
   cBtn.textContent = done ? '↩️ 완료 취소' : '✅ 완료';
@@ -12336,6 +12342,31 @@ async function deleteVehicleStock() {
     renderVehicleStockList();
     updateVstockBadge();
   } catch(e) { alert('삭제 실패: ' + e.message); }
+}
+async function saveVehicleStockDetail() {
+  if(!_currentVstock) return;
+  const carName = (document.getElementById('vsd_carName').value||'').trim();
+  if(!carName) { alert('차량명을 입력해주세요.'); return; }
+  const patch = {
+    car_name:     carName,
+    product_type: (document.getElementById('vsd_productType').value||'').trim(),
+    grade:        (document.getElementById('vsd_grade').value||'').trim(),
+    need_time:    (document.getElementById('vsd_needTime').value||'').trim(),
+    color_ext:    (document.getElementById('vsd_colorExt').value||'').trim(),
+    color_int:    (document.getElementById('vsd_colorInt').value||'').trim(),
+    options:      (document.getElementById('vsd_options').value||'').trim(),
+    memo:         (document.getElementById('vsd_memo').value||'').trim()
+  };
+  window._lastLocalChange = Date.now();
+  try {
+    await sbUpdateVehicleStock(_currentVstock.id, patch);
+    Object.assign(_currentVstock, patch);
+    const c = _vstockCache.find(x=>x.id===_currentVstock.id); if(c) Object.assign(c, patch);
+    if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
+    showGlobalToast('수정 내용이 저장되었습니다.');
+    closeModal('vehicleStockDetailModal');
+    renderVehicleStockList();
+  } catch(e) { alert('저장 실패: ' + e.message); }
 }
 function setEmojiMode(useEmoji, silent) {
   const onBtn  = document.getElementById('scr_emojiOn');
