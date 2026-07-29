@@ -3556,6 +3556,11 @@
           </div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px;">💡 금액·광고성 내용 감지 시 관리자 발송요청으로 전환됩니다 ((광고)·무료수신거부 자동 포함)</div>
         </div>
+        <!-- 상담메모 수기 입력 -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;">📝 상담메모 <span style="font-size:10px;color:var(--text3);font-weight:400;">(선택 · 수신고객 상담메모에 함께 기록)</span></div>
+          <textarea id="smsMemoNote" placeholder="상담메모에 남길 내용을 입력하세요..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:70px;line-height:1.6;"></textarea>
+        </div>
         <!-- 미리보기 -->
         <div>
           <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;">📱 발송 미리보기</div>
@@ -10295,6 +10300,7 @@ function openSmsModal() {
   // 발송 회사 초기화
   document.querySelectorAll('input[name="smsCompany"]').forEach(r => r.checked = false);
   document.getElementById('smsBody').value = '';
+  { const _mn = document.getElementById('smsMemoNote'); if (_mn) _mn.value = ''; }
   renderSmsRecipients();
   updateSmsPreview();
   document.getElementById('smsBulkModal').classList.add('open');
@@ -10738,6 +10744,7 @@ async function sendSmsBulk(testMode) {
   if (!company) { alert('발송 회사를 선택해주세요.'); return; }
   const body = document.getElementById('smsBody').value.trim();
   if (!body) { alert('메시지 본문을 입력해주세요.'); return; }
+  const memoNote = (document.getElementById('smsMemoNote')?.value || '').trim();
   if (smsRecipients.length === 0) { alert('수신자를 1명 이상 추가해주세요.'); return; }
   // 관리자: 담당자 2명 이상 섞이면 차단 (담당자별로 나눠 발송)
   const signer = getSmsSigner();
@@ -10770,7 +10777,7 @@ async function sendSmsBulk(testMode) {
         if (!Array.isArray(c.memos)) c.memos = [];
         const prevCount = c.memos.filter(m => m.text && m.text.includes('단체문자발송')).length;
         c.memos.unshift({
-          text: `[단체문자발송 #${prevCount + 1}] ${company} / ${msgType} / ${bytes}byte`,
+          text: (memoNote ? memoNote + '\n' : '') + `[단체문자발송 #${prevCount + 1}] ${company} / ${msgType} / ${bytes}byte`,
           author: currentUser, date: dateStr, dateISO: dateISO, isSystem: false
         });
         if (typeof isSbConfigured === 'function' && isSbConfigured()) {
