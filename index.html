@@ -5898,7 +5898,49 @@ function latestMemoPreview(c) {
   const m = real[0];
   const preview = m.text.length > 22 ? m.text.slice(0,22)+'…' : m.text;
   const d = m.dateISO || m.date.slice(0,10);
-  return '<span style="font-size:11px;color:var(--text2);" title="'+m.text+' ('+d+')">'+preview+'</span>';
+  return '<span style="font-size:11px;color:var(--text2);cursor:help;" onmouseenter="showMemoTip(event,'+c.id+')" onmousemove="moveMemoTip(event)" onmouseleave="hideMemoTip()">'+preview+'</span>';
+}
+function _escMemoTip(s) {
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function showMemoTip(ev, id) {
+  const c = (typeof customers !== 'undefined') ? customers.find(x=>x.id===id) : null;
+  if(!c || !Array.isArray(c.memos)) return;
+  const real = c.memos.filter(m=>!m.isSystem).slice(0,3);
+  if(!real.length) return;
+  let tip = document.getElementById('memoHoverTip');
+  if(!tip) {
+    tip = document.createElement('div');
+    tip.id = 'memoHoverTip';
+    tip.style.cssText = 'position:fixed;z-index:99999;display:none;max-width:380px;min-width:260px;background:var(--bg2,#1a1a1a);border:1px solid var(--border2,#333);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.65);padding:10px 12px;pointer-events:none;font-family:inherit;';
+    document.body.appendChild(tip);
+  }
+  tip.innerHTML = '<div style="font-size:10px;color:var(--text3,#888);font-weight:700;margin-bottom:7px;letter-spacing:.5px;">📝 최근 상담메모 '+real.length+'건</div>' +
+    real.map((m,i)=>{
+      const d = m.dateISO || (m.date||'').slice(0,10);
+      return '<div style="'+(i>0?'border-top:1px solid var(--border,#2a2a2a);margin-top:7px;padding-top:7px;':'')+'">'+
+        '<div style="font-size:10px;color:var(--text3,#888);font-family:JetBrains Mono,monospace;margin-bottom:2px;">'+_escMemoTip(d)+' · '+_escMemoTip(m.author||'-')+'</div>'+
+        '<div style="font-size:12px;color:var(--text,#eee);line-height:1.55;white-space:pre-wrap;word-break:break-all;">'+_escMemoTip(m.text)+'</div>'+
+      '</div>';
+    }).join('');
+  tip.style.display = 'block';
+  moveMemoTip(ev);
+}
+function moveMemoTip(ev) {
+  const tip = document.getElementById('memoHoverTip');
+  if(!tip || tip.style.display === 'none') return;
+  const r = tip.getBoundingClientRect();
+  let x = ev.clientX + 16, y = ev.clientY + 16;
+  if(x + r.width > window.innerWidth - 10) x = ev.clientX - r.width - 16;
+  if(y + r.height > window.innerHeight - 10) y = ev.clientY - r.height - 16;
+  if(y < 10) y = 10;
+  if(x < 10) x = 10;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+function hideMemoTip() {
+  const tip = document.getElementById('memoHoverTip');
+  if(tip) tip.style.display = 'none';
 }
 function latestConsultDate(c) {
   const iso = consultDateISO(c);
