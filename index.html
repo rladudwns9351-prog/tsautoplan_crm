@@ -2654,8 +2654,9 @@
             <input type="text" id="stkSearch" placeholder="🔍 찾는 차량 입력 (2글자 이상, 예: 아이오닉 9 / 그랜저 / 화이트)" oninput="onStockSearchInput()"
               style="width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;outline:none;">
           </div>
-          <button class="btn btn-ghost" onclick="clearStockSearch()">초기화</button>
+          <button class="btn btn-ghost" onclick="clearStockSearch()">검색 초기화</button>
           <button class="btn btn-ghost" onclick="exportStockExcel()">엑셀 저장</button>
+          <button class="btn btn-ghost" id="stkResetBtn" onclick="resetStockVendor()" style="display:none;color:var(--red);border-color:var(--red);">선택 업체 재고 삭제</button>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
           <input list="stkDLCar"  id="stkFCar"  class="stk-f" placeholder="차량명" oninput="renderStockItems()">
@@ -12316,6 +12317,8 @@ function switchStockTab(t){
 }
 
 function renderStockVendorList(){
+  const rb = document.getElementById('stkResetBtn');
+  if(rb) rb.style.display = stkSelVendor ? '' : 'none';
   const wrap = document.getElementById('stkVendorList'); if(!wrap) return;
   const names = stkVendorNames(stkTab);
   const today = stkToday();
@@ -12482,6 +12485,20 @@ function renderStockItems(){
     + '</tbody></table>';
 }
 
+async function resetStockVendor(){
+  if(!stkSelVendor){ alert('업체를 먼저 선택하세요.'); return; }
+  const name = stkSelVendor, type = stkTab;
+  if(!confirm('['+name+'] 재고 자료를 전부 삭제합니다. 되돌릴 수 없습니다. 진행할까요?')) return;
+  try {
+    const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name=eq.'+encodeURIComponent(name);
+    await sbFetch('stock_items?'+filter, 'DELETE');
+    await sbFetch('stock_uploads?'+filter, 'DELETE');
+    showGlobalToast(name+' 재고 삭제 완료');
+    stkRows = []; stkMode='none';
+    await loadStockData();
+    renderStockVendorList(); renderStockItems(); updateStockNavBadge();
+  } catch(e){ alert('삭제 실패: '+e.message); }
+}
 function exportStockExcel(){
   if(typeof XLSX==='undefined'){ alert('엑셀 모듈을 불러오지 못했습니다.'); return; }
   const rows = stkFilteredRows();
@@ -12836,11 +12853,27 @@ async function saveStockPreview(){
   if(!name){ alert('업체를 선택하거나 입력하세요.'); return; }
   const rows = stkPreview.filter(r=>(r.car_name||'').trim());
   if(!rows.length){ alert('저장할 재고가 없습니다.'); return; }
-  if(!confirm('['+name+'] 기존 재고를 삭제하고 '+rows.length+'대로 교체합니다. 진행할까요?')) return;
+  const prevUp = stkUploads[stkKey(type,name)];
+  const sameDay = prevUp && stkDateOf(prevUp.uploaded_at) === stkToday();
+  const msg = sameDay
+    ? '['+name+'] 오늘 자료에 '+rows.length+'건을 추가합니다.\n(같은 차량명은 새 자료로 교체됩니다)\n진행할까요?'
+    : '['+name+'] 이전 날짜 재고를 초기화하고 '+rows.length+'건을 등록합니다. 진행할까요?';
+  if(!confirm(msg)) return;
   stkProg('저장 중...');
   try {
     const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name=eq.'+encodeURIComponent(name);
-    await sbFetch('stock_items?'+filter, 'DELETE');
+    if(!sameDay){
+      stkProg('이전 날짜 자료 정리 중...');
+      await sbFetch('stock_items?'+filter, 'DELETE');
+    } else {
+      // 같은 날 재업로드: 이번 자료에 포함된 차량명만 먼저 삭제 (중복 누적 방지)
+      const names = Array.from(new Set(rows.map(r=>String(r.car_name||'').trim()).filter(Boolean)));
+      for(let i=0;i<names.length;i+=25){
+        stkProg('중복 정리 중... '+Math.min(i+25,names.length)+' / '+names.length);
+        const list = names.slice(i,i+25).map(n=>'"'+n.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"').join(',');
+        await sbFetch('stock_items?'+filter+'&car_name=in.('+encodeURIComponent(list)+')', 'DELETE');
+      }
+    }
     const payload = rows.map(r=>({
       vendor_type: type, vendor_name: name,
       car_name: r.car_name.trim(), fuel: r.fuel||'', opt: r.opt||'',
@@ -12850,13 +12883,23 @@ async function saveStockPreview(){
       qty: parseInt(String(r.qty||1).replace(/[^0-9]/g,''),10)||1,
       discount: r.discount? parseInt(String(r.discount).replace(/[^0-9]/g,''),10)||null : null
     }));
-    for(let i=0;i<payload.length;i+=300){
-      await sbFetch('stock_items','POST',payload.slice(i,i+300),'return=minimal');
+    const BS = 1000;
+    for(let i=0;i<payload.length;i+=BS){
+      stkProg('저장 중... '+Math.min(i+BS,payload.length)+' / '+payload.length);
+      await sbFetch('stock_items','POST',payload.slice(i,i+BS),'return=minimal');
     }
-    await sbFetch('stock_uploads?on_conflict=vendor_type,vendor_name','POST',[{vendor_type:type, vendor_name:name, uploaded_at:new Date().toISOString(), uploaded_by:currentUser||'', cnt:payload.reduce((a,b)=>a+(b.qty||1),0)}],'return=minimal,resolution=merge-duplicates');
+    const newCnt = payload.reduce((a,b)=>a+(b.qty||1),0);
+    let totalCnt = newCnt;
+    if(sameDay){
+      try {
+        const agg = await sbFetch(STK_AGG+'?select=qty&vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name=eq.'+encodeURIComponent(name)+'&limit=100000');
+        totalCnt = (agg||[]).reduce((a,b)=>a+(Number(b.qty)||0),0);
+      } catch(e){ totalCnt = (prevUp.cnt||0) + newCnt; }
+    }
+    await sbFetch('stock_uploads?on_conflict=vendor_type,vendor_name','POST',[{vendor_type:type, vendor_name:name, uploaded_at:new Date().toISOString(), uploaded_by:currentUser||'', cnt:totalCnt}],'return=minimal,resolution=merge-duplicates');
     stkProg('');
     closeStockUploadModal();
-    showGlobalToast(rows.length+'대 저장 완료');
+    showGlobalToast(rows.length+'건 '+(sameDay?'추가':'등록')+' 완료');
     await loadStockData();
     stkTab = type; stkSelVendor = name;
     document.getElementById('stkTabFinance').classList.toggle('active', stkTab==='finance');
