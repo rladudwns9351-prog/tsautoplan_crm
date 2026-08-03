@@ -12661,11 +12661,14 @@ async function parseStockExcel(file){
   if(/^[0-9]+$/.test(filePrefix) || !filePrefix || filePrefix.length>15) filePrefix='';
 
   const CAR = /차종|차량명|차명|모델명/;
+  const MODEL = /^모델$|^모델명$|^차명$/;
+  const YEAR = /^연식$|^년식$|^MY$/i;
+  const OPTN = /옵션명|옵션내역|사양명/;
   const DISC = /판매조건계|조건계|할인금액|할인가/;
   const PCODE = /판매코드/;
   const OPT = /옵션/;
   const PRICE = /^가격$|차량가|출고가|판매가|소비자가/;
-  const QTY = /^재고$|재고수량|^수량$|대수/;
+  const QTY = /^재고$|재고수량|^수량$|대수|^합계$|^총계$/;
   const COLOR2 = /외\s*\/\s*내장|내\s*\/\s*외장|외내장|내외장/;
   const EXTC = /외장|외색|외부/;
   const INTC = /내장|내색|내부/;
@@ -12678,6 +12681,9 @@ async function parseStockExcel(file){
       row.forEach((c,j)=>{ if(m.color2===undefined && COLOR2.test(c)) m.color2=j; });
       row.forEach((c,j)=>{
         if(!c) return;
+        if(m.model===undefined&& MODEL.test(c)) m.model=j;
+        if(m.year===undefined && YEAR.test(c))  m.year=j;
+        if(m.optn===undefined && OPTN.test(c))  m.optn=j;
         if(m.car===undefined  && CAR.test(c))   m.car=j;
         if(m.disc===undefined && DISC.test(c))  m.disc=j;
         if(m.pcode===undefined&& PCODE.test(c)) m.pcode=j;
@@ -12691,6 +12697,7 @@ async function parseStockExcel(file){
         }
       });
       if(m.color2!==undefined){ m.ext=m.color2; m.int=m.color2+1; }
+      if(m.optn!==undefined) m.opt=m.optn;
       if(m.car!==undefined || (m.disc!==undefined && m.pcode!==undefined)) return {i, m};
     }
     return null;
@@ -12727,13 +12734,18 @@ async function parseStockExcel(file){
   carSheets.forEach(({nm, aoa, h})=>{
     const m = h.m;
     let prefix = '';
-    if(multi) prefix = nm.replace(/\s*\(.*?\)\s*/g,'').trim();
+    if(m.model!==undefined) prefix = '';
+    else if(multi) prefix = nm.replace(/\s*\(.*?\)\s*/g,'').trim();
     else if(filePrefix) prefix = filePrefix;
 
     for(let i=h.i+1;i<aoa.length;i++){
       const r = aoa[i];
       let car = cell(r,m.car); if(!car) continue;
       if(CAR.test(car)) continue;
+      if(m.model!==undefined){
+        const mv = cell(r,m.model), yv = m.year!==undefined ? cell(r,m.year) : '';
+        if(mv && car.indexOf(mv)<0) car = (mv+' '+(yv?yv+' ':'')+car).trim();
+      }
       if(prefix && car.indexOf(prefix)<0) car = prefix+' '+car;
 
       let qty = 1;
