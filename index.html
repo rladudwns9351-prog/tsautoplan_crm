@@ -112,9 +112,9 @@
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">도구</div>
-      <div class="nav-item admin-only" onclick="goPage(&#39;stockcheck&#39;,this)" style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="nav-item" onclick="goPage(&#39;stockcheck&#39;,this)" style="display:flex;align-items:center;justify-content:space-between;">
         <span>재고확인</span>
-        <span id="stkNavBadge" class="admin-only" style="display:none;align-items:center;gap:0;min-width:18px;height:18px;padding:0 7px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;justify-content:center;"></span>
+        <span id="stkNavBadge" style="display:none;align-items:center;gap:0;min-width:18px;height:18px;padding:0 7px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;justify-content:center;"></span>
       </div>
       <div class="nav-item" onclick="goPage(&#39;alarmsettings&#39;,this)">
         알람설정
@@ -2640,7 +2640,7 @@
           <div class="page-title">📦 재고확인</div>
           <div class="page-sub" id="stkTodayDate"></div>
         </div>
-        <button class="btn btn-primary" style="margin-left:auto;align-self:center;" onclick="openStockUploadModal()">+ 재고 업로드</button>
+        <button class="btn btn-primary admin-only" style="margin-left:auto;align-self:center;" onclick="openStockUploadModal()">+ 재고 업로드</button>
       </div>
       <div class="section-card" style="padding:20px;">
         <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
@@ -2656,7 +2656,7 @@
           </div>
           <button class="btn btn-ghost" onclick="clearStockSearch()">검색 초기화</button>
           <button class="btn btn-ghost" onclick="exportStockExcel()">엑셀 저장</button>
-          <button class="btn btn-ghost" id="stkResetBtn" onclick="resetStockVendor()" style="display:none;color:var(--red);border-color:var(--red);">선택 업체 재고 삭제</button>
+          <button class="btn btn-ghost admin-only" id="stkResetBtn" onclick="resetStockVendor()" style="display:none;color:var(--red);border-color:var(--red);">선택 업체 재고 삭제</button>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
           <input list="stkDLCar"  id="stkFCar"  class="stk-f" placeholder="차량명" oninput="renderStockItems()">
@@ -12366,7 +12366,7 @@ function switchStockTab(t){
 
 function renderStockVendorList(){
   const rb = document.getElementById('stkResetBtn');
-  if(rb) rb.style.display = stkSelVendor ? '' : 'none';
+  if(rb) rb.style.display = (stkSelVendor && currentRole==='admin') ? '' : 'none';
   const wrap = document.getElementById('stkVendorList'); if(!wrap) return;
   const names = stkVendorNames(stkTab);
   const today = stkToday();
@@ -12534,6 +12534,7 @@ function renderStockItems(){
 }
 
 async function resetStockVendor(){
+  if(currentRole!=='admin'){ alert('관리자만 가능합니다.'); return; }
   if(!stkSelVendor){ alert('업체를 먼저 선택하세요.'); return; }
   const name = stkSelVendor, type = stkTab;
   if(!confirm('['+name+'] 재고 자료를 전부 삭제합니다. 되돌릴 수 없습니다. 진행할까요?')) return;
@@ -12568,6 +12569,7 @@ function updateStockNavBadge(){
 
 /* ---- 업로드 모달 ---- */
 async function openStockUploadModal(){
+  if(currentRole!=='admin'){ alert('관리자만 가능합니다.'); return; }
   if(!stkLoaded) await loadStockData();
   document.getElementById('stockUploadModal').classList.add('open');
   fillStockUpVendors(stkTab==='seller' ? 'seller' : 'finance');
