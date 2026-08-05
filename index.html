@@ -10030,6 +10030,23 @@ function updateToggleUI() {
   ball.style.transform = userActiveState ? 'translateX(22px)' : 'translateX(0)';
   lbl.textContent = userActiveState ? '사용중' : '중지';
 }
+async function cascadeRenameStaff(oldName, newName){
+  const enc = v => encodeURIComponent(v);
+  const jobs = [
+    ['customers?assign=eq.'+enc(oldName),                { assign: newName }],
+    ['customers?prev_assign=eq.'+enc(oldName),           { prev_assign: newName }],
+    ['customers?archive_prev_assign=eq.'+enc(oldName),   { archive_prev_assign: newName }],
+    ['fundings?assign=eq.'+enc(oldName),                 { assign: newName }],
+    ['activity_logs?staff=eq.'+enc(oldName),             { staff: newName }],
+    ['activity_logs?created_by=eq.'+enc(oldName),        { created_by: newName }],
+  ];
+  const failed = [];
+  for(const [path, body] of jobs){
+    try { await sbFetch(path, 'PATCH', body, 'return=minimal'); }
+    catch(e){ failed.push(path.split('?')[0]+' ('+(e.message||e)+')'); }
+  }
+  return failed;
+}
 async function saveUserForm() {
   const userid = document.getElementById('uf_userid').value.trim();
   const name   = document.getElementById('uf_name').value.trim();
@@ -10045,6 +10062,14 @@ async function saveUserForm() {
   if(editingUserId !== null) {
     const u = staffList.find(u=>u.id===editingUserId);
     if(!u) return;
+    const oldName = u.name;
+    const nameChanged = (oldName && oldName !== name);
+    if(nameChanged){
+      if(staffList.some(x=>x.id!==editingUserId && x.name===name)){
+        alert('이미 사용중인 이름입니다. 다른 이름을 입력하세요.'); return;
+      }
+      if(!confirm('이름을 ['+oldName+'] → ['+name+'] 로 변경합니다.\n기존 배분 DB·펀딩·상담이력의 담당자명도 함께 변경됩니다.\n진행할까요?')) return;
+    }
     const updated = {
       ...u, name, phone, email, addr, role,
       active: userActiveState,
@@ -10056,11 +10081,21 @@ async function saveUserForm() {
       alert('직원 수정 실패:\n'+(e.message||e));
       return;                                  // 실패 시 화면 그대로
     }
+    if(nameChanged){
+      window._lastLocalChange = Date.now();
+      const failed = await cascadeRenameStaff(oldName, name);
+      if(failed.length) alert('일부 데이터 이름 반영 실패:\n'+failed.join('\n')+'\n\n직원 정보는 변경되었습니다. 관리자에게 문의하세요.');
+      if(currentUser === oldName) currentUser = name;
+      try { await loadData(); } catch(e){}
+    }
     await sbReloadStaff();                     // ② DB 재조회 → staffList 교체
     showGlobalToast('"'+toastName+'" 수정 완료');
   } else {
     if(staffList.find(u=>u.userid===userid)) {
       alert('이미 사용중인 아이디입니다.'); return;
+    }
+    if(staffList.find(u=>u.name===name)) {
+      alert('이미 사용중인 이름입니다. 다른 이름을 입력하세요.'); return;
     }
     const newUser = {
       userid, name, phone, email, addr, role,
