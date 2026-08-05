@@ -4580,7 +4580,7 @@ function renderAdminDashboard() {
     const val = u[valKey];
     const max = list[0][valKey] || 1;
     const pct = max ? Math.round((val/max)*100) : 0;
-    const display = isCurrency ? (val.toLocaleString('ko-KR')+suffix) : (val+suffix);
+    const display = isCurrency ? '' : (val+suffix);
     return `<div style="display:flex;align-items:center;gap:12px;padding:10px 18px;${isMe?'background:rgba(255,255,255,.04);':''}">
       <div style="font-size:16px;width:24px;text-align:center;">${medals[i]||'<span style=\"color:var(--text3);font-size:12px;\">'+(i+1)+'</span>'}</div>
       <div style="width:32px;height:32px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">${u.name[0]}</div>
@@ -5140,7 +5140,7 @@ function renderStaffDashboard() {
     const val = u[valKey];
     const max = list[0][valKey] || 1;
     const pct = max ? Math.round((val/max)*100) : 0;
-    const display = isCurrency ? (val.toLocaleString('ko-KR')+suffix) : (val+suffix);
+    const display = isCurrency ? '' : (val+suffix);
     return '<div style="display:flex;align-items:center;gap:10px;padding:8px 16px;'+
       (isMe?'background:rgba(255,255,255,.06);border-left:3px solid var(--accent);':'border-left:3px solid transparent;')+'">'+
       '<div style="font-size:14px;width:22px;text-align:center;">'+(medals[i]||'<span style="color:var(--text3);font-size:11px;">'+(i+1)+'</span>')+'</div>'+
