@@ -3408,7 +3408,7 @@
 <!-- ===== MODALS ===== -->
 <!-- Add Customer -->
 <div class="modal-bg" id="addModal">
-  <div class="modal">
+  <div class="modal" style="width:760px;max-width:94vw;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div class="modal-title" style="margin-bottom:0;">신규 고객 등록</div>
       <span id="addModalDragHint" class="admin-only" style="font-size:11px;color:var(--text3);">💡 항목을 드래그해서 순서 변경 가능</span>
@@ -9939,7 +9939,7 @@ function renderUsers() {
   const sort = document.getElementById('userSortSel')?.value||'';
   if(sort.includes('오름')) list.sort((a,b)=>a.regDate.localeCompare(b.regDate));
   else if(sort.includes('이름')) list.sort((a,b)=>a.name.localeCompare(b.name));
-  else list.sort((a,b)=>b.regDate.localeCompare(a.regDate));
+  else list.sort((a,b)=>String(a.userid||'').localeCompare(String(b.userid||''),'en',{numeric:true}));
   document.getElementById('userTotal').textContent = list.length;
   const tbody = document.getElementById('userTableBody');
   tbody.innerHTML = list.map((u,i)=>`
@@ -10238,8 +10238,21 @@ function mgrMove(id, dir) {
   syncAllStatusSelects();
   renderStatusMgrList();
 }
+const STAFF_GROUP_ORDER = ['', '타소', '롯데', '현대', '중고'];
+function staffGroupOf(name){
+  const m = String(name||'').match(/\(([^)]*)\)\s*$/);
+  return m ? m[1].trim() : '';
+}
 function getActiveStaff() {
-  return staffList.filter(u => u.active && u.role === 'staff').sort((a,b)=>(a.id||0)-(b.id||0));
+  return staffList.filter(u => u.active && u.role === 'staff').sort((a,b)=>{
+    const ga = staffGroupOf(a.name), gb = staffGroupOf(b.name);
+    let ia = STAFF_GROUP_ORDER.indexOf(ga), ib = STAFF_GROUP_ORDER.indexOf(gb);
+    if(ia < 0) ia = STAFF_GROUP_ORDER.length;
+    if(ib < 0) ib = STAFF_GROUP_ORDER.length;
+    if(ia !== ib) return ia - ib;
+    if(ia === STAFF_GROUP_ORDER.length && ga !== gb) return ga.localeCompare(gb,'ko');
+    return (a.id||0) - (b.id||0);
+  });
 }
 function fillAssignSelect(el, selectedName, includeGudb) {
   if(!el) return;
