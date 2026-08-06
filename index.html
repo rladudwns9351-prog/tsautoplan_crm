@@ -2646,6 +2646,7 @@
         <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
           <button class="stk-tab active" id="stkTabFinance" onclick="switchStockTab('finance')">금융사재고</button>
           <button class="stk-tab" id="stkTabSeller" onclick="switchStockTab('seller')">판매사재고</button>
+          <div id="stkUpdateInfo" style="margin-left:14px;font-size:13px;font-weight:700;color:var(--accent);"></div>
           <div id="stkTodayInfo" style="margin-left:auto;font-size:12px;color:var(--text3);"></div>
         </div>
 
@@ -3477,6 +3478,7 @@
       </select>
       <select id="stkUpVendor" class="select-filter" style="min-width:200px;" onchange="onStockVendorSelChange()"></select>
       <input type="text" id="stkUpVendorNew" placeholder="판매사명 직접 입력" style="display:none;min-width:200px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:9px 12px;font-family:inherit;font-size:13px;outline:none;">
+      <input type="text" id="stkUpDealer" placeholder="대리점명 (선택)" style="min-width:180px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:9px 12px;font-family:inherit;font-size:13px;outline:none;">
       <div style="font-size:12px;color:var(--text3);">※ 저장 시 해당 업체의 기존 재고는 새 자료로 교체됩니다</div>
     </div>
     <div class="stk-drop" id="stkDrop" onclick="document.getElementById('stkFile').click()">
@@ -12375,6 +12377,7 @@ function renderStockVendorList(){
   if(info) info.innerHTML = names.length
     ? ('오늘 업로드 '+(names.length-notToday)+' / '+names.length + (notToday? ' · <span style="color:var(--red);font-weight:700;">미업로드 '+notToday+'</span>':''))
     : '';
+  renderStockUpdateInfo(names);
   if(!names.length){
     wrap.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:16px;text-align:center;">등록된 '+(stkTab==='finance'?'금융사':'판매사')+'가 없습니다</div>';
     return;
@@ -12389,6 +12392,28 @@ function renderStockVendorList(){
       + '<span class="stk-cnt">'+(cnt? cnt.toLocaleString()+'대' : '-')+'</span>'
       + '</div>';
   }).join('');
+}
+
+function stkFmtKDate(ymd){
+  if(!ymd) return '';
+  const p = ymd.split('-');
+  if(p.length<3) return ymd;
+  return Number(p[0])+'년 '+Number(p[1])+'월 '+Number(p[2])+'일';
+}
+function renderStockUpdateInfo(names){
+  const el = document.getElementById('stkUpdateInfo'); if(!el) return;
+  names = names || stkVendorNames(stkTab);
+  if(stkSelVendor){
+    const d = stkDateOf(stkUploads[stkKey(stkTab,stkSelVendor)]?.uploaded_at);
+    el.innerHTML = d ? (escapeHtml(stkSelVendor)+' · '+stkFmtKDate(d)+' 업데이트 재고입니다.') : (escapeHtml(stkSelVendor)+' · 등록된 재고가 없습니다.');
+    return;
+  }
+  const dates = names.map(n=>stkDateOf(stkUploads[stkKey(stkTab,n)]?.uploaded_at)).filter(Boolean);
+  if(!dates.length){ el.textContent = '등록된 재고가 없습니다.'; return; }
+  const uniq = Array.from(new Set(dates)).sort();
+  const latest = uniq[uniq.length-1];
+  el.innerHTML = stkFmtKDate(latest)+' 업데이트 재고입니다.'
+    + (uniq.length>1 ? ' <span style="font-weight:400;color:var(--text3);font-size:11px;">(일부 업체 '+stkFmtKDate(uniq[0])+'~ 혼재)</span>' : '');
 }
 
 function selectStockVendor(n){
@@ -12514,14 +12539,21 @@ function renderStockItems(){
   const td = 'padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:top;';
   const arrow = k => stkSort.key===k ? (stkSort.dir>0?' <span style="color:var(--accent);">▲</span>':' <span style="color:var(--accent);">▼</span>') : ' <span style="opacity:.25;">↕</span>';
   const H = (k,label,right) => '<th style="'+th+(right?'text-align:right;':'')+'" onclick="setStockSort(\''+k+'\')" title="클릭하여 정렬">'+label+arrow(k)+'</th>';
+  const dealerOf = r => (stkUploads[stkKey(r.vendor_type||stkTab, r.vendor_name)]?.dealer || '');
+  const hasDealer = rows.some(r=>dealerOf(r));
+  const hasPF = rows.some(r=>String(r.pre_fin||'').trim());
   wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr>'
     + H('vendor_name', stkTab==='finance'?'금융사':'판매사')
+    + (hasDealer? '<th style="'+th+'">대리점</th>' : '')
+    + (hasPF? H('pre_fin','선점금융사') : '')
     + H('car_name','차량명') + H('fuel','유종') + H('opt','옵션')
     + H('ext_color','외장') + H('int_color','내장')
     + H('price','가격',1) + H('discount','할인',1) + H('qty','수량',1)
     + '</tr></thead><tbody>'
     + rows.map(r=>'<tr>'
       + '<td style="'+td+'white-space:nowrap;color:var(--accent);font-weight:600;">'+escapeHtml(r.vendor_name||'-')+'</td>'
+      + (hasDealer? '<td style="'+td+'white-space:nowrap;color:var(--text2);">'+escapeHtml(dealerOf(r)||'-')+'</td>' : '')
+      + (hasPF? '<td style="'+td+'white-space:nowrap;color:var(--text2);">'+escapeHtml(r.pre_fin||'-')+'</td>' : '')
       + '<td style="'+td+'min-width:200px;">'+escapeHtml(r.car_name||'-')+'</td>'
       + '<td style="'+td+'white-space:nowrap;">'+escapeHtml(r.fuel||'-')+'</td>'
       + '<td style="'+td+'color:var(--text2);">'+escapeHtml(r.opt||'-')+'</td>'
@@ -12552,8 +12584,8 @@ function exportStockExcel(){
   if(typeof XLSX==='undefined'){ alert('엑셀 모듈을 불러오지 못했습니다.'); return; }
   const rows = stkFilteredRows();
   if(!rows.length){ alert('저장할 재고가 없습니다.'); return; }
-  const aoa = [['업체','차량명','유종','옵션','외장색','내장색','가격','할인','수량']];
-  rows.forEach(r=>aoa.push([r.vendor_name||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1]));
+  const aoa = [['업체','대리점','선점금융사','차량명','유종','옵션','외장색','내장색','가격','할인','수량']];
+  rows.forEach(r=>aoa.push([r.vendor_name||'',(stkUploads[stkKey(r.vendor_type||stkTab,r.vendor_name)]?.dealer||''),r.pre_fin||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1]));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), '재고');
   XLSX.writeFile(wb, '재고_'+stkToday()+'.xlsx');
@@ -12574,6 +12606,7 @@ async function openStockUploadModal(){
   document.getElementById('stockUploadModal').classList.add('open');
   fillStockUpVendors(stkTab==='seller' ? 'seller' : 'finance');
   if(stkSelVendor) { const sel=document.getElementById('stkUpVendor'); if([].some.call(sel.options,o=>o.value===stkSelVendor)) sel.value = stkSelVendor; }
+  stkFillDealerInput();
   stkPreview = []; renderStockPreview();
   document.getElementById('stkText').value = '';
   document.getElementById('stkProgress').textContent = '';
@@ -12602,15 +12635,23 @@ function fillStockUpVendors(forceType){
     if(!names.length) sel.value = '__new__';
   }
   if(nw){ nw.value = ''; nw.style.display = (sel.value==='__new__') ? '' : 'none'; }
+  stkFillDealerInput();
 }
 function onStockVendorSelChange(){
   const sel = document.getElementById('stkUpVendor');
   const nw = document.getElementById('stkUpVendorNew');
   if(nw) nw.style.display = (sel.value==='__new__') ? '' : 'none';
+  stkFillDealerInput();
+}
+function stkFillDealerInput(){
+  const el = document.getElementById('stkUpDealer'); if(!el) return;
+  const t = (document.getElementById('stkUpType')||{}).value || 'finance';
+  const v = (document.getElementById('stkUpVendor')||{}).value || '';
+  el.value = (v && v!=='__new__') ? (stkUploads[stkKey(t,v)]?.dealer || '') : '';
 }
 function stkProg(msg){ const el=document.getElementById('stkProgress'); if(el) el.textContent = msg||''; }
 
-function addStockPreviewRow(){ stkPreview.push({car_name:'',fuel:'',opt:'',ext_color:'',int_color:'',price:'',car_no:'',qty:1,discount:''}); renderStockPreview(); }
+function addStockPreviewRow(){ stkPreview.push({car_name:'',fuel:'',opt:'',ext_color:'',int_color:'',price:'',car_no:'',qty:1,discount:'',pre_fin:''}); renderStockPreview(); }
 function clearStockPreview(){ stkPreview = []; renderStockPreview(); }
 function delStockPreviewRow(i){ stkPreview.splice(i,1); renderStockPreview(); }
 const STK_NUMK = { price:1, discount:1, qty:1 };
@@ -12629,10 +12670,12 @@ function renderStockPreview(){
   wrap.style.display='';
   document.getElementById('stkPrevCnt').textContent = '('+stkPreview.length+'대)';
   const th = 'padding:8px;background:var(--bg3);font-size:11px;color:var(--text3);text-align:left;position:sticky;top:0;';
-  tb.innerHTML = '<thead><tr><th style="'+th+'width:26px;">#</th><th style="'+th+'">차량명</th><th style="'+th+'width:70px;">유종</th><th style="'+th+'">옵션</th><th style="'+th+'width:120px;">외장</th><th style="'+th+'width:120px;">내장</th><th style="'+th+'width:95px;">가격</th><th style="'+th+'width:90px;">할인</th><th style="'+th+'width:50px;">수량</th><th style="'+th+'width:36px;"></th></tr></thead><tbody>'
+  const hasPF = stkPreview.some(r=>String(r.pre_fin||'').trim());
+  const cols = hasPF ? ['car_name','fuel','opt','ext_color','int_color','pre_fin','price','discount','qty'] : ['car_name','fuel','opt','ext_color','int_color','price','discount','qty'];
+  tb.innerHTML = '<thead><tr><th style="'+th+'width:26px;">#</th><th style="'+th+'">차량명</th><th style="'+th+'width:70px;">유종</th><th style="'+th+'">옵션</th><th style="'+th+'width:120px;">외장</th><th style="'+th+'width:120px;">내장</th>'+(hasPF?'<th style="'+th+'width:120px;">선점금융사</th>':'')+'<th style="'+th+'width:95px;">가격</th><th style="'+th+'width:90px;">할인</th><th style="'+th+'width:50px;">수량</th><th style="'+th+'width:36px;"></th></tr></thead><tbody>'
     + stkPreview.map((r,i)=>'<tr>'
       + '<td style="color:var(--text3);">'+(i+1)+'</td>'
-      + ['car_name','fuel','opt','ext_color','int_color','price','discount','qty'].map(k=>{
+      + cols.map(k=>{
           const raw = r[k]==null?'':String(r[k]);
           const disp = STK_NUMK[k] ? stkNumFmt(raw) : raw;
           const align = STK_NUMK[k] ? ' style="text-align:right;"' : '';
@@ -12680,7 +12723,8 @@ function stkPushItems(arr){
       price: o.price ? String(o.price).replace(/[^0-9]/g,'') : '',
       car_no: (o.car_no||'').trim(),
       qty: o.qty ? (parseInt(o.qty,10)||1) : 1,
-      discount: o.discount ? String(o.discount).replace(/[^0-9]/g,'') : ''
+      discount: o.discount ? String(o.discount).replace(/[^0-9]/g,'') : '',
+      pre_fin: (o.pre_fin||'').trim()
     });
   });
   renderStockPreview();
@@ -12744,6 +12788,19 @@ async function parseStockExcel(file){
   function findHeader(aoa){
     for(let i=0;i<Math.min(20,aoa.length);i++){
       const row = (aoa[i]||[]).map(c=>String(c==null?'':c).trim());
+      // 배정분 포맷(계약자 + 한글명) 전용 매핑
+      const ix = {}; row.forEach((c,j)=>{ if(c && ix[c]===undefined) ix[c]=j; });
+      if(ix['계약자']!==undefined && ix['한글명']!==undefined){
+        return { i, m: {
+          car: ix['한글명'],
+          opt: ix['옵션명'],
+          ext: ix['외장색상명'],
+          int: ix['내장색상명'],
+          price: ix['판매가격'],
+          prefin: ix['계약자'],
+          noPrefix: true, dedupe: true
+        }};
+      }
       const m = {};
       row.forEach((c,j)=>{ if(m.color2===undefined && COLOR2.test(c)) m.color2=j; });
       row.forEach((c,j)=>{
@@ -12801,7 +12858,8 @@ async function parseStockExcel(file){
   carSheets.forEach(({nm, aoa, h})=>{
     const m = h.m;
     let prefix = '';
-    if(m.model!==undefined) prefix = '';
+    if(m.noPrefix) prefix = '';
+    else if(m.model!==undefined) prefix = '';
     else if(multi) prefix = nm.replace(/\s*\(.*?\)\s*/g,'').trim();
     else if(filePrefix) prefix = filePrefix;
 
@@ -12834,8 +12892,21 @@ async function parseStockExcel(file){
         price: m.price!==undefined ? String(num(cell(r,m.price))||'') : '',
         car_no: cell(r,m.carno),
         qty: qty,
-        discount: disc || ''
+        discount: disc || '',
+        pre_fin: m.prefin!==undefined ? cell(r,m.prefin) : ''
       });
+    }
+    if(m.dedupe){
+      const map = new Map();
+      const merged = [];
+      out.splice(0, out.length, ...(function(){
+        out.forEach(o=>{
+          const k = [o.car_name,o.fuel,o.opt,o.ext_color,o.int_color,o.price,o.discount,o.pre_fin].join('|');
+          if(map.has(k)) map.get(k).qty += (o.qty||1);
+          else { map.set(k,o); merged.push(o); }
+        });
+        return merged;
+      })());
     }
   });
 
@@ -12931,7 +13002,8 @@ async function saveStockPreview(){
       price: r.price? parseInt(String(r.price).replace(/[^0-9]/g,''),10)||null : null,
       car_no: r.car_no||'',
       qty: parseInt(String(r.qty||1).replace(/[^0-9]/g,''),10)||1,
-      discount: r.discount? parseInt(String(r.discount).replace(/[^0-9]/g,''),10)||null : null
+      discount: r.discount? parseInt(String(r.discount).replace(/[^0-9]/g,''),10)||null : null,
+      pre_fin: String(r.pre_fin||'').trim()
     }));
     const BS = 1000;
     for(let i=0;i<payload.length;i+=BS){
@@ -12946,7 +13018,8 @@ async function saveStockPreview(){
         totalCnt = (agg||[]).reduce((a,b)=>a+(Number(b.qty)||0),0);
       } catch(e){ totalCnt = (prevUp.cnt||0) + newCnt; }
     }
-    await sbFetch('stock_uploads?on_conflict=vendor_type,vendor_name','POST',[{vendor_type:type, vendor_name:name, uploaded_at:new Date().toISOString(), uploaded_by:currentUser||'', cnt:totalCnt}],'return=minimal,resolution=merge-duplicates');
+    const dealerVal = (document.getElementById('stkUpDealer')?.value||'').trim();
+    await sbFetch('stock_uploads?on_conflict=vendor_type,vendor_name','POST',[{vendor_type:type, vendor_name:name, uploaded_at:new Date().toISOString(), uploaded_by:currentUser||'', cnt:totalCnt, dealer:dealerVal}],'return=minimal,resolution=merge-duplicates');
     stkProg('');
     closeStockUploadModal();
     showGlobalToast(rows.length+'건 '+(sameDay?'추가':'등록')+' 완료');
