@@ -8364,11 +8364,12 @@ function initSyncChannel() {
     try { _handleSyncEvent(JSON.parse(e.newValue)); } catch(_){}
   });
   if(!window._syncPollTimer) {
-    window._syncPollTimer = setInterval(async () => {
+    window._pollSync = async function(force){
       if(_isSyncReloading) return;
       if(!isSbConfigured()) return;
       if(!document.getElementById('app')?.classList.contains('active')) return;
-      if(window._realtimeReceivedData) return; // 실시간 이벤트를 실제로 받고 있을 때만 polling 생략
+      if(!force && document.hidden) return; // 백그라운드 탭에서는 폴링 정지 (복귀 시 즉시 1회 갱신)
+      if(!force && window._realtimeReceivedData) return; // 실시간 이벤트를 실제로 받고 있을 때만 polling 생략
       if(window._lastLocalChange && Date.now() - window._lastLocalChange < 2500) return; // 로컬 저장 직후엔 DB 반영 대기(stale 덮어쓰기 방지)
       _isSyncReloading = true;
       try {
@@ -8377,7 +8378,11 @@ function initSyncChannel() {
       } catch(_){} finally {
         _isSyncReloading = false;
       }
-    }, 30000);
+    };
+    window._syncPollTimer = setInterval(()=>window._pollSync(false), 60000);
+    document.addEventListener('visibilitychange', ()=>{
+      if(!document.hidden) window._pollSync(true); // 화면 복귀 즉시 최신화 → 체감 지연 없음
+    });
   }
   initSupabaseRealtime();
 }
@@ -9155,7 +9160,9 @@ function colFilterDB(keepPage) {
   const source = document.getElementById('colF_source')?.value||'';
   const division = document.getElementById('colF_division')?.value||'';
   const memoTag = document.getElementById('colF_memoTag')?.value||'';
-  const assign = currentRole==='admin' ? (document.getElementById('colF_assign')?.value||'') : currentUser;
+  const assign = currentRole==='admin'
+    ? ((document.getElementById('colF_assign')?.value||'') || (document.getElementById('dbAssignFilter')?.value||''))
+    : currentUser;
   const status = document.getElementById('colF_status')?.value||'';
   const q      = (document.getElementById('dbSearchQ')?.value||'').toLowerCase();
   const topStatus = document.getElementById('dbStatusFilter')?.value||'';
