@@ -12593,7 +12593,7 @@ function renderStockItems(){
     if(qLen===1) msg = '2글자 이상 입력하세요';
     else if(stkMode==='search') msg = '검색 결과가 없습니다';
     else if(stkMode==='vendor') msg = '조건에 맞는 재고가 없습니다';
-    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;">'+msg+'</div>';
+    wrap.innerHTML = sfGalleryHtml() + '<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;">'+msg+'</div>';
     return;
   }
   const totalCars = rows.reduce((a,b)=>a+(Number(b.qty)||1),0);
@@ -12647,6 +12647,23 @@ function renderStockItems(){
       + (hasFE? '<td style="'+td+'text-align:right;white-space:nowrap;color:var(--accent);">'+escapeHtml(r.fee||'-')+'</td>' : '')
       + '</tr>').join('')
     + '</tbody></table>';
+  wrap.innerHTML = sfGalleryHtml() + wrap.innerHTML;
+}
+// 선택 업체의 첨부 원본 파일 미리보기
+function sfGalleryHtml(){
+  const list = (typeof sfForVendor==='function') ? sfForVendor() : [];
+  if(!stkSelVendor || !list.length) return '';
+  return '<div style="padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg3);">'
+    + '<div style="font-size:11px;color:var(--text3);margin-bottom:8px;">📎 원본 첨부 파일 '+list.length+'건 · 클릭하면 크게 보기 (← → 이동)</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    + list.map((f,i)=>{
+        const img = sfIsImage(f.mime, f.file_name);
+        return '<div onclick="sfOpen('+i+')" title="'+escapeHtml(f.file_name)+'" style="width:120px;cursor:pointer;border:1px solid var(--border2);border-radius:6px;overflow:hidden;background:var(--bg2);">'
+          + (img ? '<img src="'+sfPublicUrl(f.path)+'" style="width:100%;height:80px;object-fit:cover;display:block;">'
+                 : '<div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:26px;">'+(/\.pdf$/i.test(f.file_name)?'📄':'📊')+'</div>')
+          + '<div style="padding:4px 6px;font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHtml(f.file_name)+'</div></div>';
+      }).join('')
+    + '</div></div>';
 }
 
 async function resetStockVendor(){
@@ -13262,8 +13279,20 @@ async function sfUpload(files){
       await sbFetch('stock_files','POST',[{ vendor_type:stkTab, vendor_name:stkSelVendor, file_name:f.name, path:path, mime:f.type||'', size:f.size, uploaded_by:currentUser||'' }],'return=minimal');
     } catch(e){ alert(f.name+' 업로드 실패: '+e.message); }
   }
+  // 첨부 업로드도 '오늘 업데이트'로 반영
+  try {
+    const prev = stkUpFor(stkTab, stkSelVendor);
+    await sbFetch('stock_uploads?on_conflict=vendor_type,vendor_name','POST',
+      [{ vendor_type:stkTab, vendor_name:stkSelVendor, uploaded_at:new Date().toISOString(),
+         uploaded_by:currentUser||'', cnt:(prev?.cnt||0), dealer:(prev?.dealer||'') }],
+      'return=minimal,resolution=merge-duplicates');
+  } catch(e){}
   if(pr) pr.textContent = '업로드 완료';
+  window._lastLocalChange = Date.now();
+  await loadStockData();
   await loadStockFiles();
+  renderStockVendorList();
+  renderStockItems();
   renderStockFileList();
   setTimeout(()=>{ if(pr) pr.textContent=''; }, 2000);
 }
