@@ -3490,6 +3490,7 @@
     <textarea id="stkText" placeholder="재고 목록 텍스트를 붙여넣으세요" style="width:100%;min-height:90px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:10px;font-family:inherit;font-size:13px;resize:vertical;outline:none;"></textarea>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
       <button class="btn btn-primary btn-sm" onclick="analyzeStockText()">🤖 텍스트 분석</button>
+      <button class="btn btn-primary btn-sm" onclick="saveStockPreview()">저장</button>
       <div id="stkProgress" style="font-size:12px;color:var(--accent);"></div>
     </div>
     <div id="stkPreviewWrap" style="display:none;margin-top:18px;">
@@ -3505,7 +3506,6 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeStockUploadModal()">취소</button>
-      <button class="btn btn-primary" onclick="saveStockPreview()">저장</button>
     </div>
   </div>
 </div>
@@ -12818,6 +12818,18 @@ async function parseStockExcel(file){
       const row = (aoa[i]||[]).map(c=>String(c==null?'':c).trim());
       // 배정분 포맷(계약자 + 한글명) 전용 매핑
       const ix = {}; row.forEach((c,j)=>{ if(c && ix[c]===undefined) ix[c]=j; });
+      // 현대캐피탈 선도구매리스트 포맷(판매사 + 차종 + 등급 + 외장색상)
+      if(ix['판매사']!==undefined && ix['등급']!==undefined && ix['외장색상']!==undefined){
+        return { i, m: {
+          car: ix['등급'],
+          model: ix['판매사'],
+          opt: ix['옵션'],
+          ext: ix['외장색상'],
+          int: ix['내장색상'],
+          price: (ix['차량가']!==undefined ? ix['차량가'] : ix['차량가격']),
+          noPrefix: true, dedupe: true
+        }};
+      }
       // SK렌터카 신차리스트 포맷(차명 + 모델명 + 색상(외장))
       if(ix['차명']!==undefined && ix['모델명']!==undefined && ix['색상(외장)']!==undefined){
         return { i, m: {
@@ -12873,7 +12885,10 @@ async function parseStockExcel(file){
   // 1차: 조건(할인) 시트 수집
   const discMap = {};
   const sheets = [];
-  wb.SheetNames.forEach(nm=>{
+  let stkSheetNames = wb.SheetNames;
+  const _pre = stkSheetNames.filter(n=>String(n).indexOf('선도구매')>=0);
+  if(_pre.length) stkSheetNames = _pre; // 선도구매리스트 시트가 있으면 해당 시트만 사용
+  stkSheetNames.forEach(nm=>{
     const aoa = XLSX.utils.sheet_to_json(wb.Sheets[nm], {header:1, defval:''});
     if(!aoa.length) return;
     if(aoa.length<2 && String(aoa[0][0]||'').indexOf('재고없음')>=0) return;
