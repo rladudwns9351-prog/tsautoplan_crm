@@ -12878,7 +12878,7 @@ function stkPushItems(arr){
       discount: o.discount ? String(o.discount).replace(/[^0-9]/g,'') : '',
       pre_fin: (o.pre_fin||'').trim(),
       asset_no: (o.asset_no||'').trim(),
-      promo: (o.promo||'').trim(),
+      promo: stkCleanPromo(o.promo),
       fee: (o.fee||'').trim(),
       delivery: (o.delivery||'').trim(),
       delivery_type: (o.delivery_type||'').trim(),
@@ -12925,6 +12925,13 @@ function stkPadAsset(v, len){
   const t = String(v==null?'':v).trim();
   if(!len || !t || !/^\d+$/.test(t)) return t;
   return t.length >= len ? t : t.padStart(len, '0');
+}
+// 문서 상단 공통 안내문구는 차량별 프로모션이 아니므로 제외
+const STK_PROMO_NOISE = /(음영은|착체대상|개소세\s*5%\s*기준|이하\s*여백|본\s*자료는|무단\s*배포)/;
+function stkCleanPromo(v){
+  const t = String(v||'').trim();
+  if(!t) return '';
+  return STK_PROMO_NOISE.test(t) ? '' : t;
 }
 function stkNormFuel(v){
   const t = String(v||'').trim().toUpperCase();
