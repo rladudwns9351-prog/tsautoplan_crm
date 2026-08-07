@@ -2665,8 +2665,7 @@
           <input list="stkDLOpt"  id="stkFOpt"  class="stk-f" placeholder="옵션" oninput="renderStockItems()">
           <input list="stkDLExt"  id="stkFExt"  class="stk-f" placeholder="외장색" oninput="renderStockItems()">
           <input list="stkDLInt"  id="stkFInt"  class="stk-f" placeholder="내장색" oninput="renderStockItems()">
-          <input type="number" id="stkFPmin" class="stk-f" placeholder="최저가(만원)" style="width:110px;" oninput="renderStockItems()">
-          <input type="number" id="stkFPmax" class="stk-f" placeholder="최고가(만원)" style="width:110px;" oninput="renderStockItems()">
+          <input id="stkFDealer" class="stk-f" placeholder="대리점" style="width:120px;" oninput="renderStockItems()">
           <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;padding:0 4px;">
             <input type="checkbox" id="stkFDisc" onchange="renderStockItems()" style="accent-color:var(--accent);"> 할인 있는 것만
           </label>
@@ -12331,11 +12330,34 @@ function stkFinanceNames(){
   try { if(typeof FINANCE_LIST !== 'undefined' && Array.isArray(FINANCE_LIST) && FINANCE_LIST.length) return FINANCE_LIST.slice(); } catch(e){}
   return STK_FINANCE_FALLBACK.slice();
 }
-const STK_BRAND_LIST = ['현대','제네시스','기아','쉐보레','GMC','KG모빌리티','르노코리아'];
+const STK_BRAND_LIST = ['현대/제네시스','기아','쉐보레','GMC','KG모빌리티','르노코리아'];
+const STK_MERGE_MAP = { '현대':'현대/제네시스', '제네시스':'현대/제네시스' };
+function stkCanonVendor(n){ return STK_MERGE_MAP[n] || n; }
+function stkVendorAliases(n){
+  if(n==='현대/제네시스') return ['현대/제네시스','현대','제네시스'];
+  return [n];
+}
+function stkVendorInList(n){
+  return 'in.('+stkVendorAliases(n).map(x=>encodeURIComponent('"'+x+'"')).join(',')+')';
+}
+// 통합 업체는 별칭들의 업로드 기록을 합산(최신일 기준)
+function stkUpFor(type, name){
+  const al = stkVendorAliases(name);
+  if(al.length===1) return stkUploads[stkKey(type,name)];
+  let best=null, cnt=0, dealer='';
+  al.forEach(a=>{
+    const u = stkUploads[stkKey(type,a)];
+    if(!u) return;
+    cnt += (u.cnt||0);
+    if(!dealer && u.dealer) dealer = u.dealer;
+    if(!best || String(u.uploaded_at||'') > String(best.uploaded_at||'')) best = u;
+  });
+  return best ? Object.assign({}, best, {cnt:cnt, dealer:dealer}) : null;
+}
 function stkVendorNames(type){
   if(type!=='seller') return stkFinanceNames();
   const set = new Set(STK_BRAND_LIST);
-  Object.keys(stkUploads).forEach(k=>{ const p=k.split('|'); if(p[0]==='seller') set.add(p[1]); });
+  Object.keys(stkUploads).forEach(k=>{ const p=k.split('|'); if(p[0]==='seller') set.add(stkCanonVendor(p[1])); });
   const arr = Array.from(set);
   arr.sort((a,b)=>{
     const ia=STK_BRAND_LIST.indexOf(a), ib=STK_BRAND_LIST.indexOf(b);
@@ -12379,7 +12401,7 @@ function renderStockVendorList(){
   const wrap = document.getElementById('stkVendorList'); if(!wrap) return;
   const names = stkVendorNames(stkTab);
   const today = stkToday();
-  const notToday = names.filter(n => stkDateOf(stkUploads[stkKey(stkTab,n)]?.uploaded_at) !== today).length;
+  const notToday = names.filter(n => stkDateOf(stkUpFor(stkTab,n)?.uploaded_at) !== today).length;
   const info = document.getElementById('stkTodayInfo');
   if(info) info.innerHTML = names.length
     ? ('오늘 업로드 '+(names.length-notToday)+' / '+names.length + (notToday? ' · <span style="color:var(--red);font-weight:700;">미업로드 '+notToday+'</span>':''))
@@ -12390,7 +12412,7 @@ function renderStockVendorList(){
     return;
   }
   wrap.innerHTML = names.map(n=>{
-    const up = stkUploads[stkKey(stkTab,n)];
+    const up = stkUpFor(stkTab,n);
     const ok = stkDateOf(up?.uploaded_at) === today;
     const cnt = up? (up.cnt||0) : 0;
     return '<div class="stk-vd'+(stkSelVendor===n?' active':'')+'" data-vn="'+escapeHtml(n)+'" onclick="selectStockVendor(this.getAttribute(\'data-vn\'))" title="'+(up? escapeHtml(stkDateOf(up.uploaded_at))+' 업로드' : '자료없음')+'">'
@@ -12411,11 +12433,11 @@ function renderStockUpdateInfo(names){
   const el = document.getElementById('stkUpdateInfo'); if(!el) return;
   names = names || stkVendorNames(stkTab);
   if(stkSelVendor){
-    const d = stkDateOf(stkUploads[stkKey(stkTab,stkSelVendor)]?.uploaded_at);
+    const d = stkDateOf(stkUpFor(stkTab,stkSelVendor)?.uploaded_at);
     el.innerHTML = d ? (escapeHtml(stkSelVendor)+' · '+stkFmtKDate(d)+' 업데이트 재고입니다.') : (escapeHtml(stkSelVendor)+' · 등록된 재고가 없습니다.');
     return;
   }
-  const dates = names.map(n=>stkDateOf(stkUploads[stkKey(stkTab,n)]?.uploaded_at)).filter(Boolean);
+  const dates = names.map(n=>stkDateOf(stkUpFor(stkTab,n)?.uploaded_at)).filter(Boolean);
   if(!dates.length){ el.textContent = '등록된 재고가 없습니다.'; return; }
   const uniq = Array.from(new Set(dates)).sort();
   const latest = uniq[uniq.length-1];
@@ -12450,7 +12472,7 @@ async function fetchStockRows(){
   } else if(stkSelVendor){
     stkMode = 'vendor';
     url = STK_AGG+'?select=*&vendor_type=eq.'+encodeURIComponent(stkTab)
-        + '&vendor_name=eq.'+encodeURIComponent(stkSelVendor)
+        + '&vendor_name='+stkVendorInList(stkSelVendor)
         + '&order=car_name.asc&limit=100000';
   } else {
     stkMode='none'; stkRows=[]; renderStockItems(); return;
@@ -12478,7 +12500,7 @@ function clearStockSearch(){ const el=document.getElementById('stkSearch'); if(e
 /* ---- 필터 / 정렬 / 렌더 ---- */
 function stkFilterVal(id){ const e=document.getElementById(id); return e? e.value.trim().toLowerCase() : ''; }
 function resetStockFilters(){
-  ['stkFCar','stkFFuel','stkFOpt','stkFExt','stkFInt','stkFPmin','stkFPmax'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=''; });
+  ['stkFCar','stkFFuel','stkFOpt','stkFExt','stkFInt','stkFDealer'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=''; });
   const c=document.getElementById('stkFDisc'); if(c) c.checked=false;
   stkSort = { key:'', dir:1 };
   renderStockItems();
@@ -12486,7 +12508,7 @@ function resetStockFilters(){
 function stkFilteredRows(){
   const fCar=stkFilterVal('stkFCar'), fFuel=stkFilterVal('stkFFuel'), fOpt=stkFilterVal('stkFOpt');
   const fExt=stkFilterVal('stkFExt'), fInt=stkFilterVal('stkFInt');
-  const pmin=parseFloat(stkFilterVal('stkFPmin')), pmax=parseFloat(stkFilterVal('stkFPmax'));
+  const fDealer=stkFilterVal('stkFDealer');
   const onlyDisc = !!document.getElementById('stkFDisc')?.checked;
   return stkRows.filter(r=>{
     if(fCar  && !(r.car_name||'').toLowerCase().includes(fCar)) return false;
@@ -12494,9 +12516,7 @@ function stkFilteredRows(){
     if(fOpt  && !(r.opt||'').toLowerCase().includes(fOpt)) return false;
     if(fExt  && !(r.ext_color||'').toLowerCase().includes(fExt)) return false;
     if(fInt  && !(r.int_color||'').toLowerCase().includes(fInt)) return false;
-    const p = Number(r.price||0)/10000;
-    if(!isNaN(pmin) && p < pmin) return false;
-    if(!isNaN(pmax) && p > pmax) return false;
+    if(fDealer && !(stkUpFor(r.vendor_type||stkTab, stkCanonVendor(r.vendor_name))?.dealer||'').toLowerCase().includes(fDealer)) return false;
     if(onlyDisc && !(Number(r.discount)>0)) return false;
     return true;
   });
@@ -12547,9 +12567,11 @@ function renderStockItems(){
   const td = 'padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:top;';
   const arrow = k => stkSort.key===k ? (stkSort.dir>0?' <span style="color:var(--accent);">▲</span>':' <span style="color:var(--accent);">▼</span>') : ' <span style="opacity:.25;">↕</span>';
   const H = (k,label,right) => '<th style="'+th+(right?'text-align:right;':'')+'" onclick="setStockSort(\''+k+'\')" title="클릭하여 정렬">'+label+arrow(k)+'</th>';
-  const dealerOf = r => (stkUploads[stkKey(r.vendor_type||stkTab, r.vendor_name)]?.dealer || '');
+  const dealerOf = r => (stkUpFor(r.vendor_type||stkTab, stkCanonVendor(r.vendor_name))?.dealer || '');
   const hasDealer = rows.some(r=>dealerOf(r));
   const hasPF = rows.some(r=>String(r.pre_fin||'').trim());
+  const hasAS = rows.some(r=>String(r.asset_no||'').trim());
+  const hasPR = rows.some(r=>String(r.promo||'').trim());
   wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr>'
     + H('vendor_name', stkTab==='finance'?'금융사':'판매사')
     + (hasDealer? '<th style="'+th+'">대리점</th>' : '')
@@ -12557,6 +12579,8 @@ function renderStockItems(){
     + H('car_name','차량명') + H('fuel','유종') + H('opt','옵션')
     + H('ext_color','외장') + H('int_color','내장')
     + H('price','가격',1) + H('discount','할인',1) + H('qty','수량',1)
+    + (hasAS? H('asset_no','자산번호') : '')
+    + (hasPR? H('promo','프로모션') : '')
     + '</tr></thead><tbody>'
     + rows.map(r=>'<tr>'
       + '<td style="'+td+'white-space:nowrap;color:var(--accent);font-weight:600;">'+escapeHtml(r.vendor_name||'-')+'</td>'
@@ -12569,7 +12593,10 @@ function renderStockItems(){
       + '<td style="'+td+'white-space:nowrap;">'+escapeHtml(r.int_color||'-')+'</td>'
       + '<td style="'+td+'text-align:right;white-space:nowrap;">'+(r.price? Number(r.price).toLocaleString():'-')+'</td>'
       + '<td style="'+td+'text-align:right;white-space:nowrap;color:'+(Number(r.discount)>0?'var(--green)':'var(--text3)')+';">'+(Number(r.discount)>0? '-'+Number(r.discount).toLocaleString():'-')+'</td>'
-      + '<td style="'+td+'text-align:right;white-space:nowrap;font-family:\'JetBrains Mono\',monospace;color:'+((Number(r.qty)||1)>1?'var(--accent)':'var(--text3)')+';">'+(Number(r.qty)||1)+'</td></tr>').join('')
+      + '<td style="'+td+'text-align:right;white-space:nowrap;font-family:\'JetBrains Mono\',monospace;color:'+((Number(r.qty)||1)>1?'var(--accent)':'var(--text3)')+';">'+(Number(r.qty)||1)+'</td>'
+      + (hasAS? '<td style="'+td+'white-space:nowrap;color:var(--text2);">'+escapeHtml(r.asset_no||'-')+'</td>' : '')
+      + (hasPR? '<td style="'+td+'color:var(--green);min-width:140px;">'+escapeHtml(r.promo||'-')+'</td>' : '')
+      + '</tr>').join('')
     + '</tbody></table>';
 }
 
@@ -12579,7 +12606,7 @@ async function resetStockVendor(){
   const name = stkSelVendor, type = stkTab;
   if(!confirm('['+name+'] 재고 자료를 전부 삭제합니다. 되돌릴 수 없습니다. 진행할까요?')) return;
   try {
-    const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name=eq.'+encodeURIComponent(name);
+    const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name='+stkVendorInList(name);
     await sbFetch('stock_items?'+filter, 'DELETE');
     await sbFetch('stock_uploads?'+filter, 'DELETE');
     showGlobalToast(name+' 재고 삭제 완료');
@@ -12592,8 +12619,8 @@ function exportStockExcel(){
   if(typeof XLSX==='undefined'){ alert('엑셀 모듈을 불러오지 못했습니다.'); return; }
   const rows = stkFilteredRows();
   if(!rows.length){ alert('저장할 재고가 없습니다.'); return; }
-  const aoa = [['업체','대리점','선점금융사','차량명','유종','옵션','외장색','내장색','가격','할인','수량']];
-  rows.forEach(r=>aoa.push([r.vendor_name||'',(stkUploads[stkKey(r.vendor_type||stkTab,r.vendor_name)]?.dealer||''),r.pre_fin||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1]));
+  const aoa = [['업체','대리점','선점금융사','차량명','유종','옵션','외장색','내장색','가격','할인','수량','자산번호','프로모션']];
+  rows.forEach(r=>aoa.push([r.vendor_name||'',(stkUpFor(r.vendor_type||stkTab,stkCanonVendor(r.vendor_name))?.dealer||''),r.pre_fin||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1,r.asset_no||'',r.promo||'']));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), '재고');
   XLSX.writeFile(wb, '재고_'+stkToday()+'.xlsx');
@@ -12603,7 +12630,7 @@ function updateStockNavBadge(){
   const b = document.getElementById('stkNavBadge'); if(!b) return;
   if(currentRole!=='admin'){ b.style.display='none'; return; }
   const today = stkToday();
-  const n = stkFinanceNames().filter(x=>stkDateOf(stkUploads[stkKey('finance',x)]?.uploaded_at)!==today).length;
+  const n = stkFinanceNames().filter(x=>stkDateOf(stkUpFor('finance',x)?.uploaded_at)!==today).length;
   if(n>0){ b.textContent = n; b.style.display='inline-flex'; } else b.style.display='none';
 }
 
@@ -12655,7 +12682,7 @@ function stkFillDealerInput(){
   const el = document.getElementById('stkUpDealer'); if(!el) return;
   const t = (document.getElementById('stkUpType')||{}).value || 'finance';
   const v = (document.getElementById('stkUpVendor')||{}).value || '';
-  el.value = (v && v!=='__new__') ? (stkUploads[stkKey(t,v)]?.dealer || '') : '';
+  el.value = (v && v!=='__new__') ? (stkUpFor(t,v)?.dealer || '') : '';
 }
 function stkProg(msg){
   const el=document.getElementById('stkProgress'); if(!el) return;
@@ -12689,7 +12716,7 @@ function renderStockPreview(){
   const th = 'padding:8px;background:var(--bg3);font-size:11px;color:var(--text3);text-align:left;position:sticky;top:0;';
   const hasPF = stkPreview.some(r=>String(r.pre_fin||'').trim());
   const cols = hasPF ? ['car_name','fuel','opt','ext_color','int_color','pre_fin','price','discount','qty'] : ['car_name','fuel','opt','ext_color','int_color','price','discount','qty'];
-  tb.innerHTML = '<thead><tr><th style="'+th+'width:26px;">#</th><th style="'+th+'">차량명</th><th style="'+th+'width:70px;">유종</th><th style="'+th+'">옵션</th><th style="'+th+'width:120px;">외장</th><th style="'+th+'width:120px;">내장</th>'+(hasPF?'<th style="'+th+'width:120px;">선점금융사</th>':'')+'<th style="'+th+'width:95px;">가격</th><th style="'+th+'width:90px;">할인</th><th style="'+th+'width:50px;">수량</th><th style="'+th+'width:36px;"></th></tr></thead><tbody>'
+  tb.innerHTML = '<thead><tr><th style="'+th+'width:26px;">#</th><th style="'+th+'">차량명</th><th style="'+th+'width:70px;">유종</th><th style="'+th+'">옵션</th><th style="'+th+'width:120px;">외장</th><th style="'+th+'width:120px;">내장</th>'+(hasPF?'<th style="'+th+'width:120px;">선점금융사</th>':'')+'<th style="'+th+'width:95px;">가격</th><th style="'+th+'width:90px;">할인</th><th style="'+th+'width:50px;">수량</th>'+(hasAS?'<th style="'+th+'width:100px;">자산번호</th>':'')+(hasPR?'<th style="'+th+'width:150px;">프로모션</th>':'')+'<th style="'+th+'width:36px;"></th></tr></thead><tbody>'
     + stkPreview.map((r,i)=>'<tr>'
       + '<td style="color:var(--text3);">'+(i+1)+'</td>'
       + cols.map(k=>{
@@ -13029,7 +13056,7 @@ async function saveStockPreview(){
   if(!name){ alert('업체를 선택하거나 입력하세요.'); return; }
   const rows = stkPreview.filter(r=>(r.car_name||'').trim());
   if(!rows.length){ alert('저장할 재고가 없습니다.'); return; }
-  const prevUp = stkUploads[stkKey(type,name)];
+  const prevUp = stkUpFor(type,name);
   const sameDay = prevUp && stkDateOf(prevUp.uploaded_at) === stkToday();
   const msg = sameDay
     ? '['+name+'] 오늘 자료에 '+rows.length+'건을 추가합니다.\n(같은 차량명은 새 자료로 교체됩니다)\n진행할까요?'
@@ -13037,7 +13064,7 @@ async function saveStockPreview(){
   if(!confirm(msg)) return;
   stkProg('저장 중...');
   try {
-    const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name=eq.'+encodeURIComponent(name);
+    const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name='+stkVendorInList(name);
     if(!sameDay){
       stkProg('이전 날짜 자료 정리 중...');
       await sbFetch('stock_items?'+filter, 'DELETE');
@@ -13069,7 +13096,7 @@ async function saveStockPreview(){
     let totalCnt = newCnt;
     if(sameDay){
       try {
-        const agg = await sbFetch(STK_AGG+'?select=qty&vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name=eq.'+encodeURIComponent(name)+'&limit=100000');
+        const agg = await sbFetch(STK_AGG+'?select=qty&vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name='+stkVendorInList(name)+'&limit=100000');
         totalCnt = (agg||[]).reduce((a,b)=>a+(Number(b.qty)||0),0);
       } catch(e){ totalCnt = (prevUp.cnt||0) + newCnt; }
     }
