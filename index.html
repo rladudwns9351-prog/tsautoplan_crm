@@ -116,6 +116,10 @@
         <span>재고확인</span>
         <span id="stkNavBadge" style="display:none;align-items:center;gap:0;min-width:18px;height:18px;padding:0 7px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;justify-content:center;"></span>
       </div>
+      <div class="nav-item" onclick="goPage(&#39;vehiclestock&#39;,this)" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>차량재고</span>
+        <span id="vstockNavBadge" style="display:none;align-items:center;gap:0;min-width:18px;height:18px;padding:0 7px;border-radius:9px;background:var(--green);color:#000;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;justify-content:center;"></span>
+      </div>
       <div class="nav-item" onclick="goPage(&#39;alarmsettings&#39;,this)">
         알람설정
       </div>
@@ -133,10 +137,6 @@
       </div>
       <div class="nav-item" onclick="goPage(&#39;localsearch&#39;,this)">
         업체 검색
-      </div>
-      <div class="nav-item" onclick="goPage(&#39;vehiclestock&#39;,this)" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>차량재고</span>
-        <span id="vstockNavBadge" style="display:none;align-items:center;gap:0;min-width:18px;height:18px;padding:0 7px;border-radius:9px;background:var(--green);color:#000;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;justify-content:center;"></span>
       </div>
       <div class="nav-item" onclick="goPage(&#39;calc33&#39;,this)">
         3.3% 계산기
@@ -13248,8 +13248,10 @@ async function sfUpload(files){
     const f = list[i];
     if(f.size > 20*1024*1024){ alert(f.name+' : 20MB를 초과해 건너뜁니다.'); continue; }
     if(pr) pr.textContent = '업로드 중... '+(i+1)+' / '+list.length+' — '+f.name;
-    const safe = f.name.replace(/[^\w.\-가-힣]/g,'_');
-    const path = stkTab+'/'+stkSelVendor.replace(/[^\w\-가-힣]/g,'_')+'/'+Date.now()+'_'+i+'_'+safe;
+    // Storage 키는 ASCII만 허용 → 한글/특수문자는 코드로 치환, 원본 파일명은 DB에 별도 저장
+    const ascii = (t)=>String(t||'').replace(/[^a-zA-Z0-9._-]/g, c=>'x'+c.charCodeAt(0).toString(16));
+    const ext = (f.name.match(/\.[a-zA-Z0-9]+$/)||[''])[0].toLowerCase();
+    const path = stkTab+'/'+ascii(stkSelVendor)+'/'+Date.now()+'_'+i+ext;
     try {
       const res = await fetch(SB_URL+'/storage/v1/object/'+SF_BUCKET+'/'+path.split('/').map(encodeURIComponent).join('/'), {
         method:'POST',
