@@ -12437,7 +12437,8 @@ async function fetchStockRows(){
     const like = '*'+q.replace(/[,()*]/g,' ').trim().replace(/\s+/g,'*')+'*';
     url = STK_AGG+'?select=*&vendor_type=eq.'+encodeURIComponent(stkTab)
         + '&or=(car_name.ilike.'+encodeURIComponent(like)+',opt.ilike.'+encodeURIComponent(like)
-        + ',ext_color.ilike.'+encodeURIComponent(like)+',int_color.ilike.'+encodeURIComponent(like)+')'
+        + ',ext_color.ilike.'+encodeURIComponent(like)+',int_color.ilike.'+encodeURIComponent(like)
+        + ',pre_fin.ilike.'+encodeURIComponent(like)+')'
         + '&order=car_name.asc&limit=3000';
   } else if(stkSelVendor){
     stkMode = 'vendor';
