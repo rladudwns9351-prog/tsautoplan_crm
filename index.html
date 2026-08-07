@@ -12650,7 +12650,16 @@ function stkFillDealerInput(){
   const v = (document.getElementById('stkUpVendor')||{}).value || '';
   el.value = (v && v!=='__new__') ? (stkUploads[stkKey(t,v)]?.dealer || '') : '';
 }
-function stkProg(msg){ const el=document.getElementById('stkProgress'); if(el) el.textContent = msg||''; }
+function stkProg(msg){
+  const el=document.getElementById('stkProgress'); if(!el) return;
+  const m = String(msg||'').trim();
+  if(!m){ el.textContent=''; el.style.color=''; el.removeAttribute('title'); return; }
+  const busy = /(중\.\.\.|중$|\.\.\.$)/.test(m) && !/완료/.test(m);
+  el.textContent = busy ? '분석중...' : '완료';
+  el.style.color = busy ? 'var(--accent)' : 'var(--green)';
+  el.style.fontWeight = '700';
+  el.title = m;
+}
 
 function addStockPreviewRow(){ stkPreview.push({car_name:'',fuel:'',opt:'',ext_color:'',int_color:'',price:'',car_no:'',qty:1,discount:'',pre_fin:''}); renderStockPreview(); }
 function clearStockPreview(){ stkPreview = []; renderStockPreview(); }
