@@ -12776,6 +12776,17 @@ async function handleStockFiles(files){
   }
 }
 
+function stkNormFuel(v){
+  const t = String(v||'').trim().toUpperCase();
+  if(!t) return '';
+  if(t==='EV'||t==='BEV'||t.indexOf('전기')>=0) return '전기';
+  if(t==='HEV'||t.indexOf('하이브리드')>=0) return '하이브리드';
+  if(t==='PHEV') return 'PHEV';
+  if(t.indexOf('가솔린')>=0||t.indexOf('휘발유')>=0) return '가솔린';
+  if(t.indexOf('디젤')>=0||t.indexOf('경유')>=0) return '디젤';
+  if(t.indexOf('LPG')>=0) return 'LPG';
+  return String(v||'').trim();
+}
 async function parseStockExcel(file){
   if(typeof XLSX==='undefined'){ alert('엑셀 모듈을 불러오지 못했습니다.'); return; }
   stkProg('엑셀 변환 중...');
@@ -12807,6 +12818,18 @@ async function parseStockExcel(file){
       const row = (aoa[i]||[]).map(c=>String(c==null?'':c).trim());
       // 배정분 포맷(계약자 + 한글명) 전용 매핑
       const ix = {}; row.forEach((c,j)=>{ if(c && ix[c]===undefined) ix[c]=j; });
+      // SK렌터카 신차리스트 포맷(차명 + 모델명 + 색상(외장))
+      if(ix['차명']!==undefined && ix['모델명']!==undefined && ix['색상(외장)']!==undefined){
+        return { i, m: {
+          car: ix['모델명'],
+          model: ix['차명'],
+          opt: ix['제조사옵션'],
+          ext: ix['색상(외장)'],
+          int: ix['색상(내장)'],
+          fuel: (ix['SKR-유종']!==undefined ? ix['SKR-유종'] : ix['입력연료']),
+          noPrefix: true, dedupe: true
+        }};
+      }
       if(ix['계약자']!==undefined && ix['한글명']!==undefined){
         return { i, m: {
           car: ix['한글명'],
@@ -12902,7 +12925,7 @@ async function parseStockExcel(file){
 
       out.push({
         car_name: car,
-        fuel: stkGuessFuel(car),
+        fuel: (m.fuel!==undefined && cell(r,m.fuel)) ? stkNormFuel(cell(r,m.fuel)) : stkGuessFuel(car),
         opt: cell(r,m.opt),
         ext_color: cell(r,m.ext),
         int_color: cell(r,m.int),
