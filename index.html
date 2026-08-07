@@ -2647,6 +2647,7 @@
           <button class="stk-tab active" id="stkTabFinance" onclick="switchStockTab('finance')">금융사재고</button>
           <button class="stk-tab" id="stkTabSeller" onclick="switchStockTab('seller')">판매사재고</button>
           <div id="stkUpdateInfo" style="margin-left:14px;font-size:13px;font-weight:700;color:var(--accent);"></div>
+          <div id="stkNoticeInfo" style="margin-left:14px;font-size:12px;color:var(--red);font-weight:600;"></div>
           <div id="stkTodayInfo" style="margin-left:auto;font-size:12px;color:var(--text3);"></div>
         </div>
 
@@ -2670,6 +2671,7 @@
             <input type="checkbox" id="stkFDisc" onchange="renderStockItems()" style="accent-color:var(--accent);"> 할인 있는 것만
           </label>
           <button class="btn btn-ghost btn-sm" onclick="resetStockFilters()">필터 해제</button>
+          <button class="btn btn-ghost btn-sm" id="stkFileBtn" onclick="openStockFileModal()" style="border-color:var(--accent);color:var(--accent);">📎 원본 파일 <span id="stkFileCnt" style="font-size:10px;opacity:.8;"></span></button>
           <datalist id="stkDLCar"></datalist><datalist id="stkDLFuel"></datalist><datalist id="stkDLOpt"></datalist>
           <datalist id="stkDLExt"></datalist><datalist id="stkDLInt"></datalist>
         </div>
@@ -3466,6 +3468,40 @@
     </div>
   </div>
 </div>
+<!-- ===== 재고 원본 파일 모달 ===== -->
+<div class="modal-bg" id="stockFileModal">
+  <div class="modal" style="width:1000px;max-width:95vw;">
+    <div class="modal-title">📎 원본 파일 <span id="sfVendorName" style="font-size:13px;color:var(--accent);font-weight:600;"></span></div>
+    <div id="sfDropWrap" class="admin-only">
+      <div id="sfDrop" style="border:2px dashed var(--border2);border-radius:10px;padding:26px;text-align:center;color:var(--text3);cursor:pointer;font-size:13px;margin-bottom:14px;">
+        📎 이미지 · 엑셀 · PDF 파일을 드래그하거나 클릭해서 업로드
+        <div style="font-size:11px;margin-top:6px;">분석 없이 원본 그대로 보관됩니다</div>
+      </div>
+      <input type="file" id="sfFile" multiple style="display:none;">
+      <div id="sfProg" style="font-size:12px;color:var(--accent);margin-bottom:10px;"></div>
+    </div>
+    <div id="sfList" style="display:flex;flex-wrap:wrap;gap:10px;max-height:300px;overflow:auto;"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeStockFileModal()">닫기</button></div>
+  </div>
+</div>
+<!-- ===== 원본 파일 뷰어 ===== -->
+<div class="modal-bg" id="stockFileViewer" style="z-index:20050;">
+  <div class="modal" style="width:96vw;max-width:1400px;background:transparent;border:none;box-shadow:none;padding:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;color:#fff;">
+      <div id="sfvName" style="font-size:13px;font-weight:600;"></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="sfvIdx" style="font-size:12px;color:#bbb;"></span>
+        <a id="sfvDl" href="#" download class="btn btn-ghost btn-sm">다운로드</a>
+        <button class="btn btn-ghost btn-sm" onclick="closeStockFileViewer()">✕ 닫기</button>
+      </div>
+    </div>
+    <div style="position:relative;background:#000;border-radius:10px;overflow:hidden;">
+      <div onclick="sfvMove(-1)" style="position:absolute;left:0;top:0;bottom:0;width:18%;cursor:w-resize;display:flex;align-items:center;justify-content:flex-start;padding-left:12px;font-size:34px;color:#fff8;user-select:none;">‹</div>
+      <div onclick="sfvMove(1)" style="position:absolute;right:0;top:0;bottom:0;width:18%;cursor:e-resize;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;font-size:34px;color:#fff8;user-select:none;">›</div>
+      <img id="sfvImg" style="max-height:80vh;width:100%;object-fit:contain;display:block;">
+    </div>
+  </div>
+</div>
 <!-- ===== 재고 업로드 모달 ===== -->
 <div class="modal-bg" id="stockUploadModal">
   <div class="modal" style="width:1000px;max-width:95vw;">
@@ -3491,6 +3527,12 @@
       <button class="btn btn-primary btn-sm" onclick="analyzeStockText()">🤖 텍스트 분석</button>
       <button class="btn btn-primary btn-sm" onclick="saveStockPreview()">저장</button>
       <div id="stkProgress" style="font-size:12px;color:var(--accent);"></div>
+      <div id="stkProgWrap" style="display:none;align-items:center;gap:8px;flex:1;max-width:260px;">
+        <div style="flex:1;height:8px;background:var(--bg3);border-radius:6px;overflow:hidden;">
+          <div id="stkProgFill" style="height:100%;width:0%;background:var(--accent);transition:width .35s ease;"></div>
+        </div>
+        <span id="stkProgPct" style="font-size:11px;color:var(--text2);font-weight:700;min-width:34px;text-align:right;">0%</span>
+      </div>
     </div>
     <div id="stkPreviewWrap" style="display:none;margin-top:18px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
@@ -12374,6 +12416,7 @@ async function loadStockData(){
     const ups = await sbFetch('stock_uploads?select=*&limit=100000');
     stkUploads = {};
     (ups||[]).forEach(u => { stkUploads[stkKey(u.vendor_type, u.vendor_name)] = u; });
+    await loadStockFiles();
     stkLoaded = true;
   } catch(e){ console.warn('재고 현황 로드 실패:', e); }
 }
@@ -12396,6 +12439,7 @@ function switchStockTab(t){
 }
 
 function renderStockVendorList(){
+  updateStockFileBtn();
   const rb = document.getElementById('stkResetBtn');
   if(rb) rb.style.display = (stkSelVendor && currentRole==='admin') ? '' : 'none';
   const wrap = document.getElementById('stkVendorList'); if(!wrap) return;
@@ -12407,6 +12451,8 @@ function renderStockVendorList(){
     ? ('오늘 업로드 '+(names.length-notToday)+' / '+names.length + (notToday? ' · <span style="color:var(--red);font-weight:700;">미업로드 '+notToday+'</span>':''))
     : '';
   renderStockUpdateInfo(names);
+  const nt = document.getElementById('stkNoticeInfo');
+  if(nt) nt.textContent = notToday>0 ? '※ 미업로드 '+(stkTab==='finance'?'금융사':'판매사')+' 재고건은 엑셀 및 금융사 웹, 단톡 확인하시기 바랍니다.' : '';
   if(!names.length){
     wrap.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:16px;text-align:center;">등록된 '+(stkTab==='finance'?'금융사':'판매사')+'가 없습니다</div>';
     return;
@@ -12612,6 +12658,7 @@ async function resetStockVendor(){
     const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name='+stkVendorInList(name);
     await sbFetch('stock_items?'+filter, 'DELETE');
     await sbFetch('stock_uploads?'+filter, 'DELETE');
+    try { await sfPurgeVendor(type, name); } catch(e){}
     showGlobalToast(name+' 재고 삭제 완료');
     stkRows = []; stkMode='none';
     await loadStockData();
@@ -12687,15 +12734,41 @@ function stkFillDealerInput(){
   const v = (document.getElementById('stkUpVendor')||{}).value || '';
   el.value = (v && v!=='__new__') ? (stkUpFor(t,v)?.dealer || '') : '';
 }
-function stkProg(msg){
+let _stkBarTimer = null, _stkBarVal = 0;
+function stkBarSet(p){
+  _stkBarVal = Math.max(0, Math.min(100, p));
+  const f=document.getElementById('stkProgFill'), t=document.getElementById('stkProgPct');
+  if(f) f.style.width = _stkBarVal+'%';
+  if(t) t.textContent = Math.round(_stkBarVal)+'%';
+}
+function stkBarShow(on){
+  const w=document.getElementById('stkProgWrap'); if(w) w.style.display = on? 'flex':'none';
+}
+function stkBarStop(){ if(_stkBarTimer){ clearInterval(_stkBarTimer); _stkBarTimer=null; } }
+// 실제 진행률(pct)이 있으면 그 값 기준, 없으면 90%까지 서서히 차오름
+function stkBarBusy(pct){
+  stkBarShow(true);
+  stkBarStop();
+  if(typeof pct === 'number'){ stkBarSet(pct); return; }
+  if(_stkBarVal >= 90) _stkBarVal = 5;
+  _stkBarTimer = setInterval(()=>{
+    if(_stkBarVal < 90) stkBarSet(_stkBarVal + Math.max(0.4, (90-_stkBarVal)*0.06));
+  }, 400);
+}
+function stkBarDone(){
+  stkBarStop(); stkBarShow(true); stkBarSet(100);
+  setTimeout(()=>{ if(!_stkBarTimer){ stkBarShow(false); stkBarSet(0); } }, 1200);
+}
+function stkProg(msg, pct){
   const el=document.getElementById('stkProgress'); if(!el) return;
   const m = String(msg||'').trim();
-  if(!m){ el.textContent=''; el.style.color=''; el.removeAttribute('title'); return; }
+  if(!m){ el.textContent=''; el.style.color=''; el.removeAttribute('title'); stkBarStop(); stkBarShow(false); stkBarSet(0); return; }
   const busy = /(중\.\.\.|중$|\.\.\.$)/.test(m) && !/완료/.test(m);
   el.textContent = busy ? '분석중...' : '완료';
   el.style.color = busy ? 'var(--accent)' : 'var(--green)';
   el.style.fontWeight = '700';
   el.title = m;
+  if(busy) stkBarBusy(pct); else stkBarDone();
 }
 
 function addStockPreviewRow(){ stkPreview.push({car_name:'',fuel:'',opt:'',ext_color:'',int_color:'',price:'',car_no:'',qty:1,discount:'',pre_fin:'',asset_no:'',promo:'',fee:''}); renderStockPreview(); }
@@ -12801,7 +12874,10 @@ function initStockDrop(){
   fi.addEventListener('change', e=>{ handleStockFiles(e.target.files); fi.value=''; });
 }
 async function handleStockFiles(files){
-  for(const f of Array.from(files||[])){
+  const list = Array.from(files||[]);
+  let _fi = 0;
+  for(const f of list){
+    if(list.length>1) stkProg('파일 '+(++_fi)+' / '+list.length+' 처리 중...', Math.round((_fi-1)/list.length*100));
     const n = f.name.toLowerCase();
     try {
       if(/\.(xlsx|xls|csv)$/.test(n)) await parseStockExcel(f);
@@ -13042,19 +13118,20 @@ async function stkCompressImage(file, maxW){
   return stkCanvasToJpeg(cv, 0.82);
 }
 async function parseStockImage(file){
-  stkProg('이미지 AI 분석 중... (10~30초 소요)');
+  stkProg('이미지 압축 중...', 8);
   const b64 = await stkCompressImage(file, 2000);
+  stkProg('이미지 AI 분석 중... (10~30초 소요)');
   stkPushItems(await stkCallAI({ mimeType:'image/jpeg', data:b64 }));
   stkProg('완료 · '+stkLastModel);
 }
 async function parseStockPdf(file){
   if(typeof pdfjsLib==='undefined'){ alert('PDF 모듈을 불러오지 못했습니다.'); return; }
-  stkProg('PDF 읽는 중...');
+  stkProg('PDF 읽는 중...', 3);
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({data:buf}).promise;
   const total = pdf.numPages;
   for(let p=1;p<=total;p++){
-    stkProg('PDF 분석 중... '+p+' / '+total+'페이지 (누적 '+stkPreview.length+'대)');
+    stkProg('PDF 분석 중... '+p+' / '+total+'페이지 (누적 '+stkPreview.length+'대)', Math.round((p-1)/total*100));
     const page = await pdf.getPage(p);
     const vp0 = page.getViewport({scale:1});
     const scale = Math.min(2.2, 1600/vp0.width);
@@ -13072,6 +13149,161 @@ async function parseStockPdf(file){
   }
   stkProg('PDF 분석 완료 · 총 '+stkPreview.length+'대');
 }
+
+
+/* ===== 재고 원본 파일 첨부 ===== */
+const SF_BUCKET = 'stock-files';
+let stkFiles = [];        // 전체 목록
+let sfViewList = [], sfViewIdx = 0;
+
+function sfPublicUrl(path){ return SB_URL + '/storage/v1/object/public/' + SF_BUCKET + '/' + path.split('/').map(encodeURIComponent).join('/'); }
+function sfIsImage(m, n){ return (m||'').startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp)$/i.test(n||''); }
+
+async function loadStockFiles(){
+  try {
+    stkFiles = await sbFetch('stock_files?select=*&order=uploaded_at.desc&limit=5000');
+  } catch(e){ stkFiles = []; }
+  updateStockFileBtn();
+}
+function sfForVendor(){
+  if(!stkSelVendor) return stkFiles.filter(f=>f.vendor_type===stkTab);
+  const al = stkVendorAliases(stkSelVendor);
+  return stkFiles.filter(f=>f.vendor_type===stkTab && al.indexOf(f.vendor_name)>=0);
+}
+function updateStockFileBtn(){
+  const c = document.getElementById('stkFileCnt');
+  if(c) c.textContent = sfForVendor().length ? '('+sfForVendor().length+')' : '';
+}
+
+function openStockFileModal(){
+  document.getElementById('sfVendorName').textContent = stkSelVendor ? ('· '+stkSelVendor) : ('· '+(stkTab==='finance'?'금융사':'판매사')+' 전체');
+  const dw = document.getElementById('sfDropWrap');
+  if(dw) dw.style.display = (currentRole==='admin' && stkSelVendor) ? '' : 'none';
+  document.getElementById('sfProg').textContent = '';
+  renderStockFileList();
+  document.getElementById('stockFileModal').classList.add('open');
+}
+function closeStockFileModal(){ document.getElementById('stockFileModal').classList.remove('open'); }
+
+function renderStockFileList(){
+  const wrap = document.getElementById('sfList'); if(!wrap) return;
+  const list = sfForVendor();
+  if(!list.length){
+    wrap.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:20px;width:100%;text-align:center;">첨부된 원본 파일이 없습니다'
+      + (currentRole==='admin' && !stkSelVendor ? '<br>업체를 먼저 선택하면 업로드할 수 있습니다.' : '') + '</div>';
+    return;
+  }
+  wrap.innerHTML = list.map((f,i)=>{
+    const img = sfIsImage(f.mime, f.file_name);
+    const thumb = img
+      ? '<img src="'+sfPublicUrl(f.path)+'" style="width:100%;height:110px;object-fit:cover;display:block;">'
+      : '<div style="height:110px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--bg3);">'+(/\.pdf$/i.test(f.file_name)?'📄':'📊')+'</div>';
+    return '<div style="width:170px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg2);">'
+      + '<div style="cursor:pointer;" onclick="sfOpen('+i+')">'+thumb+'</div>'
+      + '<div style="padding:6px 8px;font-size:11px;color:var(--text2);word-break:break-all;">'+escapeHtml(f.file_name)+'</div>'
+      + '<div style="padding:0 8px 8px;display:flex;gap:6px;align-items:center;">'
+      + '<a href="'+sfPublicUrl(f.path)+'" target="_blank" download style="font-size:11px;color:var(--accent);">열기</a>'
+      + (currentRole==='admin' ? '<button onclick="sfDelete('+f.id+')" style="margin-left:auto;font-size:11px;color:var(--red);background:transparent;border:none;cursor:pointer;">삭제</button>' : '')
+      + '</div></div>';
+  }).join('');
+}
+
+function sfOpen(i){
+  const list = sfForVendor();
+  const f = list[i];
+  if(!f) return;
+  if(!sfIsImage(f.mime, f.file_name)){ window.open(sfPublicUrl(f.path), '_blank'); return; }
+  sfViewList = list.filter(x=>sfIsImage(x.mime, x.file_name));
+  sfViewIdx = Math.max(0, sfViewList.findIndex(x=>x.id===f.id));
+  sfRenderViewer();
+  document.getElementById('stockFileViewer').classList.add('open');
+}
+function sfRenderViewer(){
+  const f = sfViewList[sfViewIdx]; if(!f) return;
+  document.getElementById('sfvImg').src = sfPublicUrl(f.path);
+  document.getElementById('sfvName').textContent = f.file_name;
+  document.getElementById('sfvIdx').textContent = (sfViewIdx+1)+' / '+sfViewList.length;
+  const dl = document.getElementById('sfvDl'); dl.href = sfPublicUrl(f.path); dl.setAttribute('download', f.file_name);
+}
+function sfvMove(d){
+  if(!sfViewList.length) return;
+  sfViewIdx = (sfViewIdx + d + sfViewList.length) % sfViewList.length;
+  sfRenderViewer();
+}
+function closeStockFileViewer(){ document.getElementById('stockFileViewer').classList.remove('open'); }
+document.addEventListener('keydown', e=>{
+  const v = document.getElementById('stockFileViewer');
+  if(!v || !v.classList.contains('open')) return;
+  if(e.key==='ArrowLeft'){ e.preventDefault(); sfvMove(-1); }
+  else if(e.key==='ArrowRight'){ e.preventDefault(); sfvMove(1); }
+  else if(e.key==='Escape'){ closeStockFileViewer(); }
+});
+
+async function sfUpload(files){
+  if(currentRole!=='admin'){ alert('관리자만 가능합니다.'); return; }
+  if(!stkSelVendor){ alert('업체를 먼저 선택하세요.'); return; }
+  const list = Array.from(files||[]); if(!list.length) return;
+  const pr = document.getElementById('sfProg');
+  for(let i=0;i<list.length;i++){
+    const f = list[i];
+    if(f.size > 20*1024*1024){ alert(f.name+' : 20MB를 초과해 건너뜁니다.'); continue; }
+    if(pr) pr.textContent = '업로드 중... '+(i+1)+' / '+list.length+' — '+f.name;
+    const safe = f.name.replace(/[^\w.\-가-힣]/g,'_');
+    const path = stkTab+'/'+stkSelVendor.replace(/[^\w\-가-힣]/g,'_')+'/'+Date.now()+'_'+i+'_'+safe;
+    try {
+      const res = await fetch(SB_URL+'/storage/v1/object/'+SF_BUCKET+'/'+path.split('/').map(encodeURIComponent).join('/'), {
+        method:'POST',
+        headers:{ 'Authorization':'Bearer '+SB_KEY, 'apikey':SB_KEY, 'Content-Type': f.type || 'application/octet-stream', 'x-upsert':'true' },
+        body: f
+      });
+      if(!res.ok) throw new Error((await res.text()).slice(0,200));
+      await sbFetch('stock_files','POST',[{ vendor_type:stkTab, vendor_name:stkSelVendor, file_name:f.name, path:path, mime:f.type||'', size:f.size, uploaded_by:currentUser||'' }],'return=minimal');
+    } catch(e){ alert(f.name+' 업로드 실패: '+e.message); }
+  }
+  if(pr) pr.textContent = '업로드 완료';
+  await loadStockFiles();
+  renderStockFileList();
+  setTimeout(()=>{ if(pr) pr.textContent=''; }, 2000);
+}
+async function sfDelete(id){
+  if(currentRole!=='admin'){ alert('관리자만 가능합니다.'); return; }
+  const f = stkFiles.find(x=>x.id===id); if(!f) return;
+  if(!confirm(f.file_name+' 을(를) 삭제할까요?')) return;
+  try {
+    await fetch(SB_URL+'/storage/v1/object/'+SF_BUCKET+'/'+f.path.split('/').map(encodeURIComponent).join('/'), {
+      method:'DELETE', headers:{ 'Authorization':'Bearer '+SB_KEY, 'apikey':SB_KEY }
+    });
+  } catch(e){}
+  try { await sbFetch('stock_files?id=eq.'+id, 'DELETE'); } catch(e){}
+  await loadStockFiles();
+  renderStockFileList();
+}
+// 재고 재업로드/삭제 시 해당 업체 첨부도 정리
+async function sfPurgeVendor(type, name){
+  const al = stkVendorAliases(name);
+  const targets = stkFiles.filter(f=>f.vendor_type===type && al.indexOf(f.vendor_name)>=0);
+  for(const f of targets){
+    try {
+      await fetch(SB_URL+'/storage/v1/object/'+SF_BUCKET+'/'+f.path.split('/').map(encodeURIComponent).join('/'), {
+        method:'DELETE', headers:{ 'Authorization':'Bearer '+SB_KEY, 'apikey':SB_KEY }
+      });
+    } catch(e){}
+    try { await sbFetch('stock_files?id=eq.'+f.id, 'DELETE'); } catch(e){}
+  }
+}
+(function initSfDrop(){
+  const bind = ()=>{
+    const dz = document.getElementById('sfDrop'), fi = document.getElementById('sfFile');
+    if(!dz || !fi || dz._bound) return;
+    dz._bound = true;
+    dz.addEventListener('click', ()=>fi.click());
+    dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.style.borderColor='var(--accent)'; });
+    dz.addEventListener('dragleave', ()=>{ dz.style.borderColor='var(--border2)'; });
+    dz.addEventListener('drop', e=>{ e.preventDefault(); dz.style.borderColor='var(--border2)'; sfUpload(e.dataTransfer.files); });
+    fi.addEventListener('change', e=>{ sfUpload(e.target.files); fi.value=''; });
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+})();
 
 /* ---- 저장 ---- */
 async function saveStockPreview(){
@@ -13093,6 +13325,7 @@ async function saveStockPreview(){
     if(!sameDay){
       stkProg('이전 날짜 자료 정리 중...');
       await sbFetch('stock_items?'+filter, 'DELETE');
+      try { await sfPurgeVendor(type, name); } catch(e){}
     } else {
       // 같은 날 재업로드: 이번 자료에 포함된 차량명만 먼저 삭제 (중복 누적 방지)
       const names = Array.from(new Set(rows.map(r=>String(r.car_name||'').trim()).filter(Boolean)));
