@@ -12572,6 +12572,7 @@ function renderStockItems(){
   const hasPF = rows.some(r=>String(r.pre_fin||'').trim());
   const hasAS = rows.some(r=>String(r.asset_no||'').trim());
   const hasPR = rows.some(r=>String(r.promo||'').trim());
+  const hasFE = rows.some(r=>String(r.fee||'').trim());
   wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr>'
     + H('vendor_name', stkTab==='finance'?'금융사':'판매사')
     + (hasDealer? '<th style="'+th+'">대리점</th>' : '')
@@ -12581,6 +12582,7 @@ function renderStockItems(){
     + H('price','가격',1) + H('discount','할인',1) + H('qty','수량',1)
     + (hasAS? H('asset_no','자산번호') : '')
     + (hasPR? H('promo','프로모션') : '')
+    + (hasFE? H('fee','수수료',1) : '')
     + '</tr></thead><tbody>'
     + rows.map(r=>'<tr>'
       + '<td style="'+td+'white-space:nowrap;color:var(--accent);font-weight:600;">'+escapeHtml(r.vendor_name||'-')+'</td>'
@@ -12596,6 +12598,7 @@ function renderStockItems(){
       + '<td style="'+td+'text-align:right;white-space:nowrap;font-family:\'JetBrains Mono\',monospace;color:'+((Number(r.qty)||1)>1?'var(--accent)':'var(--text3)')+';">'+(Number(r.qty)||1)+'</td>'
       + (hasAS? '<td style="'+td+'white-space:nowrap;color:var(--text2);">'+escapeHtml(r.asset_no||'-')+'</td>' : '')
       + (hasPR? '<td style="'+td+'color:var(--green);min-width:140px;">'+escapeHtml(r.promo||'-')+'</td>' : '')
+      + (hasFE? '<td style="'+td+'text-align:right;white-space:nowrap;color:var(--accent);">'+escapeHtml(r.fee||'-')+'</td>' : '')
       + '</tr>').join('')
     + '</tbody></table>';
 }
@@ -12619,8 +12622,8 @@ function exportStockExcel(){
   if(typeof XLSX==='undefined'){ alert('엑셀 모듈을 불러오지 못했습니다.'); return; }
   const rows = stkFilteredRows();
   if(!rows.length){ alert('저장할 재고가 없습니다.'); return; }
-  const aoa = [['업체','대리점','선점금융사','차량명','유종','옵션','외장색','내장색','가격','할인','수량','자산번호','프로모션']];
-  rows.forEach(r=>aoa.push([r.vendor_name||'',(stkUpFor(r.vendor_type||stkTab,stkCanonVendor(r.vendor_name))?.dealer||''),r.pre_fin||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1,r.asset_no||'',r.promo||'']));
+  const aoa = [['업체','대리점','선점금융사','차량명','유종','옵션','외장색','내장색','가격','할인','수량','자산번호','프로모션','수수료']];
+  rows.forEach(r=>aoa.push([r.vendor_name||'',(stkUpFor(r.vendor_type||stkTab,stkCanonVendor(r.vendor_name))?.dealer||''),r.pre_fin||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1,r.asset_no||'',r.promo||'',r.fee||'']));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), '재고');
   XLSX.writeFile(wb, '재고_'+stkToday()+'.xlsx');
@@ -12695,7 +12698,7 @@ function stkProg(msg){
   el.title = m;
 }
 
-function addStockPreviewRow(){ stkPreview.push({car_name:'',fuel:'',opt:'',ext_color:'',int_color:'',price:'',car_no:'',qty:1,discount:'',pre_fin:'',asset_no:'',promo:''}); renderStockPreview(); }
+function addStockPreviewRow(){ stkPreview.push({car_name:'',fuel:'',opt:'',ext_color:'',int_color:'',price:'',car_no:'',qty:1,discount:'',pre_fin:'',asset_no:'',promo:'',fee:''}); renderStockPreview(); }
 function clearStockPreview(){ stkPreview = []; renderStockPreview(); }
 function delStockPreviewRow(i){ stkPreview.splice(i,1); renderStockPreview(); }
 const STK_NUMK = { price:1, discount:1, qty:1 };
@@ -12717,8 +12720,9 @@ function renderStockPreview(){
   const hasPF = stkPreview.some(r=>String(r.pre_fin||'').trim());
   const hasAS = stkPreview.some(r=>String(r.asset_no||'').trim());
   const hasPR = stkPreview.some(r=>String(r.promo||'').trim());
-  const cols = ['car_name','fuel','opt','ext_color','int_color'].concat(hasPF?['pre_fin']:[]).concat(['price','discount','qty']).concat(hasAS?['asset_no']:[]).concat(hasPR?['promo']:[]);
-  tb.innerHTML = '<thead><tr><th style="'+th+'width:26px;">#</th><th style="'+th+'">차량명</th><th style="'+th+'width:70px;">유종</th><th style="'+th+'">옵션</th><th style="'+th+'width:120px;">외장</th><th style="'+th+'width:120px;">내장</th>'+(hasPF?'<th style="'+th+'width:120px;">선점금융사</th>':'')+'<th style="'+th+'width:95px;">가격</th><th style="'+th+'width:90px;">할인</th><th style="'+th+'width:50px;">수량</th>'+(hasAS?'<th style="'+th+'width:100px;">자산번호</th>':'')+(hasPR?'<th style="'+th+'width:150px;">프로모션</th>':'')+'<th style="'+th+'width:36px;"></th></tr></thead><tbody>'
+  const hasFE = stkPreview.some(r=>String(r.fee||'').trim());
+  const cols = ['car_name','fuel','opt','ext_color','int_color'].concat(hasPF?['pre_fin']:[]).concat(['price','discount','qty']).concat(hasAS?['asset_no']:[]).concat(hasPR?['promo']:[]).concat(hasFE?['fee']:[]);
+  tb.innerHTML = '<thead><tr><th style="'+th+'width:26px;">#</th><th style="'+th+'">차량명</th><th style="'+th+'width:70px;">유종</th><th style="'+th+'">옵션</th><th style="'+th+'width:120px;">외장</th><th style="'+th+'width:120px;">내장</th>'+(hasPF?'<th style="'+th+'width:120px;">선점금융사</th>':'')+'<th style="'+th+'width:95px;">가격</th><th style="'+th+'width:90px;">할인</th><th style="'+th+'width:50px;">수량</th>'+(hasAS?'<th style="'+th+'width:100px;">자산번호</th>':'')+(hasPR?'<th style="'+th+'width:150px;">프로모션</th>':'')+(hasFE?'<th style="'+th+'width:90px;">수수료</th>':'')+'<th style="'+th+'width:36px;"></th></tr></thead><tbody>'
     + stkPreview.map((r,i)=>'<tr>'
       + '<td style="color:var(--text3);">'+(i+1)+'</td>'
       + cols.map(k=>{
@@ -12772,7 +12776,8 @@ function stkPushItems(arr){
       discount: o.discount ? String(o.discount).replace(/[^0-9]/g,'') : '',
       pre_fin: (o.pre_fin||'').trim(),
       asset_no: (o.asset_no||'').trim(),
-      promo: (o.promo||'').trim()
+      promo: (o.promo||'').trim(),
+      fee: (o.fee||'').trim()
     });
   });
   renderStockPreview();
@@ -13107,7 +13112,8 @@ async function saveStockPreview(){
       discount: r.discount? parseInt(String(r.discount).replace(/[^0-9]/g,''),10)||null : null,
       pre_fin: String(r.pre_fin||'').trim(),
       asset_no: String(r.asset_no||'').trim(),
-      promo: String(r.promo||'').trim()
+      promo: String(r.promo||'').trim(),
+      fee: String(r.fee||'').trim()
     }));
     const BS = 1000;
     for(let i=0;i<payload.length;i+=BS){
