@@ -2674,6 +2674,7 @@
           </div>
           <button class="btn btn-ghost" onclick="clearStockSearch()">검색 초기화</button>
           <button class="btn btn-ghost" onclick="exportStockExcel()">엑셀 저장</button>
+          <button class="btn btn-ghost admin-only" id="stkDelFilteredBtn" onclick="deleteFilteredStock()" style="display:none;color:var(--yellow);border-color:var(--yellow);">조회 결과 삭제</button>
           <button class="btn btn-ghost admin-only" id="stkResetBtn" onclick="resetStockVendor()" style="display:none;color:var(--red);border-color:var(--red);">선택 업체 재고 삭제</button>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
@@ -12638,6 +12639,8 @@ function renderStockItems(){
   const cntEl = document.getElementById('stkCount');
   const qLen = (document.getElementById('stkSearch')?.value||'').trim().length;
   let rows = stkFilteredRows();
+  const dfb = document.getElementById('stkDelFilteredBtn');
+  if(dfb) dfb.style.display = (currentRole==='admin' && rows.length) ? '' : 'none';
   if(!rows.length){
     if(cntEl) cntEl.textContent='';
     let msg = '업체를 선택하거나 차량명을 검색하세요';
@@ -12743,6 +12746,51 @@ async function resetStockVendor(){
     await loadStockData();
     renderStockVendorList(); renderStockItems(); updateStockNavBadge();
   } catch(e){ alert('삭제 실패: '+e.message); }
+}
+async function deleteFilteredStock(){
+  if(currentRole!=='admin'){ alert('관리자만 가능합니다.'); return; }
+  const rows = stkFilteredRows();
+  if(!rows.length){ alert('삭제할 재고가 없습니다.'); return; }
+  const ids = [];
+  let noId = false;
+  rows.forEach(r=>{
+    const a = r.ids;
+    if(Array.isArray(a)) a.forEach(v=>{ if(v!==null && v!==undefined && v!=='') ids.push(v); });
+    else if(typeof a === 'string' && a.trim()) String(a).replace(/^\{|\}$/g,'').split(',').forEach(v=>{ v=v.trim().replace(/^"|"$/g,''); if(v) ids.push(v); });
+    else noId = true;
+  });
+  if(noId || !ids.length){
+    alert('이 기능은 stock_agg 뷰에 ids 컬럼이 필요합니다.\nSupabase에서 뷰 갱신 SQL을 먼저 실행해 주세요.');
+    return;
+  }
+  const qty = rows.reduce((a,b)=>a+(parseInt(b.qty,10)||1),0);
+  const vends = Array.from(new Set(rows.map(r=>(r.vendor_type||stkTab)+'\u0001'+(r.vendor_name||''))));
+  if(!confirm('현재 조회된 '+rows.length+'행 · '+qty.toLocaleString()+'대를 삭제합니다.\n(화면에 보이는 결과만 삭제됩니다)\n\n되돌릴 수 없습니다. 진행할까요?')) return;
+  window._lastLocalChange = Date.now();
+  try {
+    for(let i=0;i<ids.length;i+=200){
+      stkProg('삭제 중... '+Math.min(i+200,ids.length)+' / '+ids.length);
+      const chunk = ids.slice(i,i+200).map(v=>'"'+String(v).replace(/"/g,'')+'"').join(',');
+      await sbFetch('stock_items?id=in.('+encodeURIComponent(chunk)+')', 'DELETE');
+    }
+    for(const key of vends){
+      const p = key.split('\u0001'), vt = p[0], vn = p[1];
+      if(!vn) continue;
+      try {
+        const agg = await sbFetch(STK_AGG+'?select=qty&vendor_type=eq.'+encodeURIComponent(vt)+'&vendor_name='+stkVendorInList(vn)+'&limit=100000');
+        const total = (agg||[]).reduce((a,b)=>a+(Number(b.qty)||0),0);
+        const prev = stkUpFor(vt, vn);
+        await sbFetch('stock_uploads?on_conflict=vendor_type,vendor_name','POST',
+          [{ vendor_type:vt, vendor_name:vn, uploaded_at:(prev&&prev.uploaded_at)||new Date().toISOString(),
+             uploaded_by:(prev&&prev.uploaded_by)||currentUser||'', cnt:total, dealer:(prev&&prev.dealer)||'' }],
+          'return=minimal,resolution=merge-duplicates');
+      } catch(e){}
+    }
+    stkProg('');
+    showGlobalToast(rows.length+'행 삭제 완료');
+    await loadStockData();
+    renderStockVendorList(); await fetchStockRows(); updateStockNavBadge();
+  } catch(e){ stkProg(''); alert('삭제 실패: '+e.message); }
 }
 function exportStockExcel(){
   if(typeof XLSX==='undefined'){ alert('엑셀 모듈을 불러오지 못했습니다.'); return; }
