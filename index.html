@@ -6075,6 +6075,31 @@ function dDayLabel(dateStr) {
   return '<span style="font-size:11px;font-weight:700;color:'+color+';font-family:JetBrains Mono,monospace;">'+label+'</span><br>'+
          '<span style="font-size:10px;color:var(--text3);">'+dateStr.slice(5)+'</span>';
 }
+/* 배분(재배분 포함) 후 1일 이상 상담메모 미작성 — 관리자 전용 강조 */
+function dbNoMemoDays(c){
+  if(currentRole !== 'admin') return 0;
+  if(!c || c.retrieved) return 0;
+  const asg = String(c.assign||'').trim();
+  if(!asg || asg==='-' || asg==='구디비' || asg==='종료디비') return 0;
+  const assignISO = String(c.reassignDate || c.date || '').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(assignISO)) return 0;
+  const base = new Date(assignISO+'T00:00:00'); if(isNaN(base.getTime())) return 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.round((today - base) / 86400000);
+  if(days < 1) return 0;
+  const real = (c.memos||[]).filter(m=>!m.isSystem);
+  const last = real.length ? String(real[0].dateISO || (real[0].date||'').slice(0,10)) : '';
+  if(last && last >= assignISO) return 0;
+  return days;
+}
+function dbMemoCellHtml(c){
+  const days = dbNoMemoDays(c);
+  if(!days) return '<td>'+latestMemoPreview(c)+'</td>';
+  return '<td style="border:2px solid var(--red);border-radius:5px;background:rgba(255,95,95,.08);">'
+    + latestMemoPreview(c)
+    + '<div style="margin-top:2px;font-size:10px;font-weight:700;color:var(--red);white-space:nowrap;">배분 '+days+'일 미상담</div>'
+    + '</td>';
+}
 function latestMemoPreview(c) {
   const real = c.memos.filter(m=>!m.isSystem);
   if(!real.length) return '<span style="color:var(--yellow);font-size:11px;font-weight:600;">메모 없음</span>';
@@ -6244,7 +6269,7 @@ function renderDB(list) {
       '<td onclick="event.stopPropagation();toggleRowCheck('+c.id+')" style="cursor:pointer;"><span style="font-size:12px;color:var(--text2);">'+(c.memoTag||'-')+'</span></td>'+
       '<td onclick="event.stopPropagation();toggleRowCheck('+c.id+')" style="font-size:13px;cursor:pointer;">'+c.assign+'</td>'+
       '<td onclick="event.stopPropagation()">'+buildStatusCell(c)+'</td>'+
-      '<td>'+latestMemoPreview(c)+'</td>'+
+      dbMemoCellHtml(c)+
       '<td style="text-align:right;font-size:11px;color:var(--text2);font-family:JetBrains Mono,monospace;">'+c.date.slice(5)+'</td>'+
       '<td style="text-align:right;">'+latestConsultDate(c)+'</td>'+
       '<td style="text-align:right;">'+dDayLabel(getNextConsult(c))+'</td>'+
