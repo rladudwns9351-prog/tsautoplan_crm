@@ -2682,14 +2682,14 @@
           <input list="stkDLOpt"  id="stkFOpt"  class="stk-f" placeholder="옵션" oninput="renderStockItems()">
           <input list="stkDLExt"  id="stkFExt"  class="stk-f" placeholder="외장색" oninput="renderStockItems()">
           <input list="stkDLInt"  id="stkFInt"  class="stk-f" placeholder="내장색" oninput="renderStockItems()">
-          <input id="stkFDealer" class="stk-f" placeholder="대리점" style="width:120px;" oninput="renderStockItems()">
+          <input list="stkDLDealer" id="stkFDealer" class="stk-f" placeholder="대리점" style="width:120px;" oninput="renderStockItems()">
           <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;padding:0 4px;">
             <input type="checkbox" id="stkFDisc" onchange="renderStockItems()" style="accent-color:var(--accent);"> 할인 있는 것만
           </label>
           <button class="btn btn-ghost btn-sm" onclick="resetStockFilters()">필터 해제</button>
           <button class="btn btn-ghost btn-sm" id="stkFileBtn" onclick="openStockFileModal()" style="border-color:var(--accent);color:var(--accent);">📎 원본 파일 <span id="stkFileCnt" style="font-size:10px;opacity:.8;"></span></button>
           <datalist id="stkDLCar"></datalist><datalist id="stkDLFuel"></datalist><datalist id="stkDLOpt"></datalist>
-          <datalist id="stkDLExt"></datalist><datalist id="stkDLInt"></datalist>
+          <datalist id="stkDLExt"></datalist><datalist id="stkDLInt"></datalist><datalist id="stkDLDealer"></datalist>
         </div>
 
         <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;">
@@ -12594,7 +12594,7 @@ function stkFilteredRows(){
     if(fOpt  && !(r.opt||'').toLowerCase().includes(fOpt)) return false;
     if(fExt  && !(r.ext_color||'').toLowerCase().includes(fExt)) return false;
     if(fInt  && !(r.int_color||'').toLowerCase().includes(fInt)) return false;
-    if(fDealer && !(stkUpFor(r.vendor_type||stkTab, stkCanonVendor(r.vendor_name))?.dealer||'').toLowerCase().includes(fDealer)) return false;
+    if(fDealer && !((r.dealer||stkUpFor(r.vendor_type||stkTab, stkCanonVendor(r.vendor_name))?.dealer||'')).toLowerCase().includes(fDealer)) return false;
     if(onlyDisc && !(Number(r.discount)>0)) return false;
     return true;
   });
@@ -12606,7 +12606,7 @@ function stkFillDatalists(){
     dl.innerHTML = Array.from(set).sort().slice(0,400).map(v=>'<option value="'+escapeHtml(v)+'">').join('');
   };
   fill('stkDLCar','car_name'); fill('stkDLFuel','fuel'); fill('stkDLOpt','opt');
-  fill('stkDLExt','ext_color'); fill('stkDLInt','int_color');
+  fill('stkDLExt','ext_color'); fill('stkDLInt','int_color'); fill('stkDLDealer','dealer');
 }
 function setStockSort(k){
   if(stkSort.key===k) stkSort.dir = -stkSort.dir;
@@ -12647,7 +12647,7 @@ function renderStockItems(){
     ? (stkSort.dir>0?' <span style="color:#fff;font-size:12px;">▲</span>':' <span style="color:#fff;font-size:12px;">▼</span>')
     : ' <span style="color:#fff;opacity:.8;font-size:12px;">↕</span>';
   const H = (k,label,right) => '<th style="'+th+(right?'text-align:right;':'')+'" onclick="setStockSort(\''+k+'\')" title="클릭하여 정렬">'+label+arrow(k)+'</th>';
-  const dealerOf = r => (stkUpFor(r.vendor_type||stkTab, stkCanonVendor(r.vendor_name))?.dealer || '');
+  const dealerOf = r => (String(r.dealer||'').trim() || stkUpFor(r.vendor_type||stkTab, stkCanonVendor(r.vendor_name))?.dealer || '');
   const hasDealer = rows.some(r=>dealerOf(r));
   const hasPF = rows.some(r=>String(r.pre_fin||'').trim());
   const hasAS = rows.some(r=>String(r.asset_no||'').trim());
@@ -12730,7 +12730,7 @@ function exportStockExcel(){
   const rows = stkFilteredRows();
   if(!rows.length){ alert('저장할 재고가 없습니다.'); return; }
   const aoa = [['업체','대리점','선점금융사','차량명','유종','옵션','외장색','내장색','가격','할인','수량','자산번호','프로모션/메모','수수료','탁송비','탁송구분','상태']];
-  rows.forEach(r=>aoa.push([r.vendor_name||'',(stkUpFor(r.vendor_type||stkTab,stkCanonVendor(r.vendor_name))?.dealer||''),r.pre_fin||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1,r.asset_no||'',r.promo||'',r.fee||'',r.delivery||'',r.delivery_type||'',r.status||'']));
+  rows.forEach(r=>aoa.push([r.vendor_name||'',(String(r.dealer||'').trim()||stkUpFor(r.vendor_type||stkTab,stkCanonVendor(r.vendor_name))?.dealer||''),r.pre_fin||'',r.car_name||'',r.fuel||'',r.opt||'',r.ext_color||'',r.int_color||'',r.price||'',r.discount||'',r.qty||1,r.asset_no||'',r.promo||'',r.fee||'',r.delivery||'',r.delivery_type||'',r.status||'']));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), '재고');
   XLSX.writeFile(wb, '재고_'+stkToday()+'.xlsx');
@@ -13523,8 +13523,9 @@ async function saveStockPreview(){
       await sbFetch('stock_items?'+filter, 'DELETE');
       try { await sfPurgeVendor(type, name); } catch(e){}
     }
+    const dealerVal = (document.getElementById('stkUpDealer')?.value||'').trim();
     const payload = rows.map(r=>({
-      vendor_type: type, vendor_name: name,
+      vendor_type: type, vendor_name: name, dealer: dealerVal,
       car_name: r.car_name.trim(), fuel: r.fuel||'', opt: r.opt||'',
       ext_color: r.ext_color||'', int_color: r.int_color||'',
       price: r.price? parseInt(String(r.price).replace(/[^0-9]/g,''),10)||null : null,
@@ -13552,7 +13553,6 @@ async function saveStockPreview(){
         totalCnt = (agg||[]).reduce((a,b)=>a+(Number(b.qty)||0),0);
       } catch(e){ totalCnt = (prevUp.cnt||0) + newCnt; }
     }
-    const dealerVal = (document.getElementById('stkUpDealer')?.value||'').trim();
     await sbFetch('stock_uploads?on_conflict=vendor_type,vendor_name','POST',[{vendor_type:type, vendor_name:name, uploaded_at:new Date().toISOString(), uploaded_by:currentUser||'', cnt:totalCnt, dealer:dealerVal}],'return=minimal,resolution=merge-duplicates');
     stkProg('');
     closeStockUploadModal();
