@@ -12747,6 +12747,7 @@ function updateStockNavBadge(){
 /* ---- 업로드 모달 ---- */
 async function openStockUploadModal(){
   if(currentRole!=='admin'){ alert('관리자만 가능합니다.'); return; }
+  if(stkBGBusy){ alert('백그라운드 재고 분석이 진행 중입니다.\n완료 후 다시 시도하세요.'); return; }
   if(!stkLoaded) await loadStockData();
   document.getElementById('stockUploadModal').classList.add('open');
   fillStockUpVendors(stkTab==='seller' ? 'seller' : 'finance');
@@ -12820,8 +12821,10 @@ function stkBarDone(){
   setTimeout(()=>{ if(!_stkBarTimer){ stkBarShow(false); stkBarSet(0); } }, 1200);
 }
 function stkProg(msg, pct){
+  const m0 = String(msg||'').trim();
+  if(stkBGBusy && m0) stkBGBadge(m0, typeof pct==='number' ? pct : undefined);
   const el=document.getElementById('stkProgress'); if(!el) return;
-  const m = String(msg||'').trim();
+  const m = m0;
   if(!m){ el.textContent=''; el.style.color=''; el.removeAttribute('title'); stkBarStop(); stkBarShow(false); stkBarSet(0); return; }
   const busy = /(중\.\.\.|중$|\.\.\.$)/.test(m) && !/완료/.test(m);
   el.textContent = busy ? '분석중...' : '완료';
@@ -12936,8 +12939,71 @@ function initStockDrop(){
   if(!dz||!fi) return;
   ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over');}));
   ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over');}));
-  dz.addEventListener('drop', e=>{ handleStockFiles(e.dataTransfer.files); });
-  fi.addEventListener('change', e=>{ handleStockFiles(e.target.files); fi.value=''; });
+  dz.addEventListener('drop', e=>{ stkStartBG(e.dataTransfer.files); });
+  fi.addEventListener('change', e=>{ stkStartBG(e.target.files); fi.value=''; });
+}
+/* ---- 백그라운드 재고 분석/업로드 ---- */
+var stkBGBusy = false;
+function stkBGBadge(msg, pct, state){
+  let el = document.getElementById('stkBGBadge');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'stkBGBadge';
+    el.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:99999;min-width:240px;max-width:340px;padding:12px 14px;border-radius:12px;background:var(--bg2);border:1px solid var(--border2);box-shadow:0 6px 26px rgba(0,0,0,.6);font-size:12px;color:var(--text);display:none;';
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:8px;"><span>&#128230;</span><span id="stkBGTitle">재고 분석 중</span><span id="stkBGPct" style="margin-left:auto;color:var(--text2);font-weight:600;"></span></div><div style="height:5px;border-radius:3px;background:var(--bg4);overflow:hidden;"><div id="stkBGFill" style="height:100%;width:0%;background:var(--accent2);transition:width .35s;"></div></div><div id="stkBGMsg" style="margin-top:7px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>';
+    document.body.appendChild(el);
+  }
+  if(msg===null){ el.style.display='none'; return; }
+  el.style.display = 'block';
+  const t=document.getElementById('stkBGTitle'); if(t && state) t.textContent = state;
+  const mm=document.getElementById('stkBGMsg'); if(mm) mm.textContent = msg||'';
+  if(typeof pct==='number'){
+    const f=document.getElementById('stkBGFill'); const p=document.getElementById('stkBGPct');
+    if(f) f.style.width = Math.max(0,Math.min(100,pct))+'%';
+    if(p) p.textContent = Math.round(pct)+'%';
+  }
+}
+window.addEventListener('beforeunload', function(e){ if(stkBGBusy){ e.preventDefault(); e.returnValue=''; return ''; } });
+async function stkStartBG(files){
+  const list = Array.from(files||[]);
+  if(!list.length) return;
+  if(stkBGBusy){ alert('이미 백그라운드 분석이 진행 중입니다.\n완료 후 다시 시도하세요.'); return; }
+  const type = document.getElementById('stkUpType').value;
+  let name = document.getElementById('stkUpVendor').value;
+  if(name==='__new__') name = (document.getElementById('stkUpVendorNew').value||'').trim();
+  if(!name){ alert('업체를 먼저 선택하거나 입력하세요.'); return; }
+  const dealer = (document.getElementById('stkUpDealer')?.value||'').trim();
+  const prevUp = stkUpFor(type,name);
+  const sameDay = prevUp && stkDateOf(prevUp.uploaded_at) === stkToday();
+  const q = (sameDay
+      ? '['+name+'] 오늘 자료에 이어서 추가합니다.\n(중복 차량도 삭제 없이 모두 추가됩니다)'
+      : '['+name+'] 이전 날짜 재고를 초기화하고 새로 등록합니다.')
+    + '\n\n분석은 백그라운드로 진행되며 완료되면 자동 저장됩니다.\n(창을 닫거나 새로고침하면 중단됩니다)\n\n진행할까요?';
+  if(!confirm(q)) return;
+
+  stkBGBusy = true;
+  stkPreview = [];
+  closeStockUploadModal();
+  stkBGBadge('파일 '+list.length+'건 분석 준비 중...', 2, '재고 분석 중');
+  try {
+    await handleStockFiles(list);
+    const cnt = stkPreview.filter(r=>(r.car_name||'').trim()).length;
+    if(!cnt){
+      stkBGBadge('분석 결과가 없습니다', 100, '분석 실패');
+      setTimeout(()=>stkBGBadge(null), 5000);
+      return;
+    }
+    stkBGBadge(cnt+'건 저장 중...', 95, '저장 중');
+    await saveStockPreview({silent:true, type:type, name:name, dealer:dealer});
+    stkBGBadge(cnt+'건 업로드 완료', 100, '완료');
+    setTimeout(()=>stkBGBadge(null), 5000);
+  } catch(e){
+    stkBGBadge(String((e&&e.message)||e||'오류'), 100, '실패');
+    setTimeout(()=>stkBGBadge(null), 8000);
+  } finally {
+    stkBGBusy = false;
+    stkPreview = [];
+  }
 }
 async function handleStockFiles(files){
   const list = Array.from(files||[]);
@@ -13502,9 +13568,9 @@ async function sfPurgeVendor(type, name){
 })();
 
 /* ---- 저장 ---- */
-async function saveStockPreview(){
-  const type = document.getElementById('stkUpType').value;
-  let name = document.getElementById('stkUpVendor').value;
+async function saveStockPreview(bg){
+  const type = (bg&&bg.type) || document.getElementById('stkUpType').value;
+  let name = (bg&&bg.name) || document.getElementById('stkUpVendor').value;
   if(name==='__new__') name = (document.getElementById('stkUpVendorNew').value||'').trim();
   if(!name){ alert('업체를 선택하거나 입력하세요.'); return; }
   const rows = stkPreview.filter(r=>(r.car_name||'').trim());
@@ -13514,7 +13580,7 @@ async function saveStockPreview(){
   const msg = sameDay
     ? '['+name+'] 오늘 자료에 '+rows.length+'건을 추가합니다.\n(중복 차량도 삭제 없이 모두 추가됩니다)\n진행할까요?'
     : '['+name+'] 이전 날짜 재고를 초기화하고 '+rows.length+'건을 등록합니다. 진행할까요?';
-  if(!confirm(msg)) return;
+  if(!(bg&&bg.silent) && !confirm(msg)) return;
   stkProg('저장 중...');
   try {
     const filter = 'vendor_type=eq.'+encodeURIComponent(type)+'&vendor_name='+stkVendorInList(name);
@@ -13523,7 +13589,7 @@ async function saveStockPreview(){
       await sbFetch('stock_items?'+filter, 'DELETE');
       try { await sfPurgeVendor(type, name); } catch(e){}
     }
-    const dealerVal = (document.getElementById('stkUpDealer')?.value||'').trim();
+    const dealerVal = (bg&&typeof bg.dealer==='string') ? bg.dealer : (document.getElementById('stkUpDealer')?.value||'').trim();
     const payload = rows.map(r=>({
       vendor_type: type, vendor_name: name, dealer: dealerVal,
       car_name: r.car_name.trim(), fuel: r.fuel||'', opt: r.opt||'',
