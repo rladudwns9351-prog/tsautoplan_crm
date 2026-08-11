@@ -13512,7 +13512,7 @@ async function saveStockPreview(){
   const prevUp = stkUpFor(type,name);
   const sameDay = prevUp && stkDateOf(prevUp.uploaded_at) === stkToday();
   const msg = sameDay
-    ? '['+name+'] 오늘 자료에 '+rows.length+'건을 추가합니다.\n(같은 차량명은 새 자료로 교체됩니다)\n진행할까요?'
+    ? '['+name+'] 오늘 자료에 '+rows.length+'건을 추가합니다.\n(중복 차량도 삭제 없이 모두 추가됩니다)\n진행할까요?'
     : '['+name+'] 이전 날짜 재고를 초기화하고 '+rows.length+'건을 등록합니다. 진행할까요?';
   if(!confirm(msg)) return;
   stkProg('저장 중...');
@@ -13522,14 +13522,6 @@ async function saveStockPreview(){
       stkProg('이전 날짜 자료 정리 중...');
       await sbFetch('stock_items?'+filter, 'DELETE');
       try { await sfPurgeVendor(type, name); } catch(e){}
-    } else {
-      // 같은 날 재업로드: 이번 자료에 포함된 차량명만 먼저 삭제 (중복 누적 방지)
-      const names = Array.from(new Set(rows.map(r=>String(r.car_name||'').trim()).filter(Boolean)));
-      for(let i=0;i<names.length;i+=25){
-        stkProg('중복 정리 중... '+Math.min(i+25,names.length)+' / '+names.length);
-        const list = names.slice(i,i+25).map(n=>'"'+n.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"').join(',');
-        await sbFetch('stock_items?'+filter+'&car_name=in.('+encodeURIComponent(list)+')', 'DELETE');
-      }
     }
     const payload = rows.map(r=>({
       vendor_type: type, vendor_name: name,
