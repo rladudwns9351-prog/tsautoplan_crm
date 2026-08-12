@@ -2669,7 +2669,7 @@
 
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
           <div style="flex:1;min-width:260px;position:relative;">
-            <input type="text" id="stkSearch" placeholder="🔍 찾는 차량 입력 (2글자 이상, 예: 아이오닉 9 / 그랜저 / 화이트)" oninput="onStockSearchInput()"
+            <input type="text" id="stkSearch" placeholder="🔍 차량명 검색 (2글자 이상, 예: 아이오닉 9 / 그랜저 / 카니발)" oninput="onStockSearchInput()"
               style="width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;outline:none;">
           </div>
           <button class="btn btn-ghost" onclick="clearStockSearch()">검색 초기화</button>
@@ -12588,9 +12588,7 @@ async function fetchStockRows(){
     stkMode = 'search';
     const like = '*'+q.replace(/[,()*]/g,' ').trim().replace(/\s+/g,'*')+'*';
     url = STK_AGG+'?select=*&vendor_type=eq.'+encodeURIComponent(stkTab)
-        + '&or=(car_name.ilike.'+encodeURIComponent(like)+',opt.ilike.'+encodeURIComponent(like)
-        + ',ext_color.ilike.'+encodeURIComponent(like)+',int_color.ilike.'+encodeURIComponent(like)
-        + ',pre_fin.ilike.'+encodeURIComponent(like)+')'
+        + '&car_name=ilike.'+encodeURIComponent(like)
         + '&order=car_name.asc&limit=3000';
   } else if(stkSelVendor){
     stkMode = 'vendor';
@@ -12995,25 +12993,27 @@ async function stkCallAI(payload){
 }
 function stkPushItems(arr){
   (arr||[]).forEach(o=>{
-    const car = (o.car_name||'').trim(); if(!car) return;
-    stkPreview.push({
+    const car = stkCleanCell(o.car_name); if(!car) return;
+    const row = {
       car_name: car,
-      fuel: (o.fuel||'').trim() || stkGuessFuel(car),
-      opt: (o.opt||'').trim(),
-      ext_color: (o.ext_color||'').trim(),
-      int_color: (o.int_color||'').trim(),
+      fuel: stkCleanCell(o.fuel) || stkGuessFuel(car),
+      opt: stkCleanCell(o.opt),
+      ext_color: stkCleanCell(o.ext_color),
+      int_color: stkCleanCell(o.int_color),
       price: o.price ? String(o.price).replace(/[^0-9]/g,'') : '',
-      car_no: (o.car_no||'').trim(),
+      car_no: stkCleanCell(o.car_no),
       qty: o.qty ? (parseInt(o.qty,10)||1) : 1,
       discount: o.discount ? String(o.discount).replace(/[^0-9]/g,'') : '',
-      pre_fin: (o.pre_fin||'').trim(),
-      asset_no: (o.asset_no||'').trim(),
-      promo: stkCleanPromo(o.promo),
-      fee: (o.fee||'').trim(),
-      delivery: (o.delivery||'').trim(),
-      delivery_type: (o.delivery_type||'').trim(),
-      status: (o.status||'').trim()
-    });
+      pre_fin: stkCleanCell(o.pre_fin),
+      asset_no: stkCleanCell(o.asset_no),
+      promo: stkCleanPromo(stkCleanCell(o.promo)),
+      fee: stkCleanCell(o.fee),
+      delivery: stkCleanCell(o.delivery),
+      delivery_type: stkCleanCell(o.delivery_type),
+      status: stkCleanCell(o.status)
+    };
+    if(!stkRowValid(row)){ stkDropped++; return; }
+    stkPreview.push(row);
   });
   renderStockPreview();
 }
@@ -13065,13 +13065,24 @@ async function stkStartBG(files){
   const list = Array.from(files||[]);
   if(!list.length) return;
   const type = document.getElementById('stkUpType').value;
+  // 파일명에 금융사명이 있으면 업체를 자동 세팅
+  let autoName = '';
+  if(type==='finance'){
+    for(let i=0;i<list.length;i++){ const v = stkVendorFromFile(list[i].name); if(v){ autoName = v; break; } }
+    const _sel = document.getElementById('stkUpVendor');
+    if(autoName && _sel && [].some.call(_sel.options, o=>o.value===autoName) && _sel.value!==autoName){
+      _sel.value = autoName;
+      onStockVendorSelChange();
+    }
+  }
   let name = document.getElementById('stkUpVendor').value;
   if(name==='__new__') name = (document.getElementById('stkUpVendorNew').value||'').trim();
   if(!name){ alert('업체를 먼저 선택하거나 입력하세요.'); return; }
   const dealer = (document.getElementById('stkUpDealer')?.value||'').trim();
   const prevUp = stkUpFor(type,name);
   const sameDay = prevUp && stkDateOf(prevUp.uploaded_at) === stkToday();
-  const q = (sameDay
+  const q = (autoName ? '※ 파일명 자동 인식 : '+autoName+'\n\n' : '')
+    + (sameDay
       ? '['+name+'] 오늘 자료에 이어서 추가합니다.\n(중복 차량도 삭제 없이 모두 추가됩니다)'
       : '['+name+'] 이전 날짜 재고를 초기화하고 새로 등록합니다.')
     + (stkBGBusy ? '\n\n현재 다른 작업이 진행 중이라 대기열에 추가됩니다.' : '')
@@ -13090,7 +13101,7 @@ async function stkBGRun(){
     while(stkBGQueue.length){
       const job = stkBGQueue.shift();
       stkBGCur = job.name;
-      stkPreview = [];
+      stkPreview = []; stkDropped = 0;
       stkBGBadge('['+job.name+'] 파일 '+job.files.length+'건 분석 준비 중...', 2, '재고 분석 중');
       try {
         await handleStockFiles(job.files);
@@ -13129,6 +13140,51 @@ async function handleStockFiles(files){
       else alert('지원하지 않는 파일: '+f.name);
     } catch(e){ stkProg(''); alert(f.name+' 처리 실패: '+e.message); }
   }
+}
+
+/* ---- 파일명 → 금융사 자동 인식 ---- */
+const STK_FILE_VENDOR = [
+  ['롯데오토리스','롯데오토리스'], ['오토리스','롯데오토리스'],
+  ['롯데렌터카','롯데렌터카'], ['롯데캐피탈','롯데캐피탈'],
+  ['농협','농협캐피탈'], ['nh','농협캐피탈'],
+  ['오릭스','오릭스캐피탈'], ['orix','오릭스캐피탈'],
+  ['bnk','BNK캐피탈'],
+  ['우리금융','우리금융'], ['우리카드','우리카드'],
+  ['신한카드','신한카드'], ['신한','신한카드'],
+  ['하나','하나캐피탈'], ['현대','현대캐피탈'],
+  ['kb캐피탈','KB캐피탈'], ['mg캐피탈','MG캐피탈'], ['im캐피탈','IM캐피탈'],
+  ['메리츠','메리츠캐피탈'], ['산은','산은캐피탈'],
+  ['아마존','아마존카'], ['sk렌터카','SK렌터카']
+];
+function stkVendorFromFile(name){
+  const n = String(name||'').toLowerCase().replace(/\s+/g,'');
+  for(let i=0;i<STK_FILE_VENDOR.length;i++){
+    if(n.indexOf(STK_FILE_VENDOR[i][0].toLowerCase())>=0) return STK_FILE_VENDOR[i][1];
+  }
+  return '';
+}
+
+/* ---- 셀 정제 / 불량행 제외 ---- */
+var stkDropped = 0;
+function stkCleanCell(v){
+  return String(v==null?'':v)
+    .replace(/_x00[0-9a-fA-F]{2}_/g,' ')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+// 글씨 깨짐·불완전 데이터는 목록에서 제외
+function stkRowValid(o){
+  const car = o.car_name||'';
+  if(!car) return false;
+  const all = [car,o.opt,o.ext_color,o.int_color,o.promo].join(' ');
+  if(/[\uFFFD\uE000-\uF8FF]/.test(all)) return false;            // 깨진 문자
+  if(!/[가-힣A-Za-z]/.test(car)) return false;                     // 글자 없음
+  if(car.replace(/[^0-9A-Za-z가-힣]/g,'').length < 2) return false; // 의미없는 값
+  if(/^[?\.\-_=]+$/.test(car)) return false;
+  const pr = Number(String(o.price||'').replace(/[^0-9]/g,''));
+  if(pr>0 && pr<1000000) return false;                            // 비정상 가격
+  return true;
 }
 
 // 물건번호 등 앞자리 0이 잘리는 번호 복원
@@ -13189,8 +13245,40 @@ async function parseStockExcel(file){
       // '차 종' 처럼 글자 사이 공백이 있는 헤더 대응
       const ix2 = {}; row.forEach((c,j)=>{ const k=String(c||'').replace(/\s+/g,''); if(k && ix2[k]===undefined) ix2[k]=j; });
 
-      // 오릭스캐피탈 선구매 차량 LIST 포맷
-      if(ix2['차종']!==undefined && ix2['모델']!==undefined && ix2['총차량가']!==undefined){
+      // 오릭스캐피탈 선구매 포맷(선점여부 + 차량명 + 차량가격)
+      if(ix2['선점여부']!==undefined && ix2['차량명']!==undefined){
+        return { i, m: {
+          car: ix2['차량명'],
+          brand: ix2['제조사'],
+          opt: ix2['옵션명'],
+          ext: ix2['외장색상'],
+          int: ix2['내장색상'],
+          price: (ix2['차량가격']!==undefined ? ix2['차량가격'] : ix2['총차량가']),
+          qty: ix2['수량'],
+          delivery: (ix2['제조사탁송료']!==undefined ? ix2['제조사탁송료'] : ix2['탁송료']),
+          promo: ix2['메모'],
+          statusCols: [ix2['선점여부'], ix2['상품구분'], ix2['이벤트차량'], ix2['출고여부'], ix2['배정예시일자']],
+          noPrefix: true
+        }};
+      }
+      // 농협캐피탈 선구매 포맷(브랜드 + 트림 + 외장/내장 통합칸)
+      if(ix2['브랜드']!==undefined && ix2['트림']!==undefined && ix2['외장/내장']!==undefined){
+        return { i, m: {
+          car: ix2['트림'],
+          model: ix2['모델'],
+          brand: ix2['브랜드'],
+          colorSplit: ix2['외장/내장'],
+          opt: ix2['옵션'],
+          price: (ix2['총차량가']!==undefined ? ix2['총차량가'] : ix2['차량가']),
+          delivery: (ix2['탁송비']!==undefined ? ix2['탁송비'] : ix2['탁송료']),
+          promo: ix2['메모'],
+          asset: ix2['차량순번'],
+          statusCols: [ix2['상품구분'], ix2['발주구분']],
+          noPrefix: true
+        }};
+      }
+      // 오릭스캐피탈 선구매 차량 LIST 포맷(구양식)
+      if(ix2['물건번호']===undefined && ix2['차종']!==undefined && ix2['모델']!==undefined && ix2['총차량가']!==undefined){
         return { i, m: {
           car: ix2['모델'],
           model: ix2['차종'],
@@ -13410,6 +13498,14 @@ async function parseStockExcel(file){
       }
       if(prefix && car.indexOf(prefix)<0) car = prefix+' '+car;
 
+      // 외장/내장 통합칸(예: "오로라 블랙 펄 / 토프") 분리
+      let _col = { ext: cell(r,m.ext), int: cell(r,m.int) };
+      if(m.colorSplit!==undefined){
+        const cv = cell(r,m.colorSplit);
+        const sp = cv.split(/\s+\/\s+/);
+        _col = { ext: (sp[0]||'').trim(), int: sp.slice(1).join(' / ').trim() };
+      }
+
       let qty = 1;
       if(m.qty!==undefined){
         const q = num(cell(r,m.qty));
@@ -13424,8 +13520,8 @@ async function parseStockExcel(file){
         car_name: car,
         fuel: (m.fuel!==undefined && cell(r,m.fuel)) ? stkNormFuel(cell(r,m.fuel)) : stkGuessFuel(car),
         opt: cell(r,m.opt),
-        ext_color: cell(r,m.ext),
-        int_color: cell(r,m.int),
+        ext_color: _col.ext,
+        int_color: _col.int,
         price: m.price!==undefined ? String(num(cell(r,m.price))||'') : '',
         car_no: cell(r,m.carno),
         qty: qty,
@@ -13435,7 +13531,7 @@ async function parseStockExcel(file){
         promo: m.promo!==undefined ? (cell(r,m.promo) || (m.fillDown ? (_fillPrev.promo||'') : '')) : (m.noticeRow ? (_fillPrev.promo||'') : ''),
         delivery: m.delivery!==undefined ? String(num(cell(r,m.delivery))||(cell(r,m.delivery)?'0':'')) : '',
         delivery_type: m.deliveryType!==undefined ? cell(r,m.deliveryType) : '',
-        status: [m.status,m.status2].filter(k=>k!==undefined).map(k=>cell(r,k)).filter(Boolean).join(' · ')
+        status: (m.statusCols || [m.status,m.status2]).filter(k=>k!==undefined).map(k=>cell(r,k)).filter(Boolean).join(' · ')
       });
     }
     if(m.dedupe){
@@ -13462,7 +13558,8 @@ async function parseStockExcel(file){
   const total = out.reduce((a,b)=>a+(b.qty||1),0);
   stkProg('시트 '+carSheets.length+'개 · '+out.length+'행 / '+total+'대 변환'
     + (matched? ' · 할인매칭 '+matched+'건':'')
-    + (skippedZero? ' · 재고0 제외 '+skippedZero+'행':''));
+    + (skippedZero? ' · 재고0 제외 '+skippedZero+'행':'')
+    + (stkDropped? ' · 불량 '+stkDropped+'행 제외':''));
 }
 
 function stkCanvasToJpeg(canvas, q){ return canvas.toDataURL('image/jpeg', q).split(',')[1]; }
@@ -13483,12 +13580,54 @@ async function parseStockImage(file){
   stkPushItems(await stkCallAI({ mimeType:'image/jpeg', data:b64 }));
   stkProg('완료 · '+stkLastModel);
 }
+// PDF 텍스트 레이어를 좌표 기준 행/열로 재구성
+async function stkPdfPageText(page){
+  const tc = await page.getTextContent();
+  const lines = {};
+  (tc.items||[]).forEach(it=>{
+    const t = String(it.str||'');
+    if(!t.trim()) return;
+    const y = Math.round(it.transform[5]);
+    const x = it.transform[4];
+    (lines[y] = lines[y] || []).push({ x: x, s: t.trim() });
+  });
+  return Object.keys(lines).map(Number).sort((a,b)=>b-a).map(y=>{
+    return lines[y].sort((a,b)=>a.x-b.x).map(o=>o.s).join('\t');
+  }).filter(t=>t.trim()).join('\n');
+}
 async function parseStockPdf(file){
   if(typeof pdfjsLib==='undefined'){ alert('PDF 모듈을 불러오지 못했습니다.'); return; }
   stkProg('PDF 읽는 중...', 3);
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({data:buf}).promise;
   const total = pdf.numPages;
+
+  // 1) 텍스트 레이어가 있으면 텍스트로 분석 (빠르고 정확)
+  stkProg('PDF 텍스트 추출 중...', 5);
+  const pageTexts = [];
+  for(let p=1;p<=total;p++){
+    try { pageTexts.push(await stkPdfPageText(await pdf.getPage(p))); }
+    catch(e){ pageTexts.push(''); }
+  }
+  const textLen = pageTexts.join('').replace(/\s/g,'').length;
+  if(textLen >= total*150){
+    const CH = 3;
+    for(let i=0;i<total;i+=CH){
+      const chunk = pageTexts.slice(i,i+CH).filter(t=>t.trim()).join('\n');
+      if(!chunk.trim()) continue;
+      stkProg('PDF 텍스트 분석 중... '+Math.min(i+CH,total)+' / '+total+'페이지 (누적 '+stkPreview.length+'대)', Math.round(i/total*100));
+      let ok=false;
+      for(let retry=0; retry<2 && !ok; retry++){
+        try { stkPushItems(await stkCallAI({ text: chunk })); ok=true; }
+        catch(e){ if(retry===1) console.warn((i+1)+'p 실패:',e.message); else await new Promise(r=>setTimeout(r,6000)); }
+      }
+      if(i+CH<total) await new Promise(r=>setTimeout(r,3000));
+    }
+    stkProg('PDF 텍스트 분석 완료 · 총 '+stkPreview.length+'대'+(stkDropped?' · 불량 '+stkDropped+'건 제외':''));
+    return;
+  }
+
+  // 2) 스캔본(텍스트 없음) → 페이지 이미지 AI 분석
   for(let p=1;p<=total;p++){
     stkProg('PDF 분석 중... '+p+' / '+total+'페이지 (누적 '+stkPreview.length+'대)', Math.round((p-1)/total*100));
     const page = await pdf.getPage(p);
@@ -13506,7 +13645,7 @@ async function parseStockPdf(file){
     }
     if(p<total) await new Promise(r=>setTimeout(r,4500));
   }
-  stkProg('PDF 분석 완료 · 총 '+stkPreview.length+'대');
+  stkProg('PDF 분석 완료 · 총 '+stkPreview.length+'대'+(stkDropped?' · 불량 '+stkDropped+'건 제외':''));
 }
 
 
