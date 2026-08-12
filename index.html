@@ -12570,9 +12570,10 @@ function renderStockUpdateInfo(names){
 
 function selectStockVendor(n){
   stkSelVendor = (stkSelVendor===n) ? null : n;
-  const el = document.getElementById('stkSearch'); if(el) el.value='';
   renderStockVendorList();
-  if(stkSelVendor) fetchStockRows(); else { stkRows=[]; stkMode='none'; renderStockItems(); }
+  const q = (document.getElementById('stkSearch')?.value||'').trim();
+  if(stkSelVendor || q.length>=2) fetchStockRows();
+  else { stkRows=[]; stkMode='none'; renderStockItems(); }
 }
 
 /* ---- 서버 조회 (집계 뷰) ---- */
@@ -12588,6 +12589,7 @@ async function fetchStockRows(){
     stkMode = 'search';
     const like = '*'+q.replace(/[,()*]/g,' ').trim().replace(/\s+/g,'*')+'*';
     url = STK_AGG+'?select=*&vendor_type=eq.'+encodeURIComponent(stkTab)
+        + (stkSelVendor ? '&vendor_name='+stkVendorInList(stkSelVendor) : '')
         + '&car_name=ilike.'+encodeURIComponent(like)
         + '&order=car_name.asc&limit=3000';
   } else if(stkSelVendor){
@@ -12675,7 +12677,7 @@ function renderStockItems(){
   }
   const totalCars = rows.reduce((a,b)=>a+(Number(b.qty)||1),0);
   if(cntEl) cntEl.textContent = '총 '+rows.length.toLocaleString()+'종 / '+totalCars.toLocaleString()+'대'
-    + (stkMode==='search'? ' · 전체 업체 검색' : (stkSelVendor? ' · '+stkSelVendor : ''));
+    + (stkMode==='search'? (stkSelVendor? ' · '+stkSelVendor+' 내 검색' : ' · 전체 업체 검색') : (stkSelVendor? ' · '+stkSelVendor : ''));
   if(stkSort.key){
     const k = stkSort.key, d = stkSort.dir;
     const numKeys = { price:1, discount:1, qty:1 };
