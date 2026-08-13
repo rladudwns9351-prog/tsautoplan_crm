@@ -4412,6 +4412,7 @@ function goDbNormal(navEl){ dbViewMode='normal'; dbSortKey=''; dbSortDir='desc';
 function goGudb(navEl){ dbViewMode='gudb'; goPage('db', navEl); }
 function goEnded(navEl){ dbViewMode='ended'; goPage('db', navEl); }
 function goPage(id, navEl, keepDbPage) {
+  if(typeof holdNavWhileSaving === 'function' && holdNavWhileSaving(()=>goPage(id, navEl, keepDbPage))) return;
   // 뒤로가기(백스페이스)로 인한 이동이 아니면 직전 페이지를 히스토리에 기록
   const _prevActive = document.querySelector('.page.active');
   const _prevId = _prevActive && _prevActive.id ? _prevActive.id.replace('page-','') : '';
@@ -9536,6 +9537,64 @@ function switchTab(id, el) {
   el.classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
 }
+/* ===== 저장 중 이탈 보호 (저장 락) =====
+   저장이 진행되는 동안 뒤로가기/페이지 이동을 가로채 '저장 중' 팝업을 띄우고,
+   저장이 끝나면 팝업을 닫고 보류된 이동 동작을 그대로 재실행한다. */
+window._saveLock = 0;
+window._pendingNav = null;
+window._saveLockTimer = null;
+function _savingOverlayEl(){
+  let el = document.getElementById('savingLockOverlay');
+  if(el) return el;
+  el = document.createElement('div');
+  el.id = 'savingLockOverlay';
+  el.style.cssText = 'position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);';
+  el.innerHTML = '<div style="background:var(--bg2,#1a1a1a);border:1px solid var(--line,#333);border-radius:12px;padding:26px 34px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.6);">'
+    + '<div style="width:34px;height:34px;margin:0 auto 14px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--accent,#4a9eff);border-radius:50%;animation:_savingSpin .8s linear infinite;"></div>'
+    + '<div style="font-size:15px;font-weight:700;color:var(--text1,#fff);">내용 저장 중...</div>'
+    + '<div style="margin-top:6px;font-size:12px;color:var(--text3,#888);">저장이 완료되면 자동으로 이동합니다.</div>'
+    + '</div>';
+  document.body.appendChild(el);
+  if(!document.getElementById('_savingSpinStyle')){
+    const st=document.createElement('style'); st.id='_savingSpinStyle';
+    st.textContent='@keyframes _savingSpin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(st);
+  }
+  return el;
+}
+function showSavingOverlay(){ const el=_savingOverlayEl(); el.style.display='flex'; }
+function hideSavingOverlay(){ const el=document.getElementById('savingLockOverlay'); if(el) el.style.display='none'; }
+function beginSaveLock(){
+  window._saveLock++;
+  window._lastLocalChange = Date.now();
+  clearTimeout(window._saveLockTimer);
+  // 안전장치: 12초 이상 걸리면 강제 해제(무한 잠금 방지)
+  window._saveLockTimer = setTimeout(()=>{ window._saveLock = 0; hideSavingOverlay(); _runPendingNav(); }, 12000);
+}
+function endSaveLock(){
+  window._saveLock = Math.max(0, window._saveLock - 1);
+  if(window._saveLock > 0) return;
+  clearTimeout(window._saveLockTimer);
+  window._lastLocalChange = Date.now();
+  hideSavingOverlay();
+  _runPendingNav();
+}
+function _runPendingNav(){
+  const fn = window._pendingNav;
+  window._pendingNav = null;
+  if(typeof fn === 'function') setTimeout(fn, 0);
+}
+/* 저장 중이면 이동을 보류시키고 true 반환 */
+function holdNavWhileSaving(action){
+  if(!window._saveLock) return false;
+  window._pendingNav = action;
+  showSavingOverlay();
+  return true;
+}
+window.addEventListener('beforeunload', function(e){
+  if(window._saveLock > 0){ e.preventDefault(); e.returnValue=''; return ''; }
+});
+
 async function addMemo() {
   const text = document.getElementById('memoInput').value.trim();
   if(!text||!currentCustomer) return;
@@ -9558,27 +9617,30 @@ async function addMemo() {
   const btn = document.getElementById('memoSaveBtn');
   const btnOrig = btn ? btn.textContent : '';
   if(btn){ btn.disabled = true; btn.textContent = '저장 중...'; }
+  beginSaveLock(); // 저장 완료 전 이탈 차단 + 폴링 덮어쓰기 방지
+  const _target = currentCustomer; // 이동해도 대상 유지
   currentCustomer.memos.unshift(newMemo); // 낙관적
   document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
   renderMemos();
   try {
-    await sbUpdateCustomer(currentCustomer);
+    await sbUpdateCustomer(_target);
     // 성공 시 확정
-    document.getElementById('memoInput').value='';
+    const _mi = document.getElementById('memoInput'); if(_mi) _mi.value='';
     renderHistory(); filterDB(true); renderConsult();
     if(typeof renderReclaimPage === 'function' && currentRole === 'admin') renderReclaimPage();
     if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
     showGlobalToast('✅ 메모가 저장되었습니다.');
   } catch(e) {
     // 실패 시 롤백 → 화면과 DB 일치 유지
-    const i = currentCustomer.memos.indexOf(newMemo);
-    if(i > -1) currentCustomer.memos.splice(i, 1);
-    document.getElementById('detailMemoCount').textContent = currentCustomer.memos.length+'건';
-    renderMemos();
-    document.getElementById('memoInput').value = text; // 입력 복원
+    const i = _target.memos.indexOf(newMemo);
+    if(i > -1) _target.memos.splice(i, 1);
+    const _dc = document.getElementById('detailMemoCount'); if(_dc) _dc.textContent = _target.memos.length+'건';
+    if(currentCustomer === _target) renderMemos();
+    const _mi2 = document.getElementById('memoInput'); if(_mi2) _mi2.value = text; // 입력 복원
     showGlobalToast('⚠️ 메모 저장 실패(저장되지 않음): '+(e.message||e));
   } finally {
     if(btn){ btn.disabled = false; btn.textContent = btnOrig || '메모 저장'; }
+    endSaveLock(); // 저장 완료 → 팝업 닫고 보류된 이동 재실행
   }
 }
 function renderMemos() {
@@ -11495,6 +11557,11 @@ window.addEventListener('keydown', e => {
   if(!app || !app.classList.contains('active')) return;
   if(document.querySelector('.modal-bg.open')) return;
   e.preventDefault();
+  if(window._saveLock > 0){ // 저장 중 → 저장 완료 후 자동 재실행
+    window._pendingNav = ()=>{ const ev=new KeyboardEvent('keydown',{key:'Backspace'}); window.dispatchEvent(ev); };
+    showSavingOverlay();
+    return;
+  }
   const cur = document.querySelector('.page.active');
   const curId = cur && cur.id ? cur.id.replace('page-','') : '';
   if(curId === 'detail'){
