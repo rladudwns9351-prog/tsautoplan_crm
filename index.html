@@ -3111,7 +3111,7 @@
             <option>현대캐피탈</option><option>롯데렌터카</option><option>BNK캐피탈</option><option>IM캐피탈</option>
             <option>KB캐피탈</option><option>MG캐피탈</option><option>농협캐피탈</option><option>롯데캐피탈</option>
             <option>롯데오토리스</option><option>산은캐피탈</option><option>아마존카</option><option>우리금융</option>
-            <option>우리카드</option><option>신한카드</option><option>하나캐피탈</option><option>메리츠캐피탈</option><option>오릭스캐피탈</option><option>SK렌터카</option>
+            <option>우리카드</option><option>신한카드</option><option>하나캐피탈</option><option>메리츠캐피탈</option><option>오릭스캐피탈</option><option>SK렌터카</option><option>JB우리캐피탈</option>
             <option value="직접입력">직접 입력</option>
           </select>
           <input type="text" id="fm_bank_input" placeholder="직접 입력" style="display:none;flex:1;padding:9px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">
@@ -6600,7 +6600,7 @@ async function applyBulkMemo() {
 }
 const FINANCE_LIST = ['현대캐피탈','롯데렌터카','BNK캐피탈','IM캐피탈','KB캐피탈','MG캐피탈',
   '농협캐피탈','롯데캐피탈','롯데오토리스','산은캐피탈','아마존카','우리금융','우리카드',
-  '신한카드','하나캐피탈','메리츠캐피탈','오릭스캐피탈','SK렌터카'];
+  '신한카드','하나캐피탈','메리츠캐피탈','오릭스캐피탈','SK렌터카','JB우리캐피탈'];
 const FUNDING_STATUSES = ['최종심사진행','약정완료','출고대기','집하장입고완료','작업,검수중','인도완료'];
 let fundingList = [];  // Supabase에서 loadData() 시 채워짐 (샘플 제거)
 let fundingNextId = 2;
@@ -12436,7 +12436,7 @@ function stkGuessFuel(s){
   return '';
 }
 
-const STK_FINANCE_FALLBACK = ['현대캐피탈','롯데렌터카','BNK캐피탈','IM캐피탈','KB캐피탈','MG캐피탈','농협캐피탈','롯데캐피탈','롯데오토리스','산은캐피탈','아마존카','우리금융','우리카드','신한카드','하나캐피탈','메리츠캐피탈','오릭스캐피탈','SK렌터카'];
+const STK_FINANCE_FALLBACK = ['현대캐피탈','롯데렌터카','BNK캐피탈','IM캐피탈','KB캐피탈','MG캐피탈','농협캐피탈','롯데캐피탈','롯데오토리스','산은캐피탈','아마존카','우리금융','우리카드','신한카드','하나캐피탈','메리츠캐피탈','오릭스캐피탈','SK렌터카','JB우리캐피탈'];
 function stkFinanceNames(){
   try { if(typeof FINANCE_LIST !== 'undefined' && Array.isArray(FINANCE_LIST) && FINANCE_LIST.length) return FINANCE_LIST.slice(); } catch(e){}
   return STK_FINANCE_FALLBACK.slice();
@@ -13162,6 +13162,7 @@ const STK_FILE_VENDOR = [
   ['농협','농협캐피탈'], ['nh','농협캐피탈'],
   ['오릭스','오릭스캐피탈'], ['orix','오릭스캐피탈'],
   ['bnk','BNK캐피탈'],
+  ['jb우리','JB우리캐피탈'], ['jb캐피탈','JB우리캐피탈'], ['전북','JB우리캐피탈'],
   ['우리금융','우리금융'], ['우리카드','우리카드'],
   ['신한카드','신한카드'], ['신한','신한카드'],
   ['하나','하나캐피탈'], ['현대','현대캐피탈'],
