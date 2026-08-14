@@ -6098,6 +6098,26 @@ function assignSortKey(c){
   if(!c) return '';
   return String(c.reassignDate || c.date || '').slice(0,10);
 }
+/* 재배분 시각(ISO): 같은 날짜 그룹 내에서 재배분 건을 상단으로 올리기 위한 보조 정렬키
+   - [재배분] / [담당자변경] 시스템 메모의 dateTS(최신) 사용
+   - 메모에 시각이 없으면 재배분일 00:00 로 간주 */
+function reassignSortTS(c){
+  if(!c) return '';
+  const day = String(c.reassignDate || '').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)) return '';
+  let best = '';
+  const memos = Array.isArray(c.memos) ? c.memos : [];
+  for(let i=0;i<memos.length;i++){
+    const m = memos[i];
+    if(!m || typeof m.text !== 'string') continue;
+    if(m.text.indexOf('[재배분]') !== 0 && m.text.indexOf('[담당자변경]') !== 0) continue;
+    const iso = String(m.dateISO || String(m.dateTS||'').slice(0,10) || '');
+    if(iso !== day) continue;
+    const ts = String(m.dateTS || (day+'T00:00:00.000Z'));
+    if(ts > best) best = ts;
+  }
+  return best || (day+'T00:00:00.000Z');
+}
 /* 다음상담일 D+10 초과 → 행 전체 연한 레드 (상태 '상담중' 및 다음상담일 없는 건 제외)
    상담메모 작성 시 최근상담일 갱신 → 다음상담일 재계산(D-3) → 자동 해제 */
 function dbOverdueRow(c){
@@ -6257,6 +6277,13 @@ function renderDB(list) {
       const ad = assignSortKey(a);
       const bd = assignSortKey(b);
       if(ad !== bd) return bd.localeCompare(ad);
+      // 같은 날짜 그룹: 재배분 건을 최상단으로 (재배분 시각 최신순)
+      const at = reassignSortTS(a);
+      const bt = reassignSortTS(b);
+      if(at && !bt) return -1;
+      if(!at && bt) return 1;
+      if(at && bt && at !== bt) return bt.localeCompare(at);
+      // 그 외 동일 조건은 기존과 동일하게 id 내림차순
       return (b.id||0) - (a.id||0);
     });
   }
