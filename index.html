@@ -7774,6 +7774,7 @@ function editLinkedCustomer(cid){
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'+
       '<input id="fmLinkName" value="'+escapeHtml(c.name||'')+'" placeholder="고객명" style="flex:1;min-width:120px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">'+
       '<input id="fmLinkPhone" value="'+escapeHtml(c.phone||'')+'" maxlength="13" oninput="formatPhoneInput(this)" placeholder="연락처" style="flex:1;min-width:120px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">'+
+      '<input id="fmLinkCar" value="'+escapeHtml(c.car||'')+'" placeholder="차량명" style="flex:2;min-width:180px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">'+
       '<button onclick="saveLinkedCustomer('+cid+')" style="padding:6px 12px;background:var(--blue);border:none;border-radius:5px;color:#fff;font-size:12px;cursor:pointer;font-family:inherit;">저장</button>'+
       '<button onclick="renderLinkedCustomerBox('+cid+')" style="padding:6px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;">취소</button>'+
     '</div>';
@@ -7790,8 +7791,9 @@ async function saveLinkedCustomer(cid){
   const newPhone = formatPhone(phoneRaw);
   const dup = customers.find(x=>x.id!==cid && (x.phone||'').replace(/[^\d]/g,'')===phoneRaw);
   if(dup && !confirm('동일한 연락처의 다른 고객("'+dup.name+'")이 있습니다.\n그래도 저장할까요?')) return;
+  const newCar = (document.getElementById('fmLinkCar')?.value||'').trim();
   window._lastLocalChange = Date.now();
-  c.name = name; c.phone = newPhone;
+  c.name = name; c.phone = newPhone; c.car = newCar;
   const linkedFundings = (typeof fundingList!=='undefined' && Array.isArray(fundingList)) ? fundingList.filter(f=>f.customerId===cid) : [];
   linkedFundings.forEach(f=>{ f.customerName = name; f.phone = newPhone; });
   try {
