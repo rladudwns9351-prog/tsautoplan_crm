@@ -2020,6 +2020,7 @@
             <th style="width:36px;text-align:center;white-space:nowrap;"></th>
             <th style="width:42px;text-align:center;white-space:nowrap;">NO</th>
             <th style="min-width:80px;white-space:nowrap;">고객명</th>
+            <th class="admin-only" style="min-width:90px;white-space:nowrap;text-align:center;">투데</th>
             <th style="min-width:120px;white-space:nowrap;">연락처</th>
             <th style="min-width:120px;white-space:nowrap;">차량명</th>
             <th style="min-width:70px;white-space:nowrap;">담당자</th>
@@ -2043,6 +2044,7 @@
             <th></th>
             <th style="text-align:center;"><button onclick="resetFundingFilters()" title="필터 초기화" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:0;">✕</button></th>
             <th><input id="ff_name" oninput="onFundingFilterInput()" placeholder="고객명" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
+            <th class="admin-only"></th>
             <th><input id="ff_phone" oninput="onFundingFilterInput()" placeholder="연락처" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
             <th><input id="ff_car" oninput="onFundingFilterInput()" placeholder="차량명" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
             <th><input id="ff_assign" oninput="onFundingFilterInput()" placeholder="담당자" style="width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;outline:none;"></th>
@@ -4008,6 +4010,7 @@ function fundingToRow(f) {
     monthly_fee:     f.monthlyFee     || 0,
     expiry_date:     f.expiryDate     || null,
     memo:           f.memo          || '',
+    toude:           f.toude          ?? false,
     check_viewed:    f.checkViewed    ?? false,
     check_dismissed: f.checkDismissed ?? false,
     files:          f.files   || [],
@@ -4056,6 +4059,7 @@ function rowToFunding(r) {
     monthlyFee:      r.monthly_fee     || 0,
     expiryDate:      r.expiry_date     || null,
     memo:          r.memo,
+    toude:          r.toude          ?? false,
     checkViewed:    r.check_viewed    ?? false,
     checkDismissed: r.check_dismissed ?? false,
     files:         parseJ(r.files),
@@ -4152,6 +4156,29 @@ async function sbSaveFundingCheckFlags(f) {
   const r = await sbFetch(`fundings?id=eq.${f.id}`, 'PATCH', patch);
   if (typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
   return r;
+}
+// 투데등록 플래그만 PATCH (관리자 전용)
+async function sbSaveFundingToude(f) {
+  const r = await sbFetch(`fundings?id=eq.${f.id}`, 'PATCH', { toude: f.toude === true });
+  if (typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
+  return r;
+}
+async function toggleToude(id) {
+  if (currentRole !== 'admin') return;
+  const f = fundingList.find(x => x.id === id);
+  if (!f) return;
+  window._lastLocalChange = Date.now();
+  const prev = f.toude === true;
+  f.toude = !prev;
+  renderFundingPage();
+  try {
+    await sbSaveFundingToude(f);
+    if (typeof _dataSignature === 'function') window._lastDataSig = _dataSignature();
+  } catch(e) {
+    f.toude = prev;
+    renderFundingPage();
+    alert('투데등록 저장 실패: ' + (e.message||e) + '\n\nSupabase fundings 테이블에 toude 컬럼이 있는지 확인이 필요합니다.');
+  }
 }
 async function sbUpdateFunding(f) {
   const row = fundingToRow(f);
@@ -7177,6 +7204,7 @@ async function saveFunding() {
     if(_prevF) {
       entry.checkViewed    = _prevF.checkViewed    === true;
       entry.checkDismissed = _prevF.checkDismissed === true;
+      entry.toude          = _prevF.toude          === true;
     }
   }
   try {
@@ -7675,6 +7703,13 @@ function renderFundingPage() {
       '</td>'+
       '<td style="text-align:center;font-size:12px;color:var(--text3);">'+(pg.total-(pg.startIndex+i))+'</td>'+
       '<td style="font-weight:600;white-space:nowrap;">'+escapeHtml(f.customerName||'')+(linkedC && (linkedC.source==='직영업'||linkedC.source==='기존고객 ★') ? ' <span style="background:rgba(255,153,68,.15);color:#ff9944;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,153,68,.4);margin-left:4px;letter-spacing:.3px;">직영업</span>' : '')+fileBadge+'</td>'+
+      '<td class="admin-only" style="text-align:center;'+(currentRole==='admin'?'':'display:none;')+'" onclick="event.stopPropagation()">'+
+        (currentRole==='admin'
+          ? (f.toude===true
+              ? '<button class="btn btn-sm" onclick="event.stopPropagation();toggleToude('+f.id+')" style="font-size:10px;padding:3px 8px;background:rgba(68,255,136,.15);border:1px solid rgba(68,255,136,.45);color:var(--green);cursor:pointer;white-space:nowrap;font-weight:700;">투데등록</button>'
+              : '<button class="btn btn-sm" onclick="event.stopPropagation();toggleToude('+f.id+')" style="font-size:10px;padding:3px 8px;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.4);color:var(--red);cursor:pointer;white-space:nowrap;font-weight:700;">투데등록</button>')
+          : '')+
+      '</td>'+
       '<td style="font-family:JetBrains Mono,monospace;font-size:11px;white-space:nowrap;">'+f.phone+'</td>'+
       '<td style="font-size:12px;white-space:nowrap;">'+f.car+(colorStr?' <span style="color:var(--text3);font-size:10px;">'+colorStr+'</span>':'')+'</td>'+
       '<td style="font-size:12px;color:var(--text2);white-space:nowrap;">'+f.assign+'</td>'+
@@ -7705,7 +7740,7 @@ function renderFundingPage() {
         (currentRole==='admin'?'<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteFunding('+f.id+')" style="cursor:pointer;">삭제</button>':'')+
       '</div></td>'+
     '</tr>';
-  }).join('') || '<tr><td colspan="21" style="text-align:center;color:var(--text3);padding:24px;">등록된 펀딩이 없습니다.</td></tr>';
+  }).join('') || '<tr><td colspan="22" style="text-align:center;color:var(--text3);padding:24px;">등록된 펀딩이 없습니다.</td></tr>';
   let navEl = document.getElementById('fundingPaginationBar');
   if(!navEl) {
     navEl = document.createElement('div');
@@ -8467,7 +8502,7 @@ function _dataSignature() {
   // 펀딩체크 공유상태 변화 감지 (다른 PC에서 확인/제거/확정 시 배지·목록 갱신)
   if(typeof fundingList !== 'undefined' && Array.isArray(fundingList)) {
     for(const f of fundingList) {
-      s += '#' + f.id + ':' + (f.checkViewed?1:0) + ':' + (f.checkDismissed?1:0) + ':' + (f.confirmed?1:0);
+      s += '#' + f.id + ':' + (f.checkViewed?1:0) + ':' + (f.checkDismissed?1:0) + ':' + (f.confirmed?1:0) + ':' + (f.toude?1:0);
     }
   }
   // 차량재고 상태 변화 감지 (신규요청/확인/완료)
