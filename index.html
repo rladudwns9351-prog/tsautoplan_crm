@@ -7006,6 +7006,7 @@ function populateFundingAssignSelect() {
   }
 }
 async function saveFunding() {
+  window._lastLocalChange = Date.now();
   if(editingFundingId) {
     const existing = fundingList.find(f=>f.id===editingFundingId);
     if(existing && existing.confirmed && currentRole !== 'admin') {
@@ -7203,6 +7204,13 @@ async function saveFunding() {
         fundingList.unshift(entry);
       }
     }
+    // 저장 직후 로컬 목록 보정: loadData()가 '로컬 저장 직후 stale 방지'로 스킵된 경우에도
+    // 등록/수정한 본인 화면에 즉시 반영되도록 보장
+    if(saveSuccess && entry.id != null) {
+      const _fi = fundingList.findIndex(f => String(f.id) === String(entry.id));
+      if(_fi === -1) fundingList.unshift(entry);
+      else if(editingFundingId) fundingList[_fi] = entry;
+    }
     if(entry.customerId) {
       const linkedC = customers.find(c=>c.id===entry.customerId);
       if(linkedC) {
@@ -7234,6 +7242,8 @@ async function saveFunding() {
     fundingLinkedCustomerId = null;
     renderFundingPage();
     refreshAllViews();
+    window._lastLocalChange = Date.now();
+    if(typeof _dataSignature==='function') window._lastDataSig=_dataSignature();
     showGlobalToast('"'+entry.customerName+'" 펀딩 '+(wasEditing?'수정':'등록')+' 완료');
     if(typeof notifyDataChanged === 'function') notifyDataChanged('fundings');
     if(typeof refreshFundingCheckBadge === 'function') refreshFundingCheckBadge();
