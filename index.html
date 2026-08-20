@@ -163,9 +163,6 @@
       <div class="nav-item" onclick="goPage(&#39;calcage&#39;,this)">
         만나이 계산기
       </div>
-      <div class="nav-item" onclick="goPage(&#39;corp-analysis&#39;,this)">
-        법인 재무분석
-      </div>
       <div class="nav-item" onclick="goPage(&#39;tracking&#39;,this)">
         탁송조회
       </div>
@@ -1999,6 +1996,7 @@
         <span style="font-size:12px;color:var(--text3);">~</span>
         <input type="date" id="fundingDateEnd" style="padding:5px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;font-family:inherit;outline:none;color-scheme:dark;">
         <button class="btn btn-primary btn-sm" onclick="applyFundingDateFilter()" style="padding:5px 14px;font-size:11px;">🔍 조회</button>
+        <button class="btn btn-ghost btn-sm" onclick="setFundingMonthPrev()" style="padding:4px 10px;font-size:11px;">◀ 지난달</button>
         <button class="btn btn-ghost btn-sm" onclick="setFundingMonthCurrent()" style="padding:4px 10px;font-size:11px;">이번달</button>
         <button class="btn btn-ghost btn-sm" onclick="setFundingMonthClear()" style="padding:4px 10px;font-size:11px;color:var(--text3);">초기화</button>
         <span id="fundingMonthBadge" style="font-size:11px;color:var(--text3);margin-left:6px;"></span>
@@ -4470,7 +4468,7 @@ function goPage(id, navEl, keepDbPage) {
   if(id==='users') { showUserList(); } // async, self-executing
   if(id==='settings') { renderStatusOptionList(); }
   if(id==='reclaim') { renderReclaimPage(); }
-  if(id==='funding') { renderFundingPage(); }
+  if(id==='funding') { if(typeof clearFundingColFilters==='function') clearFundingColFilters(); setPage('funding', 1); renderFundingPage(); }
   if(id==='alarmsettings') {  }
   if(id==='alarmperiodic') { renderAlarmPeriodicPage(); }
   if(id==='script')        { renderScriptPage(); }
@@ -7598,6 +7596,23 @@ function setFundingMonthCurrent() {
   if(s) s.value = fmt(first);
   if(e) e.value = fmt(last);
   renderFundingPage();
+}
+function setFundingMonthPrev() {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth() - 1;
+  const first = new Date(y, m, 1);
+  const last = new Date(y, m + 1, 0);
+  const fmt = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const s = document.getElementById('fundingDateStart');
+  const e = document.getElementById('fundingDateEnd');
+  if(s) s.value = fmt(first);
+  if(e) e.value = fmt(last);
+  setPage('funding', 1);
+  renderFundingPage();
+}
+// 펀딩현황 진입 시 항목별 텍스트 필터 초기화 (전체 목록 노출)
+function clearFundingColFilters() {
+  ['ff_name','ff_phone','ff_car','ff_assign','ff_type','ff_bank','ff_status'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
 }
 function setFundingMonthClear() {
   const s = document.getElementById('fundingDateStart');
