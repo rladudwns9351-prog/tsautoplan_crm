@@ -10,7 +10,7 @@
 <style>:root{--bg:#0d0d0f;--bg2:#141416;--bg3:#1b1b1e;--bg4:#26262a;--border:#333338;--border2:#42424a;--text:#f2f2f4;--text2:#c2c2ca;--text3:#9a9aa4;--accent:#6c6c7a;--accent2:#82828f;--red:#ff5f5f;--green:#3fd980;--yellow:#ffc44d;--blue:#66aaff;--sidebar:220px;--radius:8px}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:#1a1d4a}.login-box{background:#12143a;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:44px 48px 22px;width:400px}.login-logo{font-size:22px;font-weight:700;letter-spacing:2px;margin-bottom:8px}.login-sub{color:var(--text2);font-size:13px;margin-bottom:36px}.login-tabs{display:flex;gap:0;margin-bottom:28px;border:1px solid rgba(255,255,255,.25);border-radius:6px;overflow:hidden}.login-tab{flex:1;padding:10px;text-align:center;font-size:13px;cursor:pointer;background:transparent;color:rgba(255,255,255,.7);border:none;transition:.2s}.login-tab.active{background:#ffffff;color:#12143a;font-weight:600}.login-field{margin-bottom:16px}.login-field label{display:block;font-size:12px;color:rgba(255,255,255,.7);margin-bottom:6px;letter-spacing:.5px}.login-field input{width:100%;padding:11px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);border-radius:6px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:.2s}.login-field input:focus{border-color:#fff}.login-btn{width:100%;padding:13px;background:#ffffff;color:#12143a;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;letter-spacing:.5px;transition:.15s}.login-btn:hover{background:#e6e8f2}.login-hint{font-size:11px;color:rgba(255,255,255,.5);text-align:center;margin-top:16px}#app{display:none;flex:1;overflow:hidden;flex-direction:row}#app.active{display:flex}.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(90deg,#000000 0%,#0a0a0b 55%,#151517 100%);border-bottom:1px solid #ffffff;display:flex;align-items:center;padding:0 20px;z-index:100;gap:16px}.topbar-logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;letter-spacing:1px;color:#fff;flex-shrink:0;padding-right:16px}.topbar-right{margin-left:auto;display:flex;align-items:center;gap:16px}.role-badge{font-size:11px;letter-spacing:1px;padding:4px 10px;border-radius:999px;font-weight:600}.role-admin{background:#fff;color:#000}.role-staff{background:var(--bg4);color:var(--text2);border:1px solid var(--border2)}.topbar-user{font-size:13px;color:rgba(255,255,255,.8)}.logout-btn{font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;background:none;border:none;padding:6px 10px;border-radius:4px;transition:.15s}.logout-btn:hover{color:#fff;background:rgba(255,255,255,.12)}.sidebar{width:var(--sidebar);background:#000000;border-right:1px solid #ffffff;padding-top:52px;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}.sidebar-section{padding:14px 0 12px 0;border-top:1px solid #ffffff;border-bottom:1px solid #ffffff;margin-bottom:-1px}.sidebar-label{font-size:10px;color:#fff;opacity:.75;letter-spacing:2px;padding:0 20px 8px;text-transform:uppercase;font-weight:700}.nav-item{display:flex;align-items:center;justify-content:center;text-align:center;gap:8px;padding:10px 12px;margin:5px 12px;cursor:pointer;color:#ffffff;background:#111113;border-radius:12px;font-size:15px;font-weight:700;letter-spacing:2px;border:1px solid #ffffff;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
 .sidebar .nav-item{margin-left:12px!important;margin-right:12px!important;border-left:none!important;justify-content:center!important}
 .nav-item:hover{transform:scale(1.06);background:#26262a;box-shadow:0 3px 10px rgba(0,0,0,.55);z-index:2}
-.nav-item.active{background:#ffffff;color:#000000;border-color:#ffffff;box-shadow:0 0 0 2px rgba(255,255,255,.35)}.nav-icon{font-size:15px;width:18px;text-align:center}.sidebar-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid #ffffff}.sidebar-version{font-size:10px;color:rgba(255,255,255,.5);font-family:'JetBrains Mono',monospace}.main{flex:1;padding-top:52px;overflow-y:auto;background:var(--bg)}.page{display:none;padding:28px}.page.active{display:block}.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.page-title{font-size:20px;font-weight:700}.pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:16px 8px;flex-wrap:wrap}.pagination .page-info{font-size:11px;color:var(--text3);margin-right:12px;font-family:JetBrains Mono,monospace}.pagination button{min-width:32px;height:30px;padding:0 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;cursor:pointer;transition:.15s}.pagination button:hover:not(:disabled){background:var(--bg4);color:var(--text);border-color:var(--accent)}.pagination button.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}.pagination button:disabled{opacity:.35;cursor:not-allowed}.pagination button.nav-btn{padding:0 12px}.page-sub{font-size:13px;color:var(--text2);margin-top:3px}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}.stat-card::after{content:'';position:absolute;top:0;right:0;width:3px;height:100%}.stat-card.c-white::after{background:#fff}.stat-card.c-green::after{background:var(--green)}.stat-card.c-yellow::after{background:var(--yellow)}.stat-card.c-blue::after{background:var(--blue)}.stat-label{font-size:11px;color:var(--text2);letter-spacing:.5px;margin-bottom:10px}.stat-value{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace}.stat-change{font-size:11px;color:var(--text2);margin-top:6px}.stat-change.up{color:var(--green)}.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}.chart-title{font-size:13px;font-weight:600;margin-bottom:16px}.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}.bar{width:100%;background:var(--bg4);border-radius:3px 3px 0 0;position:relative;transition:.6s}.bar-val{font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace}.bar-lbl{font-size:10px;color:var(--text3)}.pie-legend{display:flex;flex-direction:column;gap:10px;margin-top:12px}.legend-item{display:flex;align-items:center;gap:10px;font-size:12px}.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.legend-label{color:var(--text2);flex:1}.legend-val{color:var(--text);font-weight:600;font-family:'JetBrains Mono',monospace}.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}.section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}.section-head-title{font-size:13px;font-weight:600}.section-action{font-size:12px;color:var(--text2);cursor:pointer;transition:.15s}.section-action:hover{color:var(--text)}.tbl{width:100%;border-collapse:collapse}.tbl th{font-size:11px;color:var(--text3);letter-spacing:.5px;text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);font-weight:500;text-transform:uppercase}.tbl td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}.tbl tr:last-child td{border-bottom:none}.tbl tr:hover td{background:var(--bg3);cursor:pointer}.tbl-name{font-weight:600}.tbl-sub{font-size:11px;color:var(--text2);margin-top:2px}.badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:4px}.badge-new{background:rgba(68,136,255,.15);color:var(--blue)}.badge-consult{background:rgba(255,204,68,.12);color:var(--yellow)}.badge-contract{background:rgba(68,255,136,.12);color:var(--green)}.badge-complete{background:rgba(255,255,255,.08);color:var(--text2)}.badge-cancel{background:rgba(255,68,68,.12);color:var(--red)}.badge-admin{background:#fff;color:#000;font-size:10px}.badge-staff{background:var(--bg4);color:var(--text2);border:1px solid var(--border2);font-size:10px}.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}.search-wrap{position:relative;flex:1;min-width:200px}.search-wrap input{width:100%;padding:9px 14px 9px 36px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.search-wrap input:focus{border-color:#ffffff}.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}.select-filter{padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:13px;font-family:inherit;outline:none;cursor:pointer}.btn{padding:9px 16px;border-radius:6px;font-size:13px;font-family:inherit;cursor:pointer;border:none;transition:.15s;font-weight:500}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text);border-color:#ffffff}.btn-sm{padding:6px 12px;font-size:12px}.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(255,68,68,.3)}.btn-danger:hover{background:rgba(255,68,68,.1)}.detail-back{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:20px;transition:.15s}.detail-back:hover{color:var(--text)}.detail-grid{display:grid;grid-template-columns:320px 1fr;gap:20px}.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}.info-avatar{width:60px;height:60px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border2);margin-bottom:16px}.info-name{font-size:18px;font-weight:700;margin-bottom:4px}.info-phone{font-size:14px;color:var(--text2);margin-bottom:16px;font-family:'JetBrains Mono',monospace}.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}.info-row:last-child{border-bottom:none}.info-key{color:var(--text2)}.info-val{font-weight:500;text-align:right}.info-edit-btn{width:100%;margin-top:16px}.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}.tab{padding:10px 20px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:.15s;margin-bottom:-1px}.tab:hover{color:var(--text)}.tab.active{color:#ffffff;border-bottom-color:#ffffff;font-weight:600}.tab-content{display:none}.tab-content.active{display:block}.memo-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:10px}.memo-meta{display:flex;justify-content:space-between;margin-bottom:8px}.memo-author{font-size:11px;color:var(--text2)}.memo-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}.memo-text{font-size:13px;line-height:1.6}.memo-input{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;margin-bottom:10px}.memo-input:focus{border-color:#ffffff}.file-drop{border:2px dashed var(--border2);border-radius:8px;padding:32px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:16px}.file-drop:hover{border-color:#ffffff;background:var(--bg3)}.file-drop-icon{font-size:32px;margin-bottom:10px}.file-drop-text{font-size:13px;color:var(--text2)}.file-list{display:flex;flex-direction:column;gap:8px}.file-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}.file-icon{font-size:20px}.file-info{flex:1}.file-name{font-size:13px;font-weight:500}.file-size{font-size:11px;color:var(--text2);margin-top:2px;font-family:'JetBrains Mono',monospace}.file-actions{display:flex;gap:8px}.user-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}.user-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px}.user-card-top{display:flex;align-items:center;gap:12px}.user-ava{width:44px;height:44px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}.user-card-name{font-weight:600;font-size:14px}.user-card-sub{font-size:12px;color:var(--text2);margin-top:2px}.user-stats{display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)}.user-stat{text-align:center}.user-stat-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}.user-stat-lbl{font-size:10px;color:var(--text2);margin-top:2px}.user-card-actions{display:flex;gap:8px;margin-top:4px}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}.modal-bg.open{display:flex}.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-height:85vh;overflow-y:auto}.modal-title{font-size:16px;font-weight:700;margin-bottom:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-field{display:flex;flex-direction:column;gap:6px}.form-field.full{grid-column:1/-1}.form-field label{font-size:12px;color:var(--text2)}.form-field input,.form-field select,.form-field textarea{padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:#ffffff}.form-field textarea{resize:vertical;min-height:70px}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}#dbBody tr.db-overdue td{background:rgba(255,68,68,.13)}#dbBody tr.db-overdue:hover td{background:rgba(255,68,68,.2)}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.nav-item.active{background:#ffffff;color:#000000;border-color:#ffffff;box-shadow:0 0 0 2px rgba(255,255,255,.35)}.nav-icon{font-size:15px;width:18px;text-align:center}.sidebar-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid #ffffff}.sidebar-version{font-size:10px;color:rgba(255,255,255,.5);font-family:'JetBrains Mono',monospace}.main{flex:1;min-width:0;padding-top:52px;overflow-y:auto;background:var(--bg)}.page{display:none;padding:28px}.page.active{display:block}.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.page-title{font-size:20px;font-weight:700}.pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:16px 8px;flex-wrap:wrap}.pagination .page-info{font-size:11px;color:var(--text3);margin-right:12px;font-family:JetBrains Mono,monospace}.pagination button{min-width:32px;height:30px;padding:0 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:12px;cursor:pointer;transition:.15s}.pagination button:hover:not(:disabled){background:var(--bg4);color:var(--text);border-color:var(--accent)}.pagination button.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}.pagination button:disabled{opacity:.35;cursor:not-allowed}.pagination button.nav-btn{padding:0 12px}.page-sub{font-size:13px;color:var(--text2);margin-top:3px}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}.stat-card::after{content:'';position:absolute;top:0;right:0;width:3px;height:100%}.stat-card.c-white::after{background:#fff}.stat-card.c-green::after{background:var(--green)}.stat-card.c-yellow::after{background:var(--yellow)}.stat-card.c-blue::after{background:var(--blue)}.stat-label{font-size:11px;color:var(--text2);letter-spacing:.5px;margin-bottom:10px}.stat-value{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace}.stat-change{font-size:11px;color:var(--text2);margin-top:6px}.stat-change.up{color:var(--green)}.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}.chart-title{font-size:13px;font-weight:600;margin-bottom:16px}.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}.bar{width:100%;background:var(--bg4);border-radius:3px 3px 0 0;position:relative;transition:.6s}.bar-val{font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace}.bar-lbl{font-size:10px;color:var(--text3)}.pie-legend{display:flex;flex-direction:column;gap:10px;margin-top:12px}.legend-item{display:flex;align-items:center;gap:10px;font-size:12px}.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.legend-label{color:var(--text2);flex:1}.legend-val{color:var(--text);font-weight:600;font-family:'JetBrains Mono',monospace}.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}.section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}.section-head-title{font-size:13px;font-weight:600}.section-action{font-size:12px;color:var(--text2);cursor:pointer;transition:.15s}.section-action:hover{color:var(--text)}.tbl{width:100%;border-collapse:collapse}.tbl th{font-size:11px;color:var(--text3);letter-spacing:.5px;text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);font-weight:500;text-transform:uppercase}.tbl td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}.tbl tr:last-child td{border-bottom:none}.tbl tr:hover td{background:var(--bg3);cursor:pointer}.tbl-name{font-weight:600}.tbl-sub{font-size:11px;color:var(--text2);margin-top:2px}.badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:4px}.badge-new{background:rgba(68,136,255,.15);color:var(--blue)}.badge-consult{background:rgba(255,204,68,.12);color:var(--yellow)}.badge-contract{background:rgba(68,255,136,.12);color:var(--green)}.badge-complete{background:rgba(255,255,255,.08);color:var(--text2)}.badge-cancel{background:rgba(255,68,68,.12);color:var(--red)}.badge-admin{background:#fff;color:#000;font-size:10px}.badge-staff{background:var(--bg4);color:var(--text2);border:1px solid var(--border2);font-size:10px}.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}.search-wrap{position:relative;flex:1;min-width:200px}.search-wrap input{width:100%;padding:9px 14px 9px 36px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.search-wrap input:focus{border-color:#ffffff}.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}.select-filter{padding:9px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:13px;font-family:inherit;outline:none;cursor:pointer}.btn{padding:9px 16px;border-radius:6px;font-size:13px;font-family:inherit;cursor:pointer;border:none;transition:.15s;font-weight:500}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text);border-color:#ffffff}.btn-sm{padding:6px 12px;font-size:12px}.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(255,68,68,.3)}.btn-danger:hover{background:rgba(255,68,68,.1)}.detail-back{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:20px;transition:.15s}.detail-back:hover{color:var(--text)}.detail-grid{display:grid;grid-template-columns:320px 1fr;gap:20px}.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}.info-avatar{width:60px;height:60px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border2);margin-bottom:16px}.info-name{font-size:18px;font-weight:700;margin-bottom:4px}.info-phone{font-size:14px;color:var(--text2);margin-bottom:16px;font-family:'JetBrains Mono',monospace}.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}.info-row:last-child{border-bottom:none}.info-key{color:var(--text2)}.info-val{font-weight:500;text-align:right}.info-edit-btn{width:100%;margin-top:16px}.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}.tab{padding:10px 20px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:.15s;margin-bottom:-1px}.tab:hover{color:var(--text)}.tab.active{color:#ffffff;border-bottom-color:#ffffff;font-weight:600}.tab-content{display:none}.tab-content.active{display:block}.memo-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:10px}.memo-meta{display:flex;justify-content:space-between;margin-bottom:8px}.memo-author{font-size:11px;color:var(--text2)}.memo-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}.memo-text{font-size:13px;line-height:1.6}.memo-input{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;margin-bottom:10px}.memo-input:focus{border-color:#ffffff}.file-drop{border:2px dashed var(--border2);border-radius:8px;padding:32px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:16px}.file-drop:hover{border-color:#ffffff;background:var(--bg3)}.file-drop-icon{font-size:32px;margin-bottom:10px}.file-drop-text{font-size:13px;color:var(--text2)}.file-list{display:flex;flex-direction:column;gap:8px}.file-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}.file-icon{font-size:20px}.file-info{flex:1}.file-name{font-size:13px;font-weight:500}.file-size{font-size:11px;color:var(--text2);margin-top:2px;font-family:'JetBrains Mono',monospace}.file-actions{display:flex;gap:8px}.user-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}.user-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px}.user-card-top{display:flex;align-items:center;gap:12px}.user-ava{width:44px;height:44px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}.user-card-name{font-weight:600;font-size:14px}.user-card-sub{font-size:12px;color:var(--text2);margin-top:2px}.user-stats{display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)}.user-stat{text-align:center}.user-stat-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}.user-stat-lbl{font-size:10px;color:var(--text2);margin-top:2px}.user-card-actions{display:flex;gap:8px;margin-top:4px}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}.modal-bg.open{display:flex}.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-height:85vh;overflow-y:auto}.modal-title{font-size:16px;font-weight:700;margin-bottom:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-field{display:flex;flex-direction:column;gap:6px}.form-field.full{grid-column:1/-1}.form-field label{font-size:12px;color:var(--text2)}.form-field input,.form-field select,.form-field textarea{padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit;outline:none}.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:#ffffff}.form-field textarea{resize:vertical;min-height:70px}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}#dbBody tr.db-overdue td{background:rgba(255,68,68,.13)}#dbBody tr.db-overdue:hover td{background:rgba(255,68,68,.2)}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .topbar button:not(.role-badge){color:#ffffff!important;border-color:rgba(255,255,255,.65)!important;background:rgba(255,255,255,.10)!important;font-weight:600}
 .topbar button:not(.role-badge):hover{background:rgba(255,255,255,.22)!important;border-color:#ffffff!important}
 .topbar .role-admin{background:#ffffff;color:#000000}
@@ -186,100 +186,57 @@
             <div class="page-sub" id="dateDisplay">2026년 5월 28일 목요일</div>
           </div>
         </div>
-        <!-- ===== 영업자 상담 활동 집계 (관리자) ===== -->
+        <!-- ===== 영업자별 DB 배분 · 전환 집계 (관리자) ===== -->
         <div class="admin-only" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px;">
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-            <div style="font-size:15px;font-weight:700;">📊 영업자 상담 활동 집계</div>
+            <div style="font-size:15px;font-weight:700;">📈 영업자별 DB 배분 · 전환 집계 <span id="dbaLabel" style="font-size:11px;color:var(--text3);font-weight:500;margin-left:6px;"></span></div>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <select id="actAggMode" onchange="onActivityPeriodChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;">
-                <option value="month">월간</option><option value="week">주간</option><option value="year">연간</option>
-              </select>
-              <select id="actAggYear" onchange="onActivityYMChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
-              <select id="actAggMonth" onchange="onActivityYMChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
-              <select id="actAggWeek" onchange="renderActivityDashboardTable()" style="display:none;padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
-              <button onclick="exportActivityExcel()" class="btn btn-primary btn-sm" style="font-size:11px;">📥 엑셀</button>
+              <select id="dbaStaff" onchange="renderDbAlloc()" style="padding:5px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"><option value="">전체 영업자</option></select>
+              <input type="date" id="dbaFrom" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;color-scheme:dark;">
+              <span style="font-size:11px;color:var(--text3);">~</span>
+              <input type="date" id="dbaTo" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;color-scheme:dark;">
+              <button class="btn btn-primary btn-sm" onclick="renderDbAlloc()" style="padding:4px 12px;font-size:11px;">🔍 조회</button>
+              <button class="btn btn-ghost btn-sm" onclick="dbaSetPrevMonth()" style="padding:4px 10px;font-size:11px;">◀ 지난달</button>
+              <button class="btn btn-ghost btn-sm" onclick="dbaSetThisMonth()" style="padding:4px 10px;font-size:11px;">이번달</button>
+              <button class="btn btn-ghost btn-sm" onclick="dbaClear()" style="padding:4px 10px;font-size:11px;color:var(--text3);">초기화</button>
             </div>
           </div>
-          <div id="actAggTable" style="overflow-x:auto;"></div>
-        </div>
-        <!-- ===== 관리자 기간 필터 (펀딩진행일자 기준) ===== -->
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-          <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 조회기간</span>
-          <select id="adminFltYear" onchange="onAdminFltYM()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
-          <select id="adminFltMonth" onchange="onAdminFltYM()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;">
-            <option value="0">전체</option>
-            <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
-            <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
-            <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
-            <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-          </select>
-          <span style="font-size:11px;color:var(--text3);">또는</span>
-          <input type="date" id="adminFltStart" onchange="onAdminFltRange()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;color-scheme:dark;">
-          <span style="font-size:11px;color:var(--text3);">~</span>
-          <input type="date" id="adminFltEnd" onchange="onAdminFltRange()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;color-scheme:dark;">
-          <button onclick="resetAdminFlt()" style="padding:5px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:11px;cursor:pointer;font-family:inherit;">초기화</button>
-          <span id="adminFltLabel" style="font-size:11px;color:var(--accent);font-weight:600;margin-left:4px;"></span>
-        </div>
-        <!-- 요약 스탯 카드: 상단 2개 (전체DB / 당일 배분) -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;" id="adminStatCardsTop">
-    <div style="position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;">
-      <div style="position:absolute;top:0;right:0;width:3px;height:100%;background:#fff;"></div>
-      <div style="font-size:11px;color:var(--text2);letter-spacing:.5px;margin-bottom:8px;">전체 DB</div>
-      <div style="font-size:28px;font-weight:700;font-family:&#39;JetBrains Mono&#39;,monospace;">57</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:6px;">2026년 5월 28일 목</div>
-    </div>
-    <div style="position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;">
-      <div style="position:absolute;top:0;right:0;width:3px;height:100%;background:var(--blue);"></div>
-      <div style="font-size:11px;color:var(--text2);letter-spacing:.5px;margin-bottom:8px;">당일 배분 DB</div>
-      <div style="font-size:28px;font-weight:700;font-family:&#39;JetBrains Mono&#39;,monospace;">5</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:6px;">오늘 신규 배분</div>
-    </div></div>
-        <!-- 하단 3개 -->
-        <div class="stats-grid" id="adminStatCards" style="margin-bottom:14px;">
-    <div class="stat-card" style="position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;">
-      <div style="position:absolute;top:0;right:0;width:3px;height:100%;background:var(--green);"></div>
-      <div class="stat-label">계약 완료</div>
-      <div class="stat-value">0</div>
-      <div class="stat-change" style="color:var(--text2);font-size:11px;margin-top:6px;">▲ 이번달 누적</div>
-    </div>
-    <div class="stat-card" style="position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;">
-      <div style="position:absolute;top:0;right:0;width:3px;height:100%;background:var(--yellow);"></div>
-      <div class="stat-label">상담 진행중</div>
-      <div class="stat-value">32</div>
-      <div class="stat-change" style="color:var(--text2);font-size:11px;margin-top:6px;">신규문의 포함</div>
-    </div>
-    <div class="stat-card" style="position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;">
-      <div style="position:absolute;top:0;right:0;width:3px;height:100%;background:var(--blue);"></div>
-      <div class="stat-label">전체 직원</div>
-      <div class="stat-value">7</div>
-      <div class="stat-change" style="color:var(--text2);font-size:11px;margin-top:6px;">활성 계정</div>
-    </div></div>
-        <!-- 단체문자 발송 집계 -->
-        <div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;">
-          <div class="section-head" style="padding:14px 18px;">
-            <div class="section-head-title">📨 단체문자 발송 집계</div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <select id="smsStatsPeriod" onchange="onSmsPeriodChange()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
-                <option value="today">오늘</option>
-                <option value="7">최근 7일</option>
-                <option value="30" selected="">최근 30일</option>
-                <option value="month">이번달</option>
-                <option value="ym">년/월 선택</option>
-                <option value="all">전체</option>
-              </select>
-              <select id="smsStatsYear" onchange="renderSmsStats()" style="display:none;padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"></select>
-              <select id="smsStatsMonth" onchange="renderSmsStats()" style="display:none;padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
-                <option value="0">전체월</option>
-                <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
-                <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
-                <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
-                <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-              </select>
-              <span id="smsStatsBadge" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">발송 0회 / 총 0건</span>
-              <button class="admin-only" onclick="resetSmsLogs()" title="발송 이력(집계) 전체 초기화" style="padding:4px 10px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.35);border-radius:5px;color:var(--red);font-size:11px;font-family:inherit;cursor:pointer;">🗑 집계 초기화</button>
+          <div id="dbaCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;"></div>
+          <div style="overflow-x:auto;max-width:100%;">
+            <table class="tbl" style="width:max-content;min-width:100%;table-layout:auto;">
+              <thead><tr>
+                <th style="min-width:110px;white-space:nowrap;">영업자</th>
+                <th style="text-align:center;white-space:nowrap;min-width:130px;">신규배분 <span style="color:var(--text3);font-weight:400;">(신규)</span></th>
+                <th style="text-align:center;white-space:nowrap;min-width:130px;">재배분 <span style="color:var(--text3);font-weight:400;">(재배분)</span></th>
+                <th style="text-align:center;white-space:nowrap;min-width:140px;">총 디비 <span style="color:var(--text3);font-weight:400;">(신규+재배분)</span></th>
+                <th style="text-align:center;white-space:nowrap;min-width:130px;">펀딩등록 <span style="color:var(--text3);font-weight:400;">(신규배분 출신)</span></th>
+                <th style="text-align:center;white-space:nowrap;min-width:140px;">전환율 <span style="color:var(--text3);font-weight:400;">(신규기준)</span></th>
+                <th style="text-align:center;white-space:nowrap;min-width:150px;">전환율 <span style="color:var(--text3);font-weight:400;">(신규+재배분)</span></th>
+                <th style="text-align:center;white-space:nowrap;min-width:120px;">배분DB 펀딩</th>
+                <th style="text-align:center;white-space:nowrap;min-width:120px;">직영업 펀딩</th>
+                <th style="text-align:right;white-space:nowrap;min-width:120px;">총매출 <span style="color:var(--text3);font-weight:400;">(매출+프로모션+대리점)</span></th>
+                <th style="text-align:right;white-space:nowrap;min-width:120px;">총품의금액</th>
+                <th style="text-align:right;white-space:nowrap;min-width:120px;">총순매출 <span style="color:var(--text3);font-weight:400;">(총매출−품의)</span></th>
+              </tr></thead>
+              <tbody id="dbaBody"></tbody>
+              <tfoot id="dbaFoot"></tfoot>
+            </table>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text2);">💰 기간내 신규배분 DB의 펀딩등록 내역 <span id="dbaFundCount" style="font-size:11px;color:var(--text3);font-weight:500;"></span></div>
+            <div style="overflow-x:auto;max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
+              <table class="tbl" style="width:100%;">
+                <thead><tr>
+                  <th style="min-width:110px;">고객명</th>
+                  <th style="min-width:80px;">담당자</th>
+                  <th style="min-width:100px;">금융사</th>
+                  <th style="text-align:right;min-width:110px;">실매출액</th>
+                </tr></thead>
+                <tbody id="dbaFundBody"></tbody>
+                <tfoot id="dbaFundFoot"></tfoot>
+              </table>
             </div>
           </div>
-          <div id="smsStatsBody" style="padding:16px 18px;"><div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">해당 기간 발송 내역 없음</div></div>
         </div>
         <!-- 실적 순위 + 매출 순위 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
@@ -287,7 +244,7 @@
           <div class="section-card" style="padding:0;overflow:hidden;">
             <div class="section-head" style="padding:14px 18px;">
               <div class="section-head-title">🏆 실적 순위</div>
-              <div style="font-size:11px;color:var(--text3);">펀딩진행일자 기준 · 건수</div>
+              <div style="font-size:11px;color:var(--text3);">상단 조회기간 기준 · 건수</div>
             </div>
             <div id="perfRankList" style="padding:0 0 8px;"><div style="display:flex;align-items:center;gap:12px;padding:10px 18px;">
       <div style="font-size:16px;width:24px;text-align:center;">🥇</div>
@@ -367,7 +324,7 @@
           <div class="section-card" style="padding:0;overflow:hidden;">
             <div class="section-head" style="padding:14px 18px;">
               <div class="section-head-title">💰 매출 순위</div>
-              <div style="font-size:11px;color:var(--text3);">펀딩진행일자 기준 · 매출</div>
+              <div style="font-size:11px;color:var(--text3);">상단 조회기간 기준 · 매출</div>
             </div>
             <div id="salesRankList" style="padding:0 0 8px;"><div style="display:flex;align-items:center;gap:12px;padding:10px 18px;">
       <div style="font-size:16px;width:24px;text-align:center;">🥇</div>
@@ -444,7 +401,68 @@
     </div></div>
           </div>
         </div>
-      <!-- ===== 유입경로별 DB 배분 분석 (관리자 전용) ===== -->
+      <!-- ===== 영업자 상담 활동 집계 (관리자) ===== -->
+        <div class="admin-only" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <div style="font-size:15px;font-weight:700;">📊 영업자 상담 활동 집계</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <select id="actAggMode" onchange="onActivityPeriodChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;">
+                <option value="month">월간</option><option value="week">주간</option><option value="year">연간</option>
+              </select>
+              <select id="actAggYear" onchange="onActivityYMChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+              <select id="actAggMonth" onchange="onActivityYMChange()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+              <select id="actAggWeek" onchange="renderActivityDashboardTable()" style="display:none;padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+              <button onclick="exportActivityExcel()" class="btn btn-primary btn-sm" style="font-size:11px;">📥 엑셀</button>
+            </div>
+          </div>
+          <div id="actAggTable" style="overflow-x:auto;"></div>
+        </div>
+        <!-- ===== 관리자 기간 필터 (상단 집계 기간과 연동, 숨김) ===== -->
+        <div style="display:none;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+          <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 조회기간</span>
+          <select id="adminFltYear" onchange="onAdminFltYM()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;"></select>
+          <select id="adminFltMonth" onchange="onAdminFltYM()" style="padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;outline:none;font-family:inherit;">
+            <option value="0">전체</option>
+            <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+            <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+            <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+            <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+          </select>
+          <span style="font-size:11px;color:var(--text3);">또는</span>
+          <input type="date" id="adminFltStart" onchange="onAdminFltRange()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;color-scheme:dark;">
+          <span style="font-size:11px;color:var(--text3);">~</span>
+          <input type="date" id="adminFltEnd" onchange="onAdminFltRange()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;color-scheme:dark;">
+          <button onclick="resetAdminFlt()" style="padding:5px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:11px;cursor:pointer;font-family:inherit;">초기화</button>
+          <span id="adminFltLabel" style="font-size:11px;color:var(--accent);font-weight:600;margin-left:4px;"></span>
+        </div>
+        <!-- 단체문자 발송 집계 -->
+        <div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+          <div class="section-head" style="padding:14px 18px;">
+            <div class="section-head-title" onclick="toggleSmsStatsFold()" style="cursor:pointer;user-select:none;"><span id="smsFoldArrow">▶</span> 📨 단체문자 발송 집계</div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select id="smsStatsPeriod" onchange="onSmsPeriodChange()" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
+                <option value="today">오늘</option>
+                <option value="7">최근 7일</option>
+                <option value="30" selected="">최근 30일</option>
+                <option value="month">이번달</option>
+                <option value="ym">년/월 선택</option>
+                <option value="all">전체</option>
+              </select>
+              <select id="smsStatsYear" onchange="renderSmsStats()" style="display:none;padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;"></select>
+              <select id="smsStatsMonth" onchange="renderSmsStats()" style="display:none;padding:4px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;outline:none;">
+                <option value="0">전체월</option>
+                <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+                <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+                <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+                <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+              </select>
+              <span id="smsStatsBadge" style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;">발송 0회 / 총 0건</span>
+              <button class="admin-only" onclick="resetSmsLogs()" title="발송 이력(집계) 전체 초기화" style="padding:4px 10px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.35);border-radius:5px;color:var(--red);font-size:11px;font-family:inherit;cursor:pointer;">🗑 집계 초기화</button>
+            </div>
+          </div>
+          <div id="smsStatsBody" style="padding:16px 18px;display:none;"><div style="text-align:center;color:var(--text3);font-size:12px;padding:30px;">해당 기간 발송 내역 없음</div></div>
+        </div>
+        <!-- ===== 유입경로별 DB 배분 분석 (관리자 전용) ===== -->
       <div class="admin-only" style="margin-top:20px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap;">
           <div style="font-size:13px;font-weight:700;">📊 유입경로별 DB 배분 분석</div>
@@ -512,96 +530,6 @@
       <div style="width:100%;height:4px;background:var(--accent);border-radius:4px 4px 0 0;transition:.5s;"></div>
     </div></div>
           <div id="adminBarLabels" style="display:flex;gap:10px;margin-top:6px;"><div style="flex:1;text-align:center;font-size:11px;color:var(--text3);">12월</div><div style="flex:1;text-align:center;font-size:11px;color:var(--text3);">1월</div><div style="flex:1;text-align:center;font-size:11px;color:var(--text3);">2월</div><div style="flex:1;text-align:center;font-size:11px;color:var(--text3);">3월</div><div style="flex:1;text-align:center;font-size:11px;color:var(--text3);">4월</div><div style="flex:1;text-align:center;font-size:11px;color:var(--text3);">5월</div></div>
-        </div>
-        <!-- 팀별 실적 / 매출 / 건수 차트 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
-          <div class="section-card" style="padding:18px;">
-            <div style="font-size:13px;font-weight:600;margin-bottom:14px;">팀별 실적 현황 <span style="font-size:10px;color:var(--text3);">건수</span></div>
-            <div id="teamContractChart" style="display:flex;align-items:flex-end;gap:8px;height:100px;">
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,255,136,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,255,136,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,255,136,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,255,136,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,255,136,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,255,136,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div></div>
-            <div id="teamContractLabels" style="display:flex;gap:8px;margin-top:6px;"><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">강민지</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">박광석</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">정서준</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">강해옥</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">이성훈</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">박대원</div></div>
-          </div>
-          <div class="section-card" style="padding:18px;">
-            <div style="font-size:13px;font-weight:600;margin-bottom:14px;">팀별 매출 현황 <span style="font-size:10px;color:var(--text3);">누적</span></div>
-            <div id="teamSalesChart" style="display:flex;align-items:flex-end;gap:8px;height:100px;">
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,136,255,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,136,255,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,136,255,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,136,255,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,136,255,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">0</div>
-        <div style="width:100%;height:4px;background:rgba(68,136,255,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div></div>
-            <div id="teamSalesLabels" style="display:flex;gap:8px;margin-top:6px;"><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">강민지</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">박광석</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">정서준</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">강해옥</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">이성훈</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">박대원</div></div>
-          </div>
-          <div class="section-card" style="padding:18px;">
-            <div style="font-size:13px;font-weight:600;margin-bottom:14px;">팀별 건수 현황 <span style="font-size:10px;color:var(--text3);">DB</span></div>
-            <div id="teamDbChart" style="display:flex;align-items:flex-end;gap:8px;height:100px;">
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">17</div>
-        <div style="width:100%;height:92px;background:rgba(255,204,68,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">14</div>
-        <div style="width:100%;height:76px;background:rgba(255,204,68,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">8</div>
-        <div style="width:100%;height:45px;background:rgba(255,204,68,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">6</div>
-        <div style="width:100%;height:35px;background:rgba(255,204,68,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">11</div>
-        <div style="width:100%;height:61px;background:rgba(255,204,68,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;">1</div>
-        <div style="width:100%;height:9px;background:rgba(255,204,68,.7);border-radius:3px 3px 0 0;opacity:.85;"></div>
-      </div></div>
-            <div id="teamDbLabels" style="display:flex;gap:8px;margin-top:6px;"><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">강민지</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">박광석</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">정서준</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">강해옥</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">이성훈</div><div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">박대원</div></div>
-          </div>
         </div>
         <!-- 팀별 상세 실적 테이블 -->
         <div class="section-card" style="margin-bottom:14px;">
@@ -742,15 +670,7 @@
     </tr></tbody>
           </table>
         </div>
-        <!-- 영업자별 상세 실적 -->
-        <div style="font-size:13px;font-weight:700;margin:20px 0 12px;">영업자별 상세 현황</div>
-        <div id="staffDetailSection"><div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;"><div class="section-head" style="background:var(--bg3);"><div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">강</div><div><div style="font-size:14px;font-weight:700;">강민지</div><div style="font-size:11px;color:var(--text2);">@shl001</div></div></div><div style="display:flex;gap:20px;font-size:12px;"><span>담당DB <strong style="color:var(--accent);">17</strong></span><span>계약/펀딩 <strong style="color:var(--green);">0</strong></span><span>상담중 <strong style="color:var(--yellow);">9</strong></span><span>회수 <strong style="color:var(--red);">0</strong></span><span>실매출 <strong style="color:var(--blue);">0원</strong></span></div></div><div style="padding:14px 18px;"><div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;"><span style="font-size:11px;color:var(--text3);width:60px;">전환율</span><div style="flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;"><div style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:.6s;"></div></div><span style="font-size:11px;font-family:JetBrains Mono,monospace;color:var(--green);width:36px;text-align:right;">0%</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffcc4422;color:#ffcc44;">상담중 9</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffffff22;color:#ffffff;">부재중 7</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#88888822;color:#888888;">장기관리고객 1</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:6px;">최근 상담</div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">렌트 견적 리터치</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-28</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">선점 권유엔 조용하시네용 ,,</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-27</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">면허 재취득 1년미만 고객님 롯데 견적 보류 하시고 부재</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-27</span></div></div></div><div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;"><div class="section-head" style="background:var(--bg3);"><div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">박</div><div><div style="font-size:14px;font-weight:700;">박광석</div><div style="font-size:11px;color:var(--text2);">@shl002</div></div></div><div style="display:flex;gap:20px;font-size:12px;"><span>담당DB <strong style="color:var(--accent);">14</strong></span><span>계약/펀딩 <strong style="color:var(--green);">0</strong></span><span>상담중 <strong style="color:var(--yellow);">12</strong></span><span>회수 <strong style="color:var(--red);">0</strong></span><span>실매출 <strong style="color:var(--blue);">0원</strong></span></div></div><div style="padding:14px 18px;"><div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;"><span style="font-size:11px;color:var(--text3);width:60px;">전환율</span><div style="flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;"><div style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:.6s;"></div></div><span style="font-size:11px;font-family:JetBrains Mono,monospace;color:var(--green);width:36px;text-align:right;">0%</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffcc4422;color:#ffcc44;">상담중 12</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffffff22;color:#ffffff;">부재중 2</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:6px;">최근 상담</div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">아무_때나_가능 // 상담하면서</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026. 5. 2</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">부재</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-28</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">전체문자</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-27</span></div></div></div><div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;"><div class="section-head" style="background:var(--bg3);"><div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">정</div><div><div style="font-size:14px;font-weight:700;">정서준</div><div style="font-size:11px;color:var(--text2);">@shl003</div></div></div><div style="display:flex;gap:20px;font-size:12px;"><span>담당DB <strong style="color:var(--accent);">8</strong></span><span>계약/펀딩 <strong style="color:var(--green);">2</strong></span><span>상담중 <strong style="color:var(--yellow);">2</strong></span><span>회수 <strong style="color:var(--red);">0</strong></span><span>실매출 <strong style="color:var(--blue);">0원</strong></span></div></div><div style="padding:14px 18px;"><div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;"><span style="font-size:11px;color:var(--text3);width:60px;">전환율</span><div style="flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;"><div style="height:100%;width:25%;background:var(--green);border-radius:4px;transition:.6s;"></div></div><span style="font-size:11px;font-family:JetBrains Mono,monospace;color:var(--green);width:36px;text-align:right;">25%</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#4488ff22;color:#4488ff;">신규문의 2</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#aa88ff22;color:#aa88ff;">펀딩완료 2</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffffff22;color:#ffffff;">부재중 4</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:6px;">최근 상담</div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">타사 받은 견적 요청 자사에서 펀딩으로 더 지원 약속 썬팅 코일매트 생활</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026. 5. 1</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">타사 받은 견적 요청 자사에서 펀딩으로 더 지원 약속 썬팅 코일매트 생활</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026. 5. 1</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">단체 문자
-안녕하세요 대표님 😊
-
-차량은 아직 결정 전이실까요?
-
-차종</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-28</span></div></div></div><div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;"><div class="section-head" style="background:var(--bg3);"><div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">강</div><div><div style="font-size:14px;font-weight:700;">강해옥</div><div style="font-size:11px;color:var(--text2);">@shl004</div></div></div><div style="display:flex;gap:20px;font-size:12px;"><span>담당DB <strong style="color:var(--accent);">6</strong></span><span>계약/펀딩 <strong style="color:var(--green);">1</strong></span><span>상담중 <strong style="color:var(--yellow);">4</strong></span><span>회수 <strong style="color:var(--red);">0</strong></span><span>실매출 <strong style="color:var(--blue);">1,134,250원</strong></span></div></div><div style="padding:14px 18px;"><div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;"><span style="font-size:11px;color:var(--text3);width:60px;">전환율</span><div style="flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;"><div style="height:100%;width:17%;background:var(--green);border-radius:4px;transition:.6s;"></div></div><span style="font-size:11px;font-family:JetBrains Mono,monospace;color:var(--green);width:36px;text-align:right;">17%</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffcc4422;color:#ffcc44;">상담중 4</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#aa88ff22;color:#aa88ff;">펀딩완료 1</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#aef29c22;color:#aef29c;">고객진행미희망 1</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:6px;">최근 상담</div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">카톡보냄</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-27</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">카톡보냄</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-27</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">가능차량 안내/  가능차량 안내와  할인 문자보냄</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-27</span></div></div></div><div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;"><div class="section-head" style="background:var(--bg3);"><div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">이</div><div><div style="font-size:14px;font-weight:700;">이성훈</div><div style="font-size:11px;color:var(--text2);">@shl005</div></div></div><div style="display:flex;gap:20px;font-size:12px;"><span>담당DB <strong style="color:var(--accent);">11</strong></span><span>계약/펀딩 <strong style="color:var(--green);">1</strong></span><span>상담중 <strong style="color:var(--yellow);">5</strong></span><span>회수 <strong style="color:var(--red);">0</strong></span><span>실매출 <strong style="color:var(--blue);">2,236,520원</strong></span></div></div><div style="padding:14px 18px;"><div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;"><span style="font-size:11px;color:var(--text3);width:60px;">전환율</span><div style="flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;"><div style="height:100%;width:9%;background:var(--green);border-radius:4px;transition:.6s;"></div></div><span style="font-size:11px;font-family:JetBrains Mono,monospace;color:var(--green);width:36px;text-align:right;">9%</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffcc4422;color:#ffcc44;">상담중 5</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#aa88ff22;color:#aa88ff;">펀딩완료 1</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#ffffff22;color:#ffffff;">부재중 3</span><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#aef29c22;color:#aef29c;">고객진행미희망 2</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:6px;">최근 상담</div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">고객 다른데서 계약 했다고함.</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-28</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">연락 안와서 문자 예정</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-28</span></div><div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;"><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">연락 안와서 문자 예정</span><span style="color:var(--text3);flex-shrink:0;font-family:JetBrains Mono,monospace;">2026-05-28</span></div></div></div><div class="section-card" style="padding:0;overflow:hidden;margin-bottom:14px;"><div class="section-head" style="background:var(--bg3);"><div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">박</div><div><div style="font-size:14px;font-weight:700;">박대원</div><div style="font-size:11px;color:var(--text2);">@shl006</div></div></div><div style="display:flex;gap:20px;font-size:12px;"><span>담당DB <strong style="color:var(--accent);">1</strong></span><span>계약/펀딩 <strong style="color:var(--green);">1</strong></span><span>상담중 <strong style="color:var(--yellow);">0</strong></span><span>회수 <strong style="color:var(--red);">0</strong></span><span>실매출 <strong style="color:var(--blue);">795,260원</strong></span></div></div><div style="padding:14px 18px;"><div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;"><span style="font-size:11px;color:var(--text3);width:60px;">전환율</span><div style="flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;"><div style="height:100%;width:100%;background:var(--green);border-radius:4px;transition:.6s;"></div></div><span style="font-size:11px;font-family:JetBrains Mono,monospace;color:var(--green);width:36px;text-align:right;">100%</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#aa88ff22;color:#aa88ff;">펀딩완료 1</span></div><div style="font-size:12px;color:var(--text3);text-align:center;padding:8px;">최근 상담 없음</div></div></div></div>
-      </div>
+        </div>
       <!-- ===== 직원 대시보드 ===== -->
       <div id="staffDashboard" style="display:none;">
         <div class="page-header">
@@ -1835,6 +1755,10 @@
                   </div>
                   <span id="toggleLabel" style="font-size:13px;">사용중</span>
                 </label>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+                  <button type="button" id="uf_resignBtn" class="btn btn-sm" onclick="toggleResigned()" style="padding:6px 16px;font-size:12px;cursor:pointer;">퇴사 처리</button>
+                  <span id="uf_resignLabel" style="font-size:12px;color:var(--text3);"></span>
+                </div>
               </div>
             </div>
           </div>
@@ -4211,6 +4135,7 @@ function rowToStaff(r) {
     addr:      r.addr      || '',
     role:      r.role      || 'staff',
     active:    r.active    ?? true,
+    resigned:  r.resigned  ?? false,
     regDate:   r.reg_date  || '',
     pw:        r.pw        || '1234',
     customers: r.customers || 0,
@@ -4230,6 +4155,7 @@ async function sbSaveStaff(u) {
     addr:      u.addr     || '',
     role:      u.role     || 'staff',
     active:    u.active   ?? true,
+    resigned:  u.resigned ?? false,
     reg_date:  u.regDate  || new Date().toISOString().split('T')[0],
     pw:        u.pw       || '1234',
     customers: 0,
@@ -4248,6 +4174,7 @@ async function sbUpdateStaff(u) {
     addr:   u.addr   || '',
     role:   u.role   || 'staff',
     active: u.active ?? true,
+    resigned: u.resigned ?? false,
   };
   if(u.pw) row.pw = u.pw;
   const result = await sbFetch(`staff?id=eq.${u.id}`, 'PATCH', row);
@@ -4558,11 +4485,311 @@ function renderRecentTable() {
 }
 function renderBarChart() {  }
 function renderPie() {  }
+
+/* ===== 영업자별 DB 배분 · 전환 집계 (대시보드 상단, 관리자) ===== */
+function dbaFmt(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dbaSetThisMonth(){
+  const n=new Date(), f=new Date(n.getFullYear(),n.getMonth(),1), l=new Date(n.getFullYear(),n.getMonth()+1,0);
+  const a=document.getElementById('dbaFrom'), b=document.getElementById('dbaTo');
+  if(a) a.value=dbaFmt(f); if(b) b.value=dbaFmt(l);
+  renderDbAlloc();
+}
+function dbaSetPrevMonth(){
+  const n=new Date(), f=new Date(n.getFullYear(),n.getMonth()-1,1), l=new Date(n.getFullYear(),n.getMonth(),0);
+  const a=document.getElementById('dbaFrom'), b=document.getElementById('dbaTo');
+  if(a) a.value=dbaFmt(f); if(b) b.value=dbaFmt(l);
+  renderDbAlloc();
+}
+function dbaClear(){
+  const a=document.getElementById('dbaFrom'), b=document.getElementById('dbaTo'), st=document.getElementById('dbaStaff');
+  if(a) a.value=''; if(b) b.value=''; if(st) st.value='';
+  renderDbAlloc();
+}
+function dbaFillStaffSelect(){
+  const sel = document.getElementById('dbaStaff');
+  if(!sel) return;
+  const cur = sel.value;
+  const names = (typeof staffList!=='undefined'?staffList:[]).filter(u=>u.active && !u.resigned && u.role==='staff').map(u=>u.name);
+  sel.innerHTML = '<option value="">전체 영업자</option>' + names.map(n=>'<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>').join('');
+  if(cur && names.includes(cur)) sel.value = cur;
+}
+function dbaShiftMonth(d, n){
+  if(!d) return '';
+  const p = d.split('-'); const y=+p[0], m=+p[1], dd=+p[2];
+  const t = new Date(y, m-1+n, 1);
+  const last = new Date(t.getFullYear(), t.getMonth()+1, 0).getDate();
+  return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(Math.min(dd,last)).padStart(2,'0');
+}
+function dbaTrend(cur, prev, isPct, fs){
+  if(prev===null || prev===undefined) return '';
+  const size = fs || 13;
+  const d = Math.round((cur-prev)*10)/10;
+  if(d===0) return ' <span style="font-size:'+size+'px;color:var(--text3);font-family:JetBrains Mono,monospace;">(-)</span>';
+  const up = d>0;
+  const col = up ? 'var(--green)' : '#ff6666';
+  let txt;
+  if(isPct){ txt = (up?'+':'')+d+'%p'; }
+  else { txt = (up?'+':'')+d+'건' + (prev>0 ? ' '+(up?'+':'')+Math.round((cur-prev)/prev*100)+'%' : ''); }
+  return ' <span style="font-size:'+size+'px;color:'+col+';font-family:JetBrains Mono,monospace;">('+(up?'▲':'▼')+' '+txt+')</span>';
+}
+function _dbaCalc(from, to, names){
+  const inR = d => { const v=String(d||'').slice(0,10); if(!from && !to) return true; if(!v) return false; if(from && v<from) return false; if(to && v>to) return false; return true; };
+  const cust = Array.isArray(customers)?customers:[];
+  const fList = (typeof fundingList!=='undefined' && Array.isArray(fundingList))?fundingList:[];
+  const isDirectCust = c => !c || !isDistributedDB(c);
+  const fundRows = [];
+  const rows = names.map(name=>{
+    const firstList = cust.filter(c=>isDistributedDB(c) && ((c.originalAssignedManager||c.assign)===name) && inR(c.firstAssignedAt||c.date));
+    let reassign = 0; const reIds = new Set();
+    cust.forEach(c=>{
+      if(!isDistributedDB(c)) return;
+      (c.memos||[]).forEach(m=>{
+        if(!m || typeof m.text!=='string' || m.text.indexOf('[재배분]')!==0) return;
+        const mm = m.text.match(/^\[재배분\]\s*(.+?)으로 재배분/);
+        const dt = m.dateISO || String(m.dateTS||'').slice(0,10);
+        if(mm && mm[1].trim()===name && inR(dt)) { reassign++; reIds.add(c.id); }
+      });
+    });
+    // 펀딩등록: 기간 내 '펀딩 등록일' 기준. 배분DB 펀딩을 최초배분(신규) / 재배분 출신으로 분리
+    // 기간내 등록된 펀딩: 배분DB건 / 직영업건 구분
+    let fundDist = 0, fundDirect = 0, sumRev = 0, sumBuui = 0, sumNet = 0;
+    const distList = [], directList = [], fundNewList = [], fundReList = [];
+    fList.forEach(f=>{
+      if((f.assign||'') !== name) return;
+      if(!inR(f.date)) return;
+      const c = f.customerId ? cust.find(x=>x.id===f.customerId) : null;
+      if(isDirectCust(c)) { fundDirect++; directList.push(f); }
+      else {
+        fundDist++; distList.push(f);
+        if(c && (c.originalAssignedManager||c.assign)===name) fundNewList.push(f); else fundReList.push(f);
+      }
+      sumRev  += (f.revenue || 0) + (f.promoAmt || 0) + (f.agency || 0);
+      sumBuui += (f.buuiTotal  || 0);
+      sumNet  += (f.netRevenue || 0);
+    });
+    fundNewList.forEach(f=>fundRows.push({ name:f.customerName||'', assign:name, bank:f.bank||'-', rev:f.netRevenue||0 }));
+    const first = firstList.length;
+    const fund = fundNewList.length;
+    const fundAll = fund + fundReList.length;
+    const totalDb = first + reassign;
+    return {
+      name, first, reassign, total: totalDb, fund, fundAll, fundDist, fundDirect, sumRev, sumBuui, sumNet,
+      _newList: fundNewList, _distList: distList, _directList: directList,
+      rate: first ? Math.round(fund/first*1000)/10 : 0,
+      rateAll: totalDb ? Math.round(fundAll/totalDb*1000)/10 : 0
+    };
+  });
+  const t = rows.reduce((a,r)=>({
+    first:a.first+r.first, reassign:a.reassign+r.reassign, total:a.total+r.total,
+    fund:a.fund+r.fund, fundAll:a.fundAll+r.fundAll, fundDist:a.fundDist+r.fundDist, fundDirect:a.fundDirect+r.fundDirect,
+    sumRev:a.sumRev+r.sumRev, sumBuui:a.sumBuui+r.sumBuui, sumNet:a.sumNet+r.sumNet
+  }),{first:0,reassign:0,total:0,fund:0,fundAll:0,fundDist:0,fundDirect:0,sumRev:0,sumBuui:0,sumNet:0});
+  t.rate    = t.first ? Math.round(t.fund/t.first*1000)/10 : 0;
+  t.rateAll = t.total ? Math.round(t.fundAll/t.total*1000)/10 : 0;
+  return { rows, total:t, fundRows };
+}
+// 상단 기간설정 → 대시보드 하위 섹션 전체 동기화
+function dbaSyncSubSections(from, to){
+  try {
+    const y=document.getElementById('adminFltYear'), m=document.getElementById('adminFltMonth');
+    const a=document.getElementById('adminFltStart'), b=document.getElementById('adminFltEnd');
+    if(y) y.value='0'; if(m) m.value='0';
+    if(a) a.value = from || '';
+    if(b) b.value = to   || '';
+    if(typeof renderAdminDashboard === 'function') renderAdminDashboard();
+  } catch(e){ console.warn(e); }
+  try {
+    if(from){
+      const mode=document.getElementById('actAggMode');
+      const ay=document.getElementById('actAggYear');
+      const am=document.getElementById('actAggMonth');
+      if(mode && ay && am){
+        mode.value='month';
+        const yy=from.slice(0,4), mm=String(parseInt(from.slice(5,7),10));
+        if([...ay.options].some(o=>o.value===yy)) ay.value=yy;
+        if([...am.options].some(o=>o.value===mm)) am.value=mm;
+        const wSel=document.getElementById('actAggWeek'); if(wSel) wSel.style.display='none';
+        am.style.display='';
+        if(typeof renderActivityDashboardTable === 'function') renderActivityDashboardTable();
+      }
+    }
+  } catch(e){ console.warn(e); }
+}
+// 펀딩 목록 모달
+function openDbaFundList(key){
+  const idx = (window._dbaFundIdx||{})[key];
+  if(!idx || !idx.list.length) return;
+  const list = idx.list.map(id=>fundingList.find(f=>f.id===id)).filter(Boolean);
+  let m = document.getElementById('dbaFundModal');
+  if(!m){
+    m = document.createElement('div');
+    m.id = 'dbaFundModal';
+    m.className = 'modal-bg';
+    m.onclick = (e)=>{ if(e.target===m) closeDbaFundList(); };
+    m.innerHTML = '<div class="modal" style="width:860px;max-width:96vw;" onclick="event.stopPropagation()">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'+
+        '<div class="modal-title" id="dbaFundModalTitle" style="margin:0;"></div>'+
+        '<button class="btn btn-ghost btn-sm" onclick="closeDbaFundList()">✕</button>'+
+      '</div>'+
+      '<div id="dbaFundModalBody" style="max-height:60vh;overflow-y:auto;"></div>'+
+      '<div style="margin-top:12px;font-size:11px;color:var(--text3);">총매출 = 매출액 + 프로모션 + 대리점수당 · 실매출액 = 총매출 − 품의금액<br>항목을 클릭하면 해당 펀딩 등록/수정 화면으로 이동합니다.</div>'+
+    '</div>';
+    document.body.appendChild(m);
+  }
+  document.getElementById('dbaFundModalTitle').textContent = idx.title + ' (' + list.length + '건)';
+  const sumNet   = list.reduce((a,f)=>a+(f.netRevenue||0),0);
+  const sumGross = list.reduce((a,f)=>a+(f.revenue||0)+(f.promoAmt||0)+(f.agency||0),0);
+  const sumBuui  = list.reduce((a,f)=>a+(f.buuiTotal||0),0);
+  document.getElementById('dbaFundModalBody').innerHTML =
+    '<table class="tbl" style="width:100%;"><thead><tr>'+
+      '<th style="min-width:100px;">고객명</th><th style="min-width:90px;">금융사</th>'+
+      '<th style="text-align:right;min-width:100px;">총매출</th>'+
+      '<th style="text-align:right;min-width:100px;">품의금액</th>'+
+      '<th style="text-align:right;min-width:100px;">실매출액</th>'+
+      '<th style="text-align:center;min-width:85px;">등록일</th>'+
+    '</tr></thead><tbody>'+
+    list.map(f=>{
+      const gross = (f.revenue||0)+(f.promoAmt||0)+(f.agency||0);
+      return '<tr style="cursor:pointer;" onclick="gotoFundingFromDba('+f.id+')" title="'+escapeHtml(f.car||'')+'">'+
+      '<td style="font-weight:600;font-size:13px;">'+escapeHtml(f.customerName||'')+'</td>'+
+      '<td style="font-size:12px;color:var(--text2);">'+escapeHtml(f.bank||'-')+'</td>'+
+      '<td style="text-align:right;font-family:JetBrains Mono,monospace;font-size:12px;">'+gross.toLocaleString('ko-KR')+'</td>'+
+      '<td style="text-align:right;font-family:JetBrains Mono,monospace;font-size:12px;color:var(--yellow);">'+(f.buuiTotal||0).toLocaleString('ko-KR')+'</td>'+
+      '<td style="text-align:right;font-family:JetBrains Mono,monospace;font-size:12px;font-weight:700;color:var(--green);">'+(f.netRevenue||0).toLocaleString('ko-KR')+'</td>'+
+      '<td style="text-align:center;font-size:11px;color:var(--text3);">'+escapeHtml(String(f.date||'-').slice(0,10))+'</td>'+
+    '</tr>'; }).join('')+
+    '</tbody><tfoot><tr style="background:var(--bg3);">'+
+      '<td colspan="2" style="text-align:right;font-weight:700;font-size:12px;">합계</td>'+
+      '<td style="text-align:right;font-weight:700;font-family:JetBrains Mono,monospace;font-size:12px;">'+sumGross.toLocaleString('ko-KR')+'</td>'+
+      '<td style="text-align:right;font-weight:700;font-family:JetBrains Mono,monospace;font-size:12px;color:var(--yellow);">'+sumBuui.toLocaleString('ko-KR')+'</td>'+
+      '<td style="text-align:right;font-weight:700;font-family:JetBrains Mono,monospace;font-size:12px;color:var(--green);">'+sumNet.toLocaleString('ko-KR')+'</td><td></td>'+
+    '</tr></tfoot></table>';
+  m.classList.add('open');
+}
+function closeDbaFundList(){
+  const m = document.getElementById('dbaFundModal');
+  if(m) m.classList.remove('open');
+}
+function gotoFundingFromDba(id){
+  closeDbaFundList();
+  try {
+    const navEl = document.querySelector('.nav-item[onclick*="\'funding\'"]');
+    goPage('funding', navEl || null, true);
+  } catch(e){}
+  setTimeout(()=>{ try { editFundingById(id); } catch(e){ alert('펀딩 정보를 불러오지 못했습니다.'); } }, 120);
+}
+function renderDbAlloc(){
+  if(currentRole !== 'admin') return;
+  const bodyEl = document.getElementById('dbaBody');
+  if(!bodyEl) return;
+  dbaFillStaffSelect();
+  const from = (document.getElementById('dbaFrom')?.value)||'';
+  const to   = (document.getElementById('dbaTo')?.value)||'';
+  const only = (document.getElementById('dbaStaff')?.value)||'';
+  const lb = document.getElementById('dbaLabel');
+  if(lb) lb.textContent = (from||to) ? '('+(from||'~')+' ~ '+(to||'~')+')' : '(전체 기간)';
+  dbaSyncSubSections(from, to);
+
+  let names = (typeof staffList!=='undefined'?staffList:[]).filter(u=>u.active && !u.resigned && u.role==='staff').map(u=>u.name);
+  if(only) names = names.filter(n=>n===only);
+
+  const cur = _dbaCalc(from, to, names);
+  const hasPeriod = !!(from && to);
+  const prev = hasPeriod ? _dbaCalc(dbaShiftMonth(from,-1), dbaShiftMonth(to,-1), names) : null;
+  const pv = k => prev ? prev.total[k] : null;
+  const pvRow = (name,k) => { if(!prev) return null; const r = prev.rows.find(x=>x.name===name); return r ? r[k] : 0; };
+
+  const rows = cur.rows, tot = cur.total;
+
+  const cards = document.getElementById('dbaCards');
+  if(cards){
+    cards.innerHTML = [
+      {l:'신규배분 DB (신규)', v:tot.first+'건', c:'var(--blue)', t:dbaTrend(tot.first, pv('first'), false, 12)},
+      {l:'재배분 DB (재배분)', v:tot.reassign+'건', c:'var(--yellow)', t:dbaTrend(tot.reassign, pv('reassign'), false, 12)},
+      {l:'총 디비 (신규+재배분)', v:tot.total+'건', c:'#fff', t:dbaTrend(tot.total, pv('total'), false, 12)},
+      {l:'펀딩등록 (신규배분 기준)', v:tot.fund+'건', c:'var(--green)', t:dbaTrend(tot.fund, pv('fund'), false, 12)},
+      {l:'전환율 (신규배분 기준)', v:tot.rate+'%', c:'var(--accent)', t:dbaTrend(tot.rate, pv('rate'), true, 12)},
+      {l:'전환율 (신규+재배분 기준)', v:tot.rateAll+'%', c:'#aa88ff', t:dbaTrend(tot.rateAll, pv('rateAll'), true, 12)},
+      {l:'배분DB 펀딩', v:tot.fundDist+'건', c:'#44bbff', t:dbaTrend(tot.fundDist, pv('fundDist'), false, 12)},
+      {l:'직영업 펀딩', v:tot.fundDirect+'건', c:'#ff9944', t:dbaTrend(tot.fundDirect, pv('fundDirect'), false, 12)},
+    ].map(x=>'<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden;">'+
+      '<div style="position:absolute;top:0;right:0;width:3px;height:100%;background:'+x.c+';"></div>'+
+      '<div style="font-size:10px;color:var(--text3);margin-bottom:5px;">'+x.l+'</div>'+
+      '<div style="font-size:19px;font-weight:700;font-family:JetBrains Mono,monospace;color:'+x.c+';white-space:nowrap;">'+x.v+(x.t||'')+'</div>'+
+    '</div>').join('');
+  }
+
+  rows.sort((a,b)=> (b.sumNet-a.sumNet) || (b.total-a.total));   // 총순매출 상위순
+  const cell = (val, color, trend, bold) => '<td style="text-align:center;font-family:JetBrains Mono,monospace;font-size:20px;white-space:nowrap;'+(bold?'font-weight:700;':'')+(color?'color:'+color+';':'')+'">'+val+(trend||'')+'</td>';
+  const cellLink = (val, color, trend, key, cnt) => '<td onclick="event.stopPropagation();'+(cnt?'openDbaFundList(\''+key+'\')':'')+'" style="text-align:center;font-family:JetBrains Mono,monospace;font-size:20px;white-space:nowrap;'+(color?'color:'+color+';':'')+(cnt?'cursor:pointer;text-decoration:underline;text-underline-offset:4px;':'')+'" title="'+(cnt?'클릭 시 펀딩 목록 보기':'')+'">'+val+(trend||'')+'</td>';
+  window._dbaFundIdx = {};
+  rows.forEach(r=>{
+    window._dbaFundIdx[r.name+'|new']    = { title:r.name+' · 펀딩등록 (신규배분 기준)', list:(r._newList||[]).map(f=>f.id) };
+    window._dbaFundIdx[r.name+'|dist']   = { title:r.name+' · 배분DB 펀딩',             list:(r._distList||[]).map(f=>f.id) };
+    window._dbaFundIdx[r.name+'|direct'] = { title:r.name+' · 직영업 펀딩',             list:(r._directList||[]).map(f=>f.id) };
+  });
+  const won = (v,color) => '<td style="text-align:right;font-family:JetBrains Mono,monospace;font-size:18px;white-space:nowrap;font-weight:700;'+(color?'color:'+color+';':'')+'">'+(v||0).toLocaleString('ko-KR')+'원</td>';
+  bodyEl.innerHTML = rows.map(r=>
+    '<tr>'+
+    '<td style="font-weight:700;font-size:15px;white-space:nowrap;">'+escapeHtml(r.name)+'</td>'+
+    cell(r.first,'var(--blue)',dbaTrend(r.first,pvRow(r.name,'first')))+
+    cell(r.reassign,'var(--yellow)',dbaTrend(r.reassign,pvRow(r.name,'reassign')))+
+    cell(r.total,'',dbaTrend(r.total,pvRow(r.name,'total')),true)+
+    cellLink(r.fund,'var(--green)',dbaTrend(r.fund,pvRow(r.name,'fund')),r.name+'|new',r.fund)+
+    cell(r.first?r.rate+'%':'-', r.first?'var(--accent)':'var(--text3)', dbaTrend(r.rate,pvRow(r.name,'rate'),true), true)+
+    cell(r.total?r.rateAll+'%':'-', r.total?'#aa88ff':'var(--text3)', dbaTrend(r.rateAll,pvRow(r.name,'rateAll'),true), true)+
+    cellLink(r.fundDist,'#44bbff',dbaTrend(r.fundDist,pvRow(r.name,'fundDist')),r.name+'|dist',r.fundDist)+
+    cellLink(r.fundDirect,'#ff9944',dbaTrend(r.fundDirect,pvRow(r.name,'fundDirect')),r.name+'|direct',r.fundDirect)+
+    won(r.sumRev,'var(--text)')+
+    won(r.sumBuui,'var(--yellow)')+
+    won(r.sumNet,'var(--green)')+
+    '</tr>'
+  ).join('') || '<tr><td colspan="12" style="text-align:center;color:var(--text3);padding:20px;">데이터 없음</td></tr>';
+
+  const foot = document.getElementById('dbaFoot');
+  if(foot){
+    const fc = (v,c)=>'<td style="text-align:center;font-weight:700;font-size:20px;white-space:nowrap;font-family:JetBrains Mono,monospace;border-top:1px solid var(--border2);'+(c?'color:'+c+';':'')+'">'+v+'</td>';
+    foot.innerHTML = '<tr style="background:var(--bg3);">'+
+      '<td style="font-weight:700;font-size:15px;white-space:nowrap;border-top:1px solid var(--border2);">합계</td>'+
+      fc(tot.first,'var(--blue)')+fc(tot.reassign,'var(--yellow)')+fc(tot.total,'')+
+      fc(tot.fund,'var(--green)')+fc(tot.first?tot.rate+'%':'-','var(--accent)')+
+      fc(tot.total?tot.rateAll+'%':'-','#aa88ff')+fc(tot.fundDist,'#44bbff')+fc(tot.fundDirect,'#ff9944')+
+      '<td style="text-align:right;font-weight:700;font-family:JetBrains Mono,monospace;font-size:18px;border-top:1px solid var(--border2);white-space:nowrap;">'+tot.sumRev.toLocaleString('ko-KR')+'원</td>'+
+      '<td style="text-align:right;font-weight:700;font-family:JetBrains Mono,monospace;font-size:18px;color:var(--yellow);border-top:1px solid var(--border2);white-space:nowrap;">'+tot.sumBuui.toLocaleString('ko-KR')+'원</td>'+
+      '<td style="text-align:right;font-weight:700;font-family:JetBrains Mono,monospace;font-size:18px;color:var(--green);border-top:1px solid var(--border2);white-space:nowrap;">'+tot.sumNet.toLocaleString('ko-KR')+'원</td>'+
+    '</tr>';
+  }
+
+  const fb = document.getElementById('dbaFundBody');
+  if(fb){
+    const fundRows = cur.fundRows.slice().sort((a,b)=>b.rev-a.rev);
+    fb.innerHTML = fundRows.map(f=>
+      '<tr>'+
+      '<td style="font-weight:600;font-size:13px;">'+escapeHtml(f.name)+'</td>'+
+      '<td style="font-size:12px;color:var(--text2);">'+escapeHtml(f.assign)+'</td>'+
+      '<td style="font-size:12px;color:var(--text2);">'+escapeHtml(f.bank)+'</td>'+
+      '<td style="text-align:right;font-family:JetBrains Mono,monospace;font-size:12px;font-weight:700;color:'+(f.rev<0?'#ff6666':'var(--green)')+';">'+(f.rev||0).toLocaleString('ko-KR')+'원</td>'+
+      '</tr>'
+    ).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px;">펀딩등록 내역 없음</td></tr>';
+    const sum = fundRows.reduce((a,f)=>a+(f.rev||0),0);
+    const ff = document.getElementById('dbaFundFoot');
+    if(ff) ff.innerHTML = '<tr style="background:var(--bg3);"><td colspan="3" style="text-align:right;font-weight:700;font-size:13px;border-top:1px solid var(--border2);">총 합계 ('+fundRows.length+'건)</td>'+
+      '<td style="text-align:right;font-weight:700;font-family:JetBrains Mono,monospace;color:var(--green);border-top:1px solid var(--border2);">'+sum.toLocaleString('ko-KR')+'원</td></tr>';
+    const fcEl = document.getElementById('dbaFundCount');
+    if(fcEl) fcEl.textContent = '('+fundRows.length+'건)';
+  }
+}
+
 function renderDashboard() {
   if(currentRole === 'admin') {
     document.getElementById('adminDashboard').style.display = '';
     document.getElementById('staffDashboard').style.display = 'none';
     renderAdminDashboard();
+    try {
+      const _a=document.getElementById('dbaFrom'), _b=document.getElementById('dbaTo');
+      if(_a && _b && !_a.value && !_b.value && !window._dbaInit){ window._dbaInit=true; dbaSetThisMonth(); }
+      else renderDbAlloc();
+    } catch(e){ console.warn(e); }
     if(typeof initActivityDashboard === 'function') initActivityDashboard();
   } else {
     document.getElementById('adminDashboard').style.display = 'none';
@@ -4606,27 +4833,6 @@ function renderAdminDashboard() {
   const todayAssigned = customers.filter(c=>c.date===today).length;
   // SMS 집계
   try { renderSmsStats(); } catch(e) {}
-  document.getElementById('adminStatCardsTop').innerHTML = [
-    {label:'전체 DB', val:totalC, sub:todayStr, color:'#fff'},
-    {label:'당일 배분 DB', val:todayAssigned, sub:'오늘 신규 배분', color:'var(--blue)'},
-  ].map(s=>`
-    <div style="position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;">
-      <div style="position:absolute;top:0;right:0;width:3px;height:100%;background:${s.color};"></div>
-      <div style="font-size:11px;color:var(--text2);letter-spacing:.5px;margin-bottom:8px;">${s.label}</div>
-      <div style="font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;">${s.val}</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:6px;">${s.sub}</div>
-    </div>`).join('');
-  document.getElementById('adminStatCards').innerHTML = [
-    {label:'계약 완료', val:contracted, change:'▲ 이번달 누적', color:'var(--green)'},
-    {label:'상담 진행중', val:consulting, change:'신규문의 포함', color:'var(--yellow)'},
-    {label:'전체 직원', val:staffList.filter(u=>u.active).length, change:'활성 계정', color:'var(--blue)'},
-  ].map(s=>`
-    <div class="stat-card" style="position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;">
-      <div style="position:absolute;top:0;right:0;width:3px;height:100%;background:${s.color};"></div>
-      <div class="stat-label">${s.label}</div>
-      <div class="stat-value">${s.val}</div>
-      <div class="stat-change" style="color:var(--text2);font-size:11px;margin-top:6px;">${s.change}</div>
-    </div>`).join('');
   // ===== 기간 필터 (펀딩진행일자 fundingDate 기준) =====
   ensureAdminFltYear();
   const _aY = parseInt(document.getElementById('adminFltYear')?.value || '0');
@@ -4653,9 +4859,9 @@ function renderAdminDashboard() {
     else if(_aY === 0) lb.textContent = '전체 기간';
     else lb.textContent = _aY + '년' + (_aM>0 ? ' ' + _aM + '월' : ' 전체');
   })();
-  const rankActive = staffList.filter(u=>u.active && u.role!=='admin');
+  const rankActive = staffList.filter(u=>u.active && !u.resigned && u.role!=='admin');
   const _fundsInPeriod = (Array.isArray(fundingList) ? fundingList : [])
-    .filter(f => inFundPeriod(f.fundingDate));
+    .filter(f => inFundPeriod(f.date));   // 상단 집계표와 동일 기준(펀딩 등록일)
   const rankStats = rankActive.map(u => {
     const mine = _fundsInPeriod.filter(f => f.assign === u.name);
     const performance = mine.length;
@@ -4725,7 +4931,7 @@ function renderAdminDashboard() {
       </div>`).join('');
     if(lb) lb.innerHTML = data.map(d=>`<div style="flex:1;text-align:center;font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</div>`).join('');
   }
-  const active = staffList.filter(u=>u.active && u.role!=='admin');
+  const active = staffList.filter(u=>u.active && !u.resigned && u.role!=='admin');
   const _statByName = {}; rankStats.forEach(s=>{ _statByName[s.name] = s; });
   renderMiniChart('teamContractChart','teamContractLabels', active.map(u=>({name:u.name,val:(_statByName[u.name]?.performance)||0})), 'rgba(68,255,136,.7)');
   renderMiniChart('teamSalesChart','teamSalesLabels', active.map(u=>({name:u.name,val:(_statByName[u.name]?.sales)||0})), 'rgba(68,136,255,.7)');
@@ -4754,7 +4960,7 @@ function renderAdminDashboard() {
   renderRecentTable();
   const staffSection = document.getElementById('staffDetailSection');
   if(staffSection) {
-    const active2 = staffList.filter(u=>u.active && u.role==='staff'); // 등록된 영업자만
+    const active2 = staffList.filter(u=>u.active && !u.resigned && u.role==='staff'); // 등록된 영업자만
     staffSection.innerHTML = active2.map(u=>{
       const myDb = customers.filter(c=>c.assign===u.name && !c.retrieved);
       const myCont = myDb.filter(c=>c.status==='계약완료'||c.status==='펀딩완료').length;
@@ -4840,7 +5046,7 @@ function _dbFlowCompute(){
     });
     return n;
   }
-  const staff = staffList.filter(u=>u.active && u.role==='staff');
+  const staff = staffList.filter(u=>u.active && !u.resigned && u.role==='staff');
   const cust = Array.isArray(customers) ? customers : [];
   const rows = staff.map(u=>{
     const name = u.name;
@@ -5208,7 +5414,7 @@ function renderStaffDashboard() {
     if(fm > 0 && m !== fm) return false;
     return true;
   }
-  const allStaff = staffList.filter(u=>u.active && u.role!=='admin');
+  const allStaff = staffList.filter(u=>u.active && !u.resigned && u.role!=='admin');
   const medals = ['🥇','🥈','🥉'];
   // 실적/매출 순위는 항상 "당월" + 펀딩진행일자(fundingDate) 기준 (조회기간 드롭다운과 무관)
   const _now = new Date();
@@ -5875,7 +6081,7 @@ function _filteredActivityRows() {
 }
 function _aggregateActivity(rows) {
   const set = new Set();
-  if(typeof staffList !== 'undefined') staffList.filter(u=>u.active && u.role==='staff').forEach(u=>set.add(u.name));
+  if(typeof staffList !== 'undefined') staffList.filter(u=>u.active && !u.resigned && u.role==='staff').forEach(u=>set.add(u.name));
   rows.forEach(a => { if(a.staff) set.add(a.staff); });
   const uidMap = {};
   if(typeof staffList !== 'undefined') staffList.forEach(u=>{ if(u.name) uidMap[u.name] = u.userid || ''; });
@@ -7950,7 +8156,7 @@ function renderReclaimPage() {
   });
   const statsEl = document.getElementById('reclaimStats');
   if(statsEl) {
-    const active2 = staffList.filter(u=>u.active && u.role==='staff');
+    const active2 = staffList.filter(u=>u.active && !u.resigned && u.role==='staff');
     statsEl.innerHTML = months3.map((m, mi)=>{
       const totalAssigned = customers.filter(c=>(c.date||'').startsWith(m)).length +
         customers.filter(c=>(c.reassignDate||'').startsWith(m) && !(c.date||'').startsWith(m)).length;
@@ -10255,7 +10461,8 @@ function showUserForm(id) {
   document.getElementById('userFormTitle').textContent = isEdit ? '팀원 수정' : '팀원 등록';
   document.getElementById('userFormBread').textContent = isEdit ? '수정' : '등록';
   userActiveState = true;
-  updateToggleUI();
+  userResignedState = false;
+  updateToggleUI(); updateResignUI();
   if(isEdit) {
     const u = staffList.find(u=>u.id===id);
     if(!u) return;
@@ -10267,7 +10474,8 @@ function showUserForm(id) {
     document.getElementById('uf_addr').value = u.addr||'';
     document.getElementById('uf_role').value = u.role;
     userActiveState = u.active;
-    updateToggleUI();
+    userResignedState = (u.resigned === true);
+    updateToggleUI(); updateResignUI();
     document.getElementById('uf_userid').readOnly = true;
     document.getElementById('uf_userid').style.opacity = '.5';
     document.getElementById('useridPreview').textContent = '아이디 수정 불가';
@@ -10288,6 +10496,32 @@ function autoFillUserId() {
   document.getElementById('uf_userid').value = next;
   document.getElementById('useridPreview').textContent = '자동 부여: '+next;
   document.getElementById('useridPreview').style.color = 'var(--green)';
+}
+let userResignedState = false;
+function toggleResigned() {
+  if(!userResignedState && !confirm('퇴사 처리하시겠습니까?\n\n· 모든 집계·통계에서 제외됩니다.\n· 기존 배분 DB·펀딩 데이터는 그대로 유지됩니다.')) return;
+  userResignedState = !userResignedState;
+  if(userResignedState) userActiveState = false;
+  updateToggleUI();
+  updateResignUI();
+}
+function updateResignUI() {
+  const btn = document.getElementById('uf_resignBtn');
+  const lbl = document.getElementById('uf_resignLabel');
+  if(!btn) return;
+  if(userResignedState) {
+    btn.textContent = '퇴사 취소';
+    btn.style.background = 'rgba(255,68,68,.18)';
+    btn.style.border = '1px solid rgba(255,68,68,.5)';
+    btn.style.color = 'var(--red)';
+    if(lbl) { lbl.textContent = '퇴사 처리됨 · 집계 제외'; lbl.style.color = 'var(--red)'; }
+  } else {
+    btn.textContent = '퇴사 처리';
+    btn.style.background = 'transparent';
+    btn.style.border = '1px solid var(--border2)';
+    btn.style.color = 'var(--text2)';
+    if(lbl) { lbl.textContent = '재직중'; lbl.style.color = 'var(--text3)'; }
+  }
 }
 function toggleActive() {
   userActiveState = !userActiveState;
@@ -10345,6 +10579,7 @@ async function saveUserForm() {
     const updated = {
       ...u, name, phone, email, addr, role,
       active: userActiveState,
+      resigned: userResignedState,
       ...(pw ? {pw} : {}),
     };
     try {
@@ -10962,6 +11197,14 @@ function deleteSmsTemplate() {
 }
 
 // === 단체문자 대시보드 집계 ===
+function toggleSmsStatsFold(){
+  const b = document.getElementById('smsStatsBody');
+  const a = document.getElementById('smsFoldArrow');
+  if(!b) return;
+  const open = b.style.display !== 'none';
+  b.style.display = open ? 'none' : '';
+  if(a) a.textContent = open ? '▶' : '▼';
+}
 function onSmsPeriodChange(){
   const p = document.getElementById('smsStatsPeriod')?.value || '30';
   const yEl = document.getElementById('smsStatsYear');
@@ -11387,7 +11630,7 @@ function exportDBStatsExcel() {
     if(to   && dateStr > to)   return false;
     return true;
   }
-  const activeStaff = staffList.filter(u=>u.active && u.role==='staff');
+  const activeStaff = staffList.filter(u=>u.active && !u.resigned && u.role==='staff');
   const dynHeaders = ['담당자','신규DB(최초배분)','구DB(재배분수신)',...statusOptions.map(o=>o.label+'(신규)'),'회수DB'];
   const rows = activeStaff.map(u=>{
     const name = u.name;
@@ -11468,7 +11711,7 @@ function renderDBStats() {
   if(currentRole !== 'admin') {
     renderStaffDBStats(); return;
   }
-  const registeredStaff = staffList.filter(u=>u.active && u.role==='staff');
+  const registeredStaff = staffList.filter(u=>u.active && !u.resigned && u.role==='staff');
   const fromVal2 = document.getElementById('statsDateFrom') ? document.getElementById('statsDateFrom').value : '';
   const toVal2   = document.getElementById('statsDateTo')   ? document.getElementById('statsDateTo').value   : '';
   function inRange2(dateStr, from, to) {
