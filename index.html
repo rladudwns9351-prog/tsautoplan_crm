@@ -5408,13 +5408,25 @@ function openDetail(id) {
   const _curActive = document.querySelector('.page.active');
   if(_curActive && _curActive.id && _curActive.id !== 'page-detail') {
     window._detailFromPage = _curActive.id.replace('page-','');
+    try {
+      const _mainEl = document.querySelector('.main');
+      window._detailFromScroll = _mainEl ? _mainEl.scrollTop : 0;
+    } catch(e){ window._detailFromScroll = 0; }
   }
   goPage('detail', null);
 }
 function goBackFromDetail() {
   const target = window._detailFromPage || 'db';
   const navEl = document.querySelector('.nav-item[onclick*="\'' + target + '\'"]');
+  const _sc = window._detailFromScroll || 0;
   goPage(target, navEl || null, target==='db');
+  if(_sc > 0) {
+    const _restore = ()=>{
+      const _mainEl = document.querySelector('.main');
+      if(_mainEl) _mainEl.scrollTop = _sc;
+    };
+    requestAnimationFrame(()=> requestAnimationFrame(()=>{ _restore(); setTimeout(_restore, 60); }));
+  }
 }
 function applyDetailStatusColor(status) {
   const dSel = document.getElementById('detailStatusSel');
