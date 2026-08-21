@@ -19,6 +19,93 @@
 .topbar .logout-btn{color:#ffffff!important;font-weight:600}
 .topbar .logout-btn:hover{color:#ffffff!important;background:rgba(255,255,255,.22)!important}</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ===== 암호화 엑셀(파일 열기 암호) 처리 ===== */
+window._xlsxPopLoading = null;
+function loadXlsxPopulate(){
+  if(window.XlsxPopulate) return Promise.resolve(window.XlsxPopulate);
+  if(window._xlsxPopLoading) return window._xlsxPopLoading;
+  window._xlsxPopLoading = new Promise((res,rej)=>{
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js';
+    sc.onload = ()=> res(window.XlsxPopulate);
+    sc.onerror = ()=> rej(new Error('복호화 모듈 로딩 실패'));
+    document.head.appendChild(sc);
+  });
+  return window._xlsxPopLoading;
+}
+// OLE2 복합문서 시그니처(D0 CF 11 E0) = 암호화 xlsx 또는 구형 xls
+function isEncryptedOffice(buf){
+  const u = new Uint8Array(buf);
+  if(u.length < 8) return false;
+  if(!(u[0]===0xD0 && u[1]===0xCF && u[2]===0x11 && u[3]===0xE0)) return false;
+  // 구형 .xls(비암호)와 구분: EncryptedPackage / EncryptionInfo 스트림명 탐색
+  const txt = new TextDecoder('latin1').decode(u.subarray(0, Math.min(u.length, 20000)));
+  return txt.indexOf('E\u0000n\u0000c\u0000r\u0000y\u0000p\u0000t\u0000') >= 0
+      || txt.indexOf('EncryptedPackage') >= 0 || txt.indexOf('EncryptionInfo') >= 0;
+}
+// 비밀번호 입력 모달
+function askExcelPassword(fileName, retry){
+  return new Promise((resolve)=>{
+    let m = document.getElementById('xlsPwModal');
+    if(!m){
+      m = document.createElement('div');
+      m.id = 'xlsPwModal';
+      m.className = 'modal-bg';
+      m.innerHTML = '<div class="modal" style="width:420px;max-width:92vw;">'+
+        '<div class="modal-title" style="margin-bottom:6px;">🔒 암호가 설정된 엑셀 파일</div>'+
+        '<div id="xlsPwFile" style="font-size:12px;color:var(--text3);margin-bottom:14px;word-break:break-all;"></div>'+
+        '<div id="xlsPwErr" style="font-size:12px;color:var(--red);margin-bottom:8px;display:none;">비밀번호가 올바르지 않습니다. 다시 입력해주세요.</div>'+
+        '<input id="xlsPwInput" type="password" placeholder="파일 열기 암호 입력" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;font-family:inherit;outline:none;">'+
+        '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">'+
+          '<button class="btn btn-ghost btn-sm" id="xlsPwCancel">취소</button>'+
+          '<button class="btn btn-primary btn-sm" id="xlsPwOk">확인</button>'+
+        '</div></div>';
+      document.body.appendChild(m);
+    }
+    const inp = m.querySelector('#xlsPwInput');
+    m.querySelector('#xlsPwFile').textContent = fileName;
+    m.querySelector('#xlsPwErr').style.display = retry ? '' : 'none';
+    inp.value = '';
+    m.classList.add('open');
+    setTimeout(()=>inp.focus(), 50);
+    const done = (v)=>{ m.classList.remove('open'); cleanup(); resolve(v); };
+    const onOk = ()=> done(inp.value || '');
+    const onCancel = ()=> done(null);
+    const onKey = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); onOk(); } if(e.key==='Escape'){ onCancel(); } };
+    function cleanup(){
+      m.querySelector('#xlsPwOk').removeEventListener('click', onOk);
+      m.querySelector('#xlsPwCancel').removeEventListener('click', onCancel);
+      inp.removeEventListener('keydown', onKey);
+    }
+    m.querySelector('#xlsPwOk').addEventListener('click', onOk);
+    m.querySelector('#xlsPwCancel').addEventListener('click', onCancel);
+    inp.addEventListener('keydown', onKey);
+  });
+}
+// 암호화면 복호화된 ArrayBuffer 반환, 아니면 원본 반환. 취소/실패 시 null
+async function decryptExcelIfNeeded(buf, fileName){
+  if(!isEncryptedOffice(buf)) return buf;
+  let Pop;
+  try { Pop = await loadXlsxPopulate(); }
+  catch(e){ alert('암호가 걸린 엑셀 파일입니다.\n복호화 모듈을 불러오지 못했습니다.\n\n엑셀에서 암호를 해제한 뒤 다시 업로드해주세요.'); return null; }
+  let retry = false;
+  for(let i=0;i<5;i++){
+    const pw = await askExcelPassword(fileName, retry);
+    if(pw === null) return null;
+    try{
+      const wb = await Pop.fromDataAsync(buf, { password: pw });
+      const out = await wb.outputAsync({ type: 'arraybuffer' });
+      return out;
+    }catch(err){
+      console.warn('복호화 실패', err);
+      retry = true;
+    }
+  }
+  alert('비밀번호 확인에 실패했습니다.\n엑셀에서 암호를 해제한 뒤 다시 업로드해주세요.');
+  return null;
+}
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";}</script>
 </head>
@@ -13645,7 +13732,9 @@ function stkNormFuel(v){
 async function parseStockExcel(file){
   if(typeof XLSX==='undefined'){ alert('엑셀 모듈을 불러오지 못했습니다.'); return; }
   stkProg('엑셀 변환 중...');
-  const buf = await file.arrayBuffer();
+  let buf = await file.arrayBuffer();
+  buf = await decryptExcelIfNeeded(buf, file.name);
+  if(!buf){ stkProg(''); return; }
   const wb = XLSX.read(buf, {type:'array'});
 
   // 파일명에서 모델 접두어 후보 (숫자로만 된 토큰은 제외)
@@ -15412,9 +15501,12 @@ function handleBulkImportFile(ev){
   if(!file) return;
   if(typeof XLSX === 'undefined'){ alert('엑셀 라이브러리 로딩 실패. 새로고침 후 다시 시도해주세요.'); return; }
   const reader = new FileReader();
-  reader.onload = (e)=>{
+  reader.onload = async (e)=>{
     try{
-      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      let buf = e.target.result;
+      buf = await decryptExcelIfNeeded(buf, file.name);
+      if(!buf) return;
+      const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
       buildBulkPreview(rows);
