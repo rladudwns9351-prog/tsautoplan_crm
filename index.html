@@ -20,30 +20,44 @@
 .topbar .logout-btn:hover{color:#ffffff!important;background:rgba(255,255,255,.22)!important}</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-/* ===== 암호화 엑셀(파일 열기 암호) 처리 ===== */
-window._xlsxPopLoading = null;
-function loadXlsxPopulate(){
-  if(window.XlsxPopulate) return Promise.resolve(window.XlsxPopulate);
-  if(window._xlsxPopLoading) return window._xlsxPopLoading;
-  window._xlsxPopLoading = new Promise((res,rej)=>{
-    const sc = document.createElement('script');
-    sc.src = 'https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js';
-    sc.onload = ()=> res(window.XlsxPopulate);
-    sc.onerror = ()=> rej(new Error('복호화 모듈 로딩 실패'));
-    document.head.appendChild(sc);
-  });
-  return window._xlsxPopLoading;
-}
-// OLE2 복합문서 시그니처(D0 CF 11 E0) = 암호화 xlsx 또는 구형 xls
-function isEncryptedOffice(buf){
+/* ===== 암호화 엑셀(파일 열기 암호) 처리 : Supabase Edge Function 복호화 ===== */
+// 암호화 판별: 'ooxml'(xlsx 열기암호) | 'biff'(구형 xls FILEPASS) | ''(비암호)
+function detectExcelEncryption(buf){
   const u = new Uint8Array(buf);
-  if(u.length < 8) return false;
-  if(!(u[0]===0xD0 && u[1]===0xCF && u[2]===0x11 && u[3]===0xE0)) return false;
-  // 구형 .xls(비암호)와 구분: EncryptedPackage / EncryptionInfo 스트림명 탐색
-  const txt = new TextDecoder('latin1').decode(u.subarray(0, Math.min(u.length, 20000)));
-  return txt.indexOf('E\u0000n\u0000c\u0000r\u0000y\u0000p\u0000t\u0000') >= 0
-      || txt.indexOf('EncryptedPackage') >= 0 || txt.indexOf('EncryptionInfo') >= 0;
+  if(u.length < 8) return '';
+  if(!(u[0]===0xD0 && u[1]===0xCF && u[2]===0x11 && u[3]===0xE0)) return '';
+  const head = u.subarray(0, Math.min(u.length, 40000));
+  const lat = new TextDecoder('latin1').decode(head);
+  const u16 = lat.replace(/\u0000/g, '');
+  if(u16.indexOf('EncryptedPackage') >= 0 || u16.indexOf('EncryptionInfo') >= 0) return 'ooxml';
+  // 구형 XLS: BOF(0x0809) 직후 레코드가 FILEPASS(0x002F)면 암호화
+  try {
+    for(let base=0; base+4<=u.length; base+=512){
+      if(u[base]===0x09 && u[base+1]===0x08){
+        const len = u[base+2] | (u[base+3]<<8);
+        const nxt = base + 4 + len;
+        if(nxt+4 <= u.length && u[nxt]===0x2F && u[nxt+1]===0x00) return 'biff';
+      }
+    }
+  } catch(e){}
+  return '';
 }
+function isEncryptedOffice(buf){ return detectExcelEncryption(buf) !== ''; }
+
+function _ab2b64(buf){
+  const u = new Uint8Array(buf);
+  let bin = '';
+  const CH = 0x8000;
+  for(let i=0;i<u.length;i+=CH) bin += String.fromCharCode.apply(null, u.subarray(i, i+CH));
+  return btoa(bin);
+}
+function _b642ab(b64){
+  const bin = atob(b64);
+  const u = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i);
+  return u.buffer;
+}
+
 // 비밀번호 입력 모달
 function askExcelPassword(fileName, retry){
   return new Promise((resolve)=>{
@@ -55,7 +69,7 @@ function askExcelPassword(fileName, retry){
       m.innerHTML = '<div class="modal" style="width:420px;max-width:92vw;">'+
         '<div class="modal-title" style="margin-bottom:6px;">🔒 암호가 설정된 엑셀 파일</div>'+
         '<div id="xlsPwFile" style="font-size:12px;color:var(--text3);margin-bottom:14px;word-break:break-all;"></div>'+
-        '<div id="xlsPwErr" style="font-size:12px;color:var(--red);margin-bottom:8px;display:none;">비밀번호가 올바르지 않습니다. 다시 입력해주세요.</div>'+
+        '<div id="xlsPwErr" style="font-size:12px;color:var(--red);margin-bottom:8px;display:none;"></div>'+
         '<input id="xlsPwInput" type="password" placeholder="파일 열기 암호 입력" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:14px;font-family:inherit;outline:none;">'+
         '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">'+
           '<button class="btn btn-ghost btn-sm" id="xlsPwCancel">취소</button>'+
@@ -64,8 +78,9 @@ function askExcelPassword(fileName, retry){
       document.body.appendChild(m);
     }
     const inp = m.querySelector('#xlsPwInput');
+    const err = m.querySelector('#xlsPwErr');
     m.querySelector('#xlsPwFile').textContent = fileName;
-    m.querySelector('#xlsPwErr').style.display = retry ? '' : 'none';
+    if(retry){ err.style.display=''; err.textContent = retry; } else { err.style.display='none'; }
     inp.value = '';
     m.classList.add('open');
     setTimeout(()=>inp.focus(), 50);
@@ -83,26 +98,36 @@ function askExcelPassword(fileName, retry){
     inp.addEventListener('keydown', onKey);
   });
 }
+
 // 암호화면 복호화된 ArrayBuffer 반환, 아니면 원본 반환. 취소/실패 시 null
 async function decryptExcelIfNeeded(buf, fileName){
-  if(!isEncryptedOffice(buf)) return buf;
-  let Pop;
-  try { Pop = await loadXlsxPopulate(); }
-  catch(e){ alert('암호가 걸린 엑셀 파일입니다.\n복호화 모듈을 불러오지 못했습니다.\n\n엑셀에서 암호를 해제한 뒤 다시 업로드해주세요.'); return null; }
-  let retry = false;
+  if(!detectExcelEncryption(buf)) return buf;
+  if(typeof SB_URL==='undefined' || !SB_URL){
+    alert('암호가 걸린 엑셀 파일입니다.\n서버 설정이 없어 해제할 수 없습니다.');
+    return null;
+  }
+  const b64 = _ab2b64(buf);
+  let errMsg = '';
   for(let i=0;i<5;i++){
-    const pw = await askExcelPassword(fileName, retry);
+    const pw = await askExcelPassword(fileName, errMsg);
     if(pw === null) return null;
     try{
-      const wb = await Pop.fromDataAsync(buf, { password: pw });
-      const out = await wb.outputAsync({ type: 'arraybuffer' });
-      return out;
-    }catch(err){
-      console.warn('복호화 실패', err);
-      retry = true;
+      const res = await fetch(`${SB_URL}/functions/v1/decrypt-excel`, {
+        method:'POST',
+        headers:{ 'Authorization':'Bearer '+SB_KEY, 'apikey':SB_KEY, 'Content-Type':'application/json' },
+        body: JSON.stringify({ file: b64, password: pw })
+      });
+      const j = await res.json();
+      if(j.ok && j.file) return _b642ab(j.file);
+      if(j.error === 'WRONG_PASSWORD'){ errMsg = '비밀번호가 올바르지 않습니다. 다시 입력해주세요.'; continue; }
+      alert('복호화에 실패했습니다.\n(' + (j.detail || j.error || '알 수 없는 오류') + ')\n\n엑셀에서 암호를 해제한 뒤 다시 업로드해주세요.');
+      return null;
+    }catch(e){
+      alert('복호화 서버 연결에 실패했습니다.\n' + (e.message||e));
+      return null;
     }
   }
-  alert('비밀번호 확인에 실패했습니다.\n엑셀에서 암호를 해제한 뒤 다시 업로드해주세요.');
+  alert('비밀번호 확인에 실패했습니다.');
   return null;
 }
 </script>
