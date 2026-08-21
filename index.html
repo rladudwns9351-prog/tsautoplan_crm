@@ -4632,16 +4632,22 @@ function dbaShiftMonth(d, n){
   const last = new Date(t.getFullYear(), t.getMonth()+1, 0).getDate();
   return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(Math.min(dd,last)).padStart(2,'0');
 }
-function dbaTrend(cur, prev, isPct, fs){
+// unit: 'cnt'(건) | 'pct'(%p) | 'won'(원)
+function dbaTrend(cur, prev, unit, fs){
   if(prev===null || prev===undefined) return '';
+  if(unit === true) unit = 'pct';
+  if(!unit) unit = 'cnt';
   const size = fs || 13;
-  const d = Math.round((cur-prev)*10)/10;
+  const raw = cur - prev;
+  const d = (unit==='won') ? Math.round(raw) : Math.round(raw*10)/10;
   if(d===0) return ' <span style="font-size:'+size+'px;color:var(--text3);font-family:JetBrains Mono,monospace;">(-)</span>';
   const up = d>0;
   const col = up ? 'var(--green)' : '#ff6666';
+  const rate = prev>0 ? ' '+(up?'+':'')+Math.round(raw/prev*100)+'%' : '';
   let txt;
-  if(isPct){ txt = (up?'+':'')+d+'%p'; }
-  else { txt = (up?'+':'')+d+'건' + (prev>0 ? ' '+(up?'+':'')+Math.round((cur-prev)/prev*100)+'%' : ''); }
+  if(unit==='pct')      txt = (up?'+':'')+d+'%p';
+  else if(unit==='won') txt = (up?'+':'')+d.toLocaleString('ko-KR')+'원' + rate;
+  else                  txt = (up?'+':'')+d+'건' + rate;
   return ' <span style="font-size:'+size+'px;color:'+col+';font-family:JetBrains Mono,monospace;">('+(up?'▲':'▼')+' '+txt+')</span>';
 }
 function _dbaCalc(from, to, names){
@@ -4824,10 +4830,13 @@ function renderDbAlloc(){
       {l:'전환율 (신규+재배분 기준)', v:tot.rateAll+'%', c:'#aa88ff', t:dbaTrend(tot.rateAll, pv('rateAll'), true, 12)},
       {l:'배분DB 펀딩', v:tot.fundDist+'건', c:'#44bbff', t:dbaTrend(tot.fundDist, pv('fundDist'), false, 12)},
       {l:'직영업 펀딩', v:tot.fundDirect+'건', c:'#ff9944', t:dbaTrend(tot.fundDirect, pv('fundDirect'), false, 12)},
+      {l:'총매출 (매출+프로모션+대리점)', v:tot.sumRev.toLocaleString('ko-KR')+'원', c:'var(--text)', t:dbaTrend(tot.sumRev, pv('sumRev'), 'won', 12)},
+      {l:'총품의금액', v:tot.sumBuui.toLocaleString('ko-KR')+'원', c:'var(--yellow)', t:dbaTrend(tot.sumBuui, pv('sumBuui'), 'won', 12)},
+      {l:'총순매출 (총매출−품의)', v:tot.sumNet.toLocaleString('ko-KR')+'원', c:'var(--green)', t:dbaTrend(tot.sumNet, pv('sumNet'), 'won', 12)},
     ].map(x=>'<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden;">'+
       '<div style="position:absolute;top:0;right:0;width:3px;height:100%;background:'+x.c+';"></div>'+
       '<div style="font-size:10px;color:var(--text3);margin-bottom:5px;">'+x.l+'</div>'+
-      '<div style="font-size:19px;font-weight:700;font-family:JetBrains Mono,monospace;color:'+x.c+';white-space:nowrap;">'+x.v+(x.t||'')+'</div>'+
+      '<div style="font-size:'+(x.v.length>10?15:19)+'px;font-weight:700;font-family:JetBrains Mono,monospace;color:'+x.c+';white-space:nowrap;">'+x.v+(x.t||'')+'</div>'+
     '</div>').join('');
   }
 
