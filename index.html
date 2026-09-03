@@ -6865,7 +6865,7 @@ async function bulkMoveToGudb() {
   if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
   if(!confirm(ids.length+'건을 구디비로 이동하시겠습니까?\n(고객 DB 목록에서 숨겨지고 구디비 탭으로 이동됩니다)')) return;
   const upd=[];
-  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ if(c.assign!=='구디비'&&c.assign!=='종료디비') c.archivePrevAssign=c.assign; c.assign='구디비'; c.retrieved=false; upd.push(c);} });
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ if(c.assign!=='구디비'&&c.assign!=='종료디비'){ c.archivePrevAssign=c.assign; if(!c.originalAssignedManager){ c.originalAssignedManager=c.assign; c.originalAssignedManagerId=c.assign; if(!c.firstAssignedAt) c.firstAssignedAt=c.date||null; } } c.assign='구디비'; c.retrieved=false; upd.push(c);} });
   if(isSbConfigured()) {
     try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
     catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
@@ -6882,7 +6882,7 @@ async function bulkMoveToEnded() {
   if(!ids.length) { alert('선택된 고객이 없습니다.'); return; }
   if(!confirm(ids.length+'건을 종료디비로 이동하시겠습니까?\\n(최종 종료된 DB로 분류되어 고객 DB 목록에서 숨겨집니다)')) return;
   const upd=[];
-  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ if(c.assign!=='구디비'&&c.assign!=='종료디비') c.archivePrevAssign=c.assign; c.assign='종료디비'; c.retrieved=false; upd.push(c);} });
+  ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){ if(c.assign!=='구디비'&&c.assign!=='종료디비'){ c.archivePrevAssign=c.assign; if(!c.originalAssignedManager){ c.originalAssignedManager=c.assign; c.originalAssignedManagerId=c.assign; if(!c.firstAssignedAt) c.firstAssignedAt=c.date||null; } } c.assign='종료디비'; c.retrieved=false; upd.push(c);} });
   if(isSbConfigured()) {
     try { await Promise.all(upd.map(c=>sbUpdateCustomer(c))); }
     catch(e){ showGlobalToast('⚠️ 저장 실패: '+(e.message||e)); return; }
