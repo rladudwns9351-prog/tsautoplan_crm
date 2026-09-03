@@ -4666,6 +4666,11 @@ function _dbaReceiver(t){
   }
   return null;
 }
+/* 최초배분을 재배분/담당자변경 버튼으로 실행한 건 → 신규에만 계상, 재배분에서 제외 */
+function _dbaIsInitialMove(c, dt, recv){
+  if(!c || !recv) return false;
+  return c.originalAssignedManager===recv && String(c.firstAssignedAt||'').slice(0,10)===dt;
+}
 function _dbaCalc(from, to, names){
   const inR = d => { const v=String(d||'').slice(0,10); if(!from && !to) return true; if(!v) return false; if(from && v<from) return false; if(to && v>to) return false; return true; };
   const cust = Array.isArray(customers)?customers:[];
@@ -4682,6 +4687,7 @@ function _dbaCalc(from, to, names){
         const recv = _dbaReceiver(m.text);   // [재배분] + [담당자변경] 모두 인정 (수신 담당자 추출)
         if(!recv) return;
         const dt = m.dateISO || String(m.dateTS||'').slice(0,10);
+        if(_dbaIsInitialMove(c, dt, recv)) return;   // 최초배분 건은 제외
         if(recv===name && inR(dt)) { reassign++; reIds.add(c.id); }
       });
     });
@@ -5178,8 +5184,11 @@ function _dbFlowCompute(){
   function reassignCountInP(c){
     let n = 0;
     (c.memos||[]).forEach(m=>{
-      if(!m || typeof m.text!=='string' || !_dbaReceiver(m.text)) return;
+      if(!m || typeof m.text!=='string') return;
+      const recv = _dbaReceiver(m.text);
+      if(!recv) return;
       const dt = m.dateISO || String(m.dateTS||'').slice(0,10);
+      if(_dbaIsInitialMove(c, dt, recv)) return;
       if(inP(dt)) n++;
     });
     return n;
@@ -5195,7 +5204,9 @@ function _dbFlowCompute(){
       (c.memos||[]).forEach(m=>{
         if(!m || typeof m.text!=='string') return;
         const recv = _dbaReceiver(m.text);
+        if(!recv) return;
         const dt = m.dateISO || String(m.dateTS||'').slice(0,10);
+        if(_dbaIsInitialMove(c, dt, recv)) return;
         if(recv===name && inP(dt)) reassign++;
       });
     });
@@ -5839,8 +5850,13 @@ async function changeAssign(newAssign) {
   const dateStr = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
   if(newAssign !== '구디비' && newAssign !== '종료디비') {
     const _today = now.toISOString().split('T')[0];
-    if(!currentCustomer.firstAssignedAt) currentCustomer.firstAssignedAt = currentCustomer.date || _today;   // 최초배분 통계 보존
-    if(!currentCustomer.originalAssignedManager && oldAssign && oldAssign!=='구디비' && oldAssign!=='종료디비'){ currentCustomer.originalAssignedManager=oldAssign; currentCustomer.originalAssignedManagerId=oldAssign; }
+    if(!currentCustomer.originalAssignedManager && oldAssign && oldAssign!=='구디비' && oldAssign!=='종료디비'){
+      currentCustomer.originalAssignedManager=oldAssign; currentCustomer.originalAssignedManagerId=oldAssign;
+      if(!currentCustomer.firstAssignedAt) currentCustomer.firstAssignedAt = currentCustomer.date || _today;
+    } else if(!currentCustomer.originalAssignedManager){   // 미배분(구디비/종료디비/공백) → 최초배분
+      currentCustomer.originalAssignedManager=newAssign; currentCustomer.originalAssignedManagerId=newAssign;
+      currentCustomer.firstAssignedAt=_today;
+    } else if(!currentCustomer.firstAssignedAt) currentCustomer.firstAssignedAt = currentCustomer.date || _today;
     currentCustomer.reassignDate = _today;
     currentCustomer.date = _today;   // 등록일 = 재배분일로 갱신 (A안)
     currentCustomer.memos.unshift({
@@ -6889,7 +6905,8 @@ async function bulkReassignFromGudb() {
   const timeStr = now.toLocaleDateString('ko-KR')+' '+now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
   const upd=[];
   ids.forEach(id=>{ const c=customers.find(x=>x.id===id); if(c){
-    if(!c.firstAssignedAt) c.firstAssignedAt = c.date || today;   // 최초배분 통계 보존
+    if(!c.originalAssignedManager){ c.originalAssignedManager=target; c.originalAssignedManagerId=target; c.firstAssignedAt=today; }  // 미배분 → 최초배분
+    else if(!c.firstAssignedAt) c.firstAssignedAt = c.date || today;   // 최초배분 통계 보존
     c.assign=target; c.retrieved=false;
     c.reassignDate=today;                         // 재배분 기준일(주황 NEW)
     c.date=today;                                 // 등록일 = 재배분일로 갱신 (A안)
@@ -8459,7 +8476,8 @@ async function confirmReassign() {
       c.originalAssignedManagerId = c.prevAssign;
       c.firstAssignedAt           = c.date || now.toISOString().split('T')[0];
     }
-    if(!c.firstAssignedAt) c.firstAssignedAt = c.date || now.toISOString().split('T')[0];   // 최초배분 통계 보존
+    if(!c.originalAssignedManager){ c.originalAssignedManager=newAssign; c.originalAssignedManagerId=newAssign; c.firstAssignedAt=now.toISOString().split('T')[0]; }  // 미배분 → 최초배분
+    else if(!c.firstAssignedAt) c.firstAssignedAt = c.date || now.toISOString().split('T')[0];   // 최초배분 통계 보존
     c.assign        = newAssign;
     c.retrieved     = false;
     c.reassignDate  = now.toISOString().split('T')[0]; // 구DB 기준일 (담당자 변경일)
