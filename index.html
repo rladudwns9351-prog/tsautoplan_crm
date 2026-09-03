@@ -3965,6 +3965,9 @@ function customerToRow(c) {
     prev_assign:      c.prevAssign    || null,
     archive_prev_assign: c.archivePrevAssign || null,
     reassign_date:    c.reassignDate  || null,
+    original_assigned_manager:    c.originalAssignedManager   || null,
+    original_assigned_manager_id: c.originalAssignedManagerId || null,
+    first_assigned_at:            c.firstAssignedAt           || null,
     memos:            c.memos  || [],
     files:            c.files  || [],
     settle_reflected: c.settleReflected ?? false,
@@ -4650,6 +4653,19 @@ function dbaTrend(cur, prev, unit, fs){
   else                  txt = (up?'+':'')+d+'건' + rate;
   return ' <span style="font-size:'+size+'px;color:'+col+';font-family:JetBrains Mono,monospace;">('+(up?'▲':'▼')+' '+txt+')</span>';
 }
+/* 재배분 수신 담당자 추출: '[재배분] OOO으로 재배분' / '[담당자변경] AAA → OOO' 모두 인정 */
+function _dbaReceiver(t){
+  if(typeof t!=='string') return null;
+  if(t.indexOf('[재배분]')===0){
+    const m = t.match(/^\[재배분\]\s*(.+?)으로 재배분/);
+    return m ? m[1].trim() : null;
+  }
+  if(t.indexOf('[담당자변경]')===0){
+    const m = t.match(/^\[담당자변경\]\s*.*?→\s*(.+?)\s*$/);
+    return m ? m[1].trim() : null;
+  }
+  return null;
+}
 function _dbaCalc(from, to, names){
   const inR = d => { const v=String(d||'').slice(0,10); if(!from && !to) return true; if(!v) return false; if(from && v<from) return false; if(to && v>to) return false; return true; };
   const cust = Array.isArray(customers)?customers:[];
@@ -4657,15 +4673,16 @@ function _dbaCalc(from, to, names){
   const isDirectCust = c => !c || !isDistributedDB(c);
   const fundRows = [];
   const rows = names.map(name=>{
-    const firstList = cust.filter(c=>isDistributedDB(c) && ((c.originalAssignedManager||c.assign)===name) && inR(c.firstAssignedAt||c.date));
+    const firstList = cust.filter(c=>isDistributedDB(c) && (c.originalAssignedManager===name) && inR(c.firstAssignedAt));
     let reassign = 0; const reIds = new Set();
     cust.forEach(c=>{
       if(!isDistributedDB(c)) return;
       (c.memos||[]).forEach(m=>{
-        if(!m || typeof m.text!=='string' || m.text.indexOf('[재배분]')!==0) return;
-        const mm = m.text.match(/^\[재배분\]\s*(.+?)으로 재배분/);
+        if(!m || typeof m.text!=='string') return;
+        const recv = _dbaReceiver(m.text);   // [재배분] + [담당자변경] 모두 인정 (수신 담당자 추출)
+        if(!recv) return;
         const dt = m.dateISO || String(m.dateTS||'').slice(0,10);
-        if(mm && mm[1].trim()===name && inR(dt)) { reassign++; reIds.add(c.id); }
+        if(recv===name && inR(dt)) { reassign++; reIds.add(c.id); }
       });
     });
     // 펀딩등록: 기간 내 '펀딩 등록일' 기준. 배분DB 펀딩을 최초배분(신규) / 재배분 출신으로 분리
@@ -4679,7 +4696,7 @@ function _dbaCalc(from, to, names){
       if(isDirectCust(c)) { fundDirect++; directList.push(f); }
       else {
         fundDist++; distList.push(f);
-        if(c && (c.originalAssignedManager||c.assign)===name) fundNewList.push(f); else fundReList.push(f);
+        if(c && c.originalAssignedManager===name) fundNewList.push(f); else fundReList.push(f);
       }
       sumRev  += (f.revenue || 0) + (f.promoAmt || 0) + (f.agency || 0);
       sumBuui += (f.buuiTotal  || 0);
@@ -5161,7 +5178,7 @@ function _dbFlowCompute(){
   function reassignCountInP(c){
     let n = 0;
     (c.memos||[]).forEach(m=>{
-      if(!m || typeof m.text!=='string' || m.text.indexOf('[재배분]')!==0) return;
+      if(!m || typeof m.text!=='string' || !_dbaReceiver(m.text)) return;
       const dt = m.dateISO || String(m.dateTS||'').slice(0,10);
       if(inP(dt)) n++;
     });
@@ -5171,15 +5188,15 @@ function _dbFlowCompute(){
   const cust = Array.isArray(customers) ? customers : [];
   const rows = staff.map(u=>{
     const name = u.name;
-    const first    = cust.filter(c=>((c.originalAssignedManager||c.assign)===name) && inP(c.firstAssignedAt||c.date)).length;
+    const first    = cust.filter(c=>(c.originalAssignedManager===name) && inP(c.firstAssignedAt)).length;
     // 재배분받음: '[재배분] OOO으로 재배분' 메모 이력 기준 → 한 DB가 여러 번 재배분돼도 각각 누적 카운팅
     let reassign = 0;
     cust.forEach(c=>{
       (c.memos||[]).forEach(m=>{
-        if(!m || typeof m.text!=='string' || m.text.indexOf('[재배분]')!==0) return;
-        const mm = m.text.match(/^\[재배분\]\s*(.+?)으로 재배분/);
+        if(!m || typeof m.text!=='string') return;
+        const recv = _dbaReceiver(m.text);
         const dt = m.dateISO || String(m.dateTS||'').slice(0,10);
-        if(mm && mm[1].trim()===name && inP(dt)) reassign++;
+        if(recv===name && inP(dt)) reassign++;
       });
     });
     const reclaim  = cust.filter(c=>c.prevAssign===name && c.retrievedDate && inP(c.retrievedDate)).length;
@@ -11757,9 +11774,8 @@ function exportDBStatsExcel() {
     const name = u.name;
     const newDB = customers.filter(c=>{
       if(!isDistributedDB(c)) return false;
-      const effMgr = c.originalAssignedManager || c.assign;
-      if(effMgr !== name) return false;
-      return inRange(c.firstAssignedAt || c.date || '', fromVal, toVal);
+      if(c.originalAssignedManager !== name) return false;
+      return inRange(c.firstAssignedAt || '', fromVal, toVal);
     });
     const oldDB = customers.filter(c=>{
       if(!isDistributedDB(c)) return false;
