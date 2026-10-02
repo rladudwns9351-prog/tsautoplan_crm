@@ -15752,6 +15752,20 @@ function bulkDivision(memoText){
 function bulkCleanAssign(raw){
   return String(raw||'').replace(/\s*\(.*?\)\s*/g,'').trim();
 }
+// 담당자명 매칭: 원문 그대로 일치 → 괄호 제거 후 일치 → 직원명 괄호 제거 비교 순으로 직원관리 이름 반환
+function bulkMatchAssign(raw, staff){
+  const r = String(raw||'').replace(/\s+/g,'').trim();
+  if(!r) return '';
+  const norm = v => String(v||'').replace(/\s+/g,'');
+  let hit = staff.find(n => norm(n) === r);
+  if(hit) return hit;
+  const c = bulkCleanAssign(raw).replace(/\s+/g,'');
+  hit = staff.find(n => norm(n) === c);
+  if(hit) return hit;
+  const cands = staff.filter(n => norm(bulkCleanAssign(n)) === c);
+  if(cands.length === 1) return cands[0];
+  return bulkCleanAssign(raw);
+}
 
 function handleBulkImportFile(ev){
   const file = ev.target.files && ev.target.files[0];
@@ -15784,7 +15798,7 @@ function buildBulkPreview(rows){
     const phoneRaw = String(bulkGetField(r,['연락처'])).trim();
     if(!name && !phoneRaw) return; // 빈 줄 skip
     const memoCol = bulkGetField(r,['메모']);
-    const assign = bulkCleanAssign(bulkGetField(r,['담당자(FC)','담당자']));
+    const assign = bulkMatchAssign(bulkGetField(r,['담당자(FC)','담당자']), bulkStaff);
     parsed.push({
       name,
       phone: (typeof formatPhone==='function' ? formatPhone(phoneRaw) : phoneRaw),
