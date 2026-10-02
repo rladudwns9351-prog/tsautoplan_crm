@@ -9277,7 +9277,7 @@ function renderStaffStatCard(u, uDB) {
 }
 let sourceOptions = ['네이버','인스타그램','카카오','지인소개','기타','기존고객 ★'];
 // 배분통계 전용: 관리자가 실제 배분한 DB만 true (직영업·펀딩등록·기고객 제외)
-function isDistributedDB(c){ return !!c && c.source !== '직영업' && c.source !== '펀딩등록' && c.source !== '기존고객 ★'; }
+function isDistributedDB(c){ return !!c && c.source !== '직영업' && c.source !== '펀딩등록' && c.source !== '기존고객 ★' && c.source !== '★개인추출디비★'; }
 let divisionOptions = ['개인','법인','개인사업자'];
 let memoTagOptions = ['조건맞으면즉시','4대보험가입 직장인'];
 function openSourceMgrModal() {
