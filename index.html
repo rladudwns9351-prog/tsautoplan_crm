@@ -15837,6 +15837,15 @@ function buildBulkPreview(rows){
       <td style="padding:5px 8px;font-size:12px;color:${p._matched?'var(--text)':'var(--red)'};">${p.assign||'(미지정)'}${p._matched?'':' ⚠'}</td>
     </tr>`).join('');
 
+  // 유입경로 드롭다운: 현재 등록된 유입경로(sourceOptions) 기준, 기본값 '투데이즈카유입디비'
+  const _bulkSrcDefault = '투데이즈카유입디비';
+  const _bulkSrcList = (typeof sourceOptions !== 'undefined' && Array.isArray(sourceOptions)) ? [...sourceOptions] : [];
+  if(!_bulkSrcList.includes(_bulkSrcDefault)) _bulkSrcList.unshift(_bulkSrcDefault);
+  const bulkSourceOpts = _bulkSrcList.map(s=>{
+    const v = String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    return `<option value="${v}"${s===_bulkSrcDefault?' selected':''}>${v}</option>`;
+  }).join('');
+
   let modal = document.getElementById('bulkPreviewModal');
   if(modal) modal.remove();
   modal = document.createElement('div');
@@ -15846,7 +15855,11 @@ function buildBulkPreview(rows){
   modal.innerHTML = `
     <div class="modal-box" style="background:var(--bg2,#1a1a1a);border:1px solid var(--border2,#333);border-radius:14px;padding:22px;width:760px;max-width:94vw;max-height:88vh;overflow:auto;color:var(--text,#eee);">
       <div style="font-size:16px;font-weight:700;margin-bottom:4px;">📥 엑셀 일괄등록 미리보기</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">총 <strong style="color:var(--accent);">${parsed.length}</strong>명 · 유입경로 "투데이즈카유입디비" · 상태 "상담중" · 메모 "투데이즈카 디비 이관처리"로 통일 등록됩니다.</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px;">총 <strong style="color:var(--accent);">${parsed.length}</strong>명 · 상태 "상담중"으로 통일 등록됩니다. (메모 없음)</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <span style="font-size:12px;color:var(--text2);">유입경로 일괄 지정</span>
+        <select id="bulkSourceSel" style="padding:6px 10px;border-radius:8px;background:var(--bg3,#222);color:var(--text,#eee);border:1px solid var(--border2,#333);font-size:13px;min-width:200px;">${bulkSourceOpts}</select>
+      </div>
       <div style="margin-bottom:8px;font-size:12px;color:var(--text2);">담당자 배분</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${distHtml}</div>
       ${unmatched?`<div style="font-size:12px;color:#ff4444;margin-bottom:10px;">⚠ 담당자 명단과 일치하지 않는 ${unmatched}건이 있습니다. 그대로 진행하면 해당 이름으로 배분됩니다.</div>`:''}
@@ -15874,11 +15887,13 @@ async function confirmBulkImport(){
   if(btn){ btn.disabled = true; btn.textContent = '등록 중…'; }
   const today = new Date().toISOString().split('T')[0];
   const localeDate = new Date().toLocaleDateString('ko-KR');
+  const _srcSel = document.getElementById('bulkSourceSel');
+  const bulkSource = (_srcSel && _srcSel.value) ? _srcSel.value : '투데이즈카유입디비';
   const objs = bulkImportParsed.map(p=>({
-    name:p.name, phone:p.phone, car:p.car, source:p.source,
+    name:p.name, phone:p.phone, car:p.car, source:bulkSource,
     division:p.division, memoTag:'', assign:p.assign, status:p.status,
     date:today,
-    memos:[{text:p.memo, author:currentUser, date:localeDate, dateISO:today, dateTS:new Date().toISOString()}],
+    memos:[],
     files:[], important:false, retrieved:false, nextConsult:'',
     originalAssignedManager:p.assign||null,
     originalAssignedManagerId:p.assign||null,
