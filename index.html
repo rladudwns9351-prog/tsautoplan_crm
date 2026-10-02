@@ -8570,17 +8570,20 @@ function quickReclaimDB(id) {
   }, 100);
 }
 const PAGE_SIZE = 50;
+const PAGE_SIZE_BY_KEY = { db: 500 }; // 목록별 페이지당 개수 (미지정시 PAGE_SIZE)
+function getPageSize(key) { return PAGE_SIZE_BY_KEY[key] || PAGE_SIZE; }
 const _pageState = {}; // 페이지별 현재 페이지 번호 저장
 function getPage(key) { return _pageState[key] || 1; }
 function setPage(key, n) { _pageState[key] = n; }
 function paginate(list, key) {
   const total = list.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const size = getPageSize(key);
+  const totalPages = Math.max(1, Math.ceil(total / size));
   let cur = getPage(key);
   if(cur > totalPages) { cur = totalPages; setPage(key, cur); }
   if(cur < 1) { cur = 1; setPage(key, cur); }
-  const start = (cur - 1) * PAGE_SIZE;
-  const end = start + PAGE_SIZE;
+  const start = (cur - 1) * size;
+  const end = start + size;
   return {
     items: list.slice(start, end),
     page: cur,
@@ -8590,7 +8593,7 @@ function paginate(list, key) {
   };
 }
 function buildPaginationHtml(key, page, totalPages, total) {
-  if(totalPages <= 1 && total <= PAGE_SIZE) return '';
+  if(totalPages <= 1 && total <= getPageSize(key)) return '';
   let start = Math.max(1, page - 2);
   let end = Math.min(totalPages, start + 4);
   start = Math.max(1, end - 4);
