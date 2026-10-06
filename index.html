@@ -3928,6 +3928,138 @@ function renderCarNews(){
   }).join('');
 }
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVubHdlbnVxenRncGZsbWJpY2RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODk3MDEsImV4cCI6MjA5NDI2NTcwMX0.710F4DvgMZDjWVE2HJeCP40P-s8uZhTaOE0wgPSXaVM';
+/* ===== 반영중 오버레이 (Supabase 쓰기 요청 + 직후 재조회 동안 표시) ===== */
+window.TSBusy = window.TSBusy || { count:0, lastWriteEnd:0, showTimer:null, hideTimer:null, safetyTimer:null };
+function _tsBusyEl(){
+  let el = document.getElementById('tsBusyOverlay');
+  if(el) return el;
+  el = document.createElement('div');
+  el.id = 'tsBusyOverlay';
+  el.style.cssText = 'position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(0,0,0,.45);backdrop-filter:blur(1px);';
+  el.innerHTML = '<div style="width:46px;height:46px;border:4px solid rgba(255,255,255,.18);border-top-color:var(--accent,#4a9eff);border-radius:50%;animation:_tsBusySpin .8s linear infinite;"></div>'
+    + '<div style="margin-top:14px;font-size:15px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);">반영중입니다..</div>';
+  if(!document.getElementById('_tsBusySpinStyle')){
+    const st=document.createElement('style'); st.id='_tsBusySpinStyle';
+    st.textContent='@keyframes _tsBusySpin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(st);
+  }
+  document.body.appendChild(el);
+  return el;
+}
+function tsBusyBegin(){
+  const B = window.TSBusy;
+  B.count++;
+  clearTimeout(B.hideTimer);
+  if(B.count === 1){
+    clearTimeout(B.showTimer);
+    // 빠르게 끝나는 작업은 깜빡임 방지 위해 표시 안 함
+    B.showTimer = setTimeout(()=>{ if(window.TSBusy.count>0 && document.body){ _tsBusyEl().style.display='flex'; } }, 350);
+    clearTimeout(B.safetyTimer);
+    B.safetyTimer = setTimeout(()=>{ window.TSBusy.count = 0; _tsBusyHideNow(); }, 60000); // 무한 표시 방지
+  }
+}
+function _tsBusyHideNow(){
+  const B = window.TSBusy;
+  clearTimeout(B.showTimer); clearTimeout(B.safetyTimer);
+  const el = document.getElementById('tsBusyOverlay');
+  if(el) el.style.display='none';
+}
+function tsBusyEnd(isWrite){
+  const B = window.TSBusy;
+  B.count = Math.max(0, B.count-1);
+  if(isWrite) B.lastWriteEnd = Date.now();
+  if(B.count > 0) return;
+  clearTimeout(B.hideTimer);
+  // 저장 → 재조회처럼 연속 요청 사이에 깜빡이지 않도록 짧게 대기 후 숨김
+  B.hideTimer = setTimeout(()=>{ if(window.TSBusy.count===0) _tsBusyHideNow(); }, 200);
+}
+(function(){
+  if(window._tsFetchWrapped || typeof window.fetch !== 'function') return;
+  window._tsFetchWrapped = true;
+  const _origFetch = window.fetch.bind(window);
+  window.fetch = function(input, init){
+    let url = '', method = 'GET';
+    try {
+      url = typeof input === 'string' ? input : (input && input.url) || '';
+      method = String((init && init.method) || (input && typeof input !== 'string' && input.method) || 'GET').toUpperCase();
+    } catch(_){}
+    let track = false, isWrite = false;
+    try {
+      if(!window._tsBusyOff && url && typeof SB_URL !== 'undefined' && url.indexOf(SB_URL) === 0
+         && url.indexOf('/functions/v1/news-search') < 0 && url.indexOf('/functions/v1/local-search') < 0) {
+        isWrite = (method !== 'GET' && method !== 'HEAD');
+        const B = window.TSBusy;
+        // 쓰기 요청 / 쓰기 진행 중 또는 직후(1.5초)의 재조회까지 대기 표시
+        track = isWrite || B.count > 0 || (Date.now() - B.lastWriteEnd < 1500);
+      }
+    } catch(_){}
+    if(!track) return _origFetch(input, init);
+    tsBusyBegin();
+    let p;
+    try { p = _origFetch(input, init); }
+    catch(e){ tsBusyEnd(isWrite); throw e; }
+    return p.then(
+      res => { tsBusyEnd(isWrite); return res; },
+      err => { tsBusyEnd(isWrite); throw err; }
+    );
+  };
+})();
+
+/* ===== 대용량 테이블 분할 조회 (id 기준 1,000건씩, 타임아웃 방지) ===== */
+const SB_PAGE_SIZE = 1000;
+async function sbFetchAllPaged(baseQuery){
+  // baseQuery 예: 'customers?select=*' (order/limit 없이)
+  const sep = baseQuery.indexOf('?') >= 0 ? '&' : '?';
+  const out = [];
+  let lastId = 0;
+  for(let guard = 0; guard < 2000; guard++){
+    const q = baseQuery + sep + 'id=gt.' + lastId + '&order=id.asc&limit=' + SB_PAGE_SIZE;
+    let rows = null, lastErr = null;
+    for(let attempt = 0; attempt < 3; attempt++){
+      try { rows = await sbFetch(q); lastErr = null; break; }
+      catch(e){ lastErr = e; await new Promise(r=>setTimeout(r, 700*(attempt+1))); }
+    }
+    if(lastErr) throw lastErr;
+    if(!Array.isArray(rows) || rows.length === 0) break;
+    for(let i=0;i<rows.length;i++) out.push(rows[i]);
+    const nextId = rows[rows.length-1].id;
+    if(!(nextId > lastId)) break; // 안전장치
+    lastId = nextId;
+  }
+  return out;
+}
+/* 영업자 기준 서버 필터 (현재/이전/최초 담당자 = 본인) */
+function sbStaffCustomerFilter(){
+  if(typeof currentRole === 'undefined' || currentRole === 'admin' || !currentUser) return '';
+  const q = '"' + String(currentUser).replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+  const cols = ['assign','prev_assign','archive_prev_assign','original_assigned_manager'];
+  return '&or=' + encodeURIComponent('(' + cols.map(k => k + '.eq.' + q).join(',') + ')');
+}
+/* 연락처 중복 검색: 관리자는 로컬(전체), 영업자는 서버에서 전체 DB 대상 조회 */
+async function findDupCustomerByPhone(normDigits, excludeId){
+  const norm = String(normDigits||'').replace(/[^0-9]/g,'');
+  if(!norm) return null;
+  const local = customers.find(c => c.id !== excludeId && (c.phone||'').replace(/[^0-9]/g,'') === norm);
+  if(local) return local;
+  if(typeof currentRole === 'undefined' || currentRole === 'admin') return null;
+  if(typeof isSbConfigured === 'function' && !isSbConfigured()) return null;
+  try {
+    const cands = new Set([norm]);
+    if(norm.length === 11) cands.add(norm.slice(0,3)+'-'+norm.slice(3,7)+'-'+norm.slice(7));
+    if(norm.length === 10) {
+      cands.add(norm.slice(0,3)+'-'+norm.slice(3,6)+'-'+norm.slice(6));
+      if(norm.startsWith('02')) cands.add(norm.slice(0,2)+'-'+norm.slice(2,6)+'-'+norm.slice(6));
+    }
+    if(norm.length === 9 && norm.startsWith('02')) cands.add(norm.slice(0,2)+'-'+norm.slice(2,5)+'-'+norm.slice(5));
+    const inList = '(' + [...cands].map(v => '"' + v + '"').join(',') + ')';
+    let q = 'customers?select=*&phone=in.' + encodeURIComponent(inList) + '&limit=5';
+    if(excludeId !== undefined && excludeId !== null) q += '&id=neq.' + encodeURIComponent(excludeId);
+    const rows = await sbFetch(q);
+    if(Array.isArray(rows) && rows.length) return rowToCustomer(rows[0]);
+  } catch(e) { console.warn('서버 중복조회 실패', e); }
+  return null;
+}
+
 async function sbFetch(path, method='GET', body=null, prefer=null) {
   const opts = {
     method,
@@ -4109,7 +4241,8 @@ function rowToFunding(r) {
   };
 }
 async function sbLoadCustomers() {
-  const rows = await sbFetch('customers?order=id.asc&select=*&limit=100000');
+  // 관리자: 전체 DB / 영업자: 본인(현재·이전·최초 담당) DB만 — 1,000건씩 분할 조회
+  const rows = await sbFetchAllPaged('customers?select=*' + sbStaffCustomerFilter());
   return rows.map(rowToCustomer);
 }
 async function sbSaveCustomer(c) {
@@ -6001,7 +6134,7 @@ async function saveCustomerPhone(newPhone) {
   }
   // 중복 체크 (자기 자신 제외)
   const normNew = cleaned.replace(/[^0-9]/g,'');
-  const dup = customers.find(c => c.id !== currentCustomer.id && (c.phone||'').replace(/[^0-9]/g,'') === normNew);
+  const dup = await findDupCustomerByPhone(normNew, currentCustomer.id);
   if(dup) {
     if(!confirm(`⚠️ 동일한 연락처가 이미 등록되어 있습니다.\n(고객명: ${dup.name})\n그래도 저장할까요?`)) {
       document.getElementById('detailPhone').value = currentCustomer.phone || '';
@@ -6637,7 +6770,7 @@ async function exportAllData(){
   try{
     if(btn){ btn.style.opacity='.6'; btn.style.pointerEvents='none'; btn.querySelector('span:last-child').textContent='저장 중...'; }
     const [customers,fundings,staff,sms_logs]=await Promise.all([
-      sbFetch('customers?select=*&order=id.asc&limit=1000000'),
+      sbFetchAllPaged('customers?select=*'),
       sbFetch('fundings?select=*&order=id.asc&limit=1000000'),
       sbFetch('staff?select=*&order=id.asc&limit=1000000'),
       sbFetch('sms_logs?select=*&limit=1000000')
@@ -8191,7 +8324,7 @@ async function saveLinkedCustomer(cid){
   if(!name){ alert('고객명을 입력해주세요.'); return; }
   if(!/^01\d{9}$/.test(phoneRaw)){ alert('연락처는 휴대폰 11자리(010-XXXX-XXXX)로 입력해주세요.'); return; }
   const newPhone = formatPhone(phoneRaw);
-  const dup = customers.find(x=>x.id!==cid && (x.phone||'').replace(/[^\d]/g,'')===phoneRaw);
+  const dup = await findDupCustomerByPhone(phoneRaw, cid);
   if(dup && !confirm('동일한 연락처의 다른 고객("'+dup.name+'")이 있습니다.\n그래도 저장할까요?')) return;
   const newCar = (document.getElementById('fmLinkCar')?.value||'').trim();
   window._lastLocalChange = Date.now();
@@ -8793,6 +8926,20 @@ async function loadData() {
     fundingList.length = 0;
     dbFundings.forEach(f => fundingList.push(f));
     if(fundingList.length) fundingNextId = Math.max(...fundingList.map(f=>f.id)) + 1;
+    // 영업자: 본인 펀딩에 연결된 고객 중 담당자 필터에 빠진 건 보충 조회
+    if(currentRole !== 'admin') {
+      try {
+        const have = new Set(customers.map(c=>c.id));
+        const missing = [...new Set(fundingList
+          .filter(f => f.assign === currentUser && f.customerId && !have.has(f.customerId))
+          .map(f => f.customerId))];
+        for(let i=0;i<missing.length;i+=150){
+          const ids = missing.slice(i,i+150).join(',');
+          const extra = await sbFetch('customers?select=*&id=in.(' + ids + ')');
+          (Array.isArray(extra)?extra:[]).forEach(r => { if(!have.has(r.id)){ have.add(r.id); customers.push(rowToCustomer(r)); } });
+        }
+      } catch(e) { console.warn('연결 고객 보충조회 실패', e); }
+    }
     const dbStaff = await sbLoadStaff();
     staffList.length = 0; // 하드코딩 초기값 완전 제거
     dbStaff.forEach(s => staffList.push(s));
@@ -11732,7 +11879,7 @@ async function saveCustomer() {
   const phone = formatPhone(document.getElementById('f_phone').value.trim());
   if(!name||!phone) { alert('고객명과 연락처는 필수입니다.'); return; }
   const _normPhone = phone.replace(/[^0-9]/g,'');
-  const _dup = customers.find(c => (c.phone||'').replace(/[^0-9]/g,'') === _normPhone);
+  const _dup = await findDupCustomerByPhone(_normPhone, null);
   if(_dup) {
     let _loc, _who;
     if(_dup.assign === '구디비') {
