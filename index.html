@@ -3986,7 +3986,9 @@ function tsBusyEnd(isWrite){
     let track = false, isWrite = false;
     try {
       if(!window._tsBusyOff && url && typeof SB_URL !== 'undefined' && url.indexOf(SB_URL) === 0
-         && url.indexOf('/functions/v1/news-search') < 0 && url.indexOf('/functions/v1/local-search') < 0) {
+         && url.indexOf('/functions/v1/news-search') < 0 && url.indexOf('/functions/v1/local-search') < 0
+         // 재고확인 탭(재고 업로드/분석/조회/파일)은 기존과 동일하게 오버레이 미표시
+         && !/\/rest\/v1\/stock_(items|uploads|agg|files)\b|\/storage\/v1\/object\/(sign\/)?stock-files\/|\/functions\/v1\/analyze-stock/.test(url)) {
         isWrite = (method !== 'GET' && method !== 'HEAD');
         const B = window.TSBusy;
         // 쓰기 요청 / 쓰기 진행 중 또는 직후(1.5초)의 재조회까지 대기 표시
