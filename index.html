@@ -13765,7 +13765,23 @@ function stkBarDone(){
   stkBarStop(); stkBarShow(true); stkBarSet(100);
   setTimeout(()=>{ if(!_stkBarTimer){ stkBarShow(false); stkBarSet(0); } }, 1200);
 }
+/* ===== 재고 분석 실시간 진행률 =====
+   게이지 = 실제 완료된 분량(파일/조각/페이지 기준), 초 카운트 = 현재 AI 응답 대기 시간 */
+var stkPF = { i:0, n:1 };          // 현재 파일 index(0부터) / 전체 파일 수
+var stkLastProgMsg = '', stkLastProgPct = undefined;
+var _stkAITicker = null;
 function stkProg(msg, pct){
+  let m = String(msg||'').trim();
+  if(m && stkPF.n > 1 && !/^파일 \d+ \/ \d+ 처리 중/.test(m)){
+    if(typeof pct !== 'number' && /완료/.test(m)) pct = 100;
+    if(typeof pct === 'number') pct = ((stkPF.i + Math.max(0,Math.min(100,pct))/100) / stkPF.n) * 100;
+    m = '[파일 ' + (stkPF.i+1) + '/' + stkPF.n + '] ' + m;
+  }
+  if(m){ stkLastProgMsg = m; if(typeof pct === 'number') stkLastProgPct = pct; }
+  else { stkLastProgMsg = ''; stkLastProgPct = undefined; }
+  _stkProgOut(m, pct);
+}
+function _stkProgOut(msg, pct){
   const m0 = String(msg||'').trim();
   if(stkBGBusy && m0) stkBGBadge(m0, typeof pct==='number' ? pct : undefined);
   const el=document.getElementById('stkProgress'); if(!el) return;
@@ -13834,6 +13850,13 @@ async function stkCallAI(payload){
   const ctl = new AbortController();
   const t0 = Date.now();
   const timer = setTimeout(()=>ctl.abort(), 90000);
+  const _baseMsg = (stkLastProgMsg || 'AI 분석 중').replace(/\s*\(10~30초 소요\)/,'').replace(/\.\.\.$/,'');
+  const _basePct = stkLastProgPct;
+  clearInterval(_stkAITicker);
+  _stkAITicker = setInterval(()=>{
+    const sec = Math.floor((Date.now()-t0)/1000);
+    _stkProgOut(_baseMsg + ' · AI 응답 대기 ' + sec + '초 (최대 90초)...', _basePct);
+  }, 1000);
   let res;
   try {
     res = await fetch(STOCK_FN_URL, {
@@ -13842,12 +13865,14 @@ async function stkCallAI(payload){
       body: JSON.stringify(payload)
     });
   } catch(e){
-    clearTimeout(timer);
+    clearTimeout(timer); clearInterval(_stkAITicker); _stkAITicker = null;
     if(e.name==='AbortError') throw new Error('90초 초과 - 응답 없음 (네트워크 또는 AI 서버 지연)');
     throw e;
   }
   clearTimeout(timer);
-  const txt = await res.text();
+  let txt;
+  try { txt = await res.text(); }
+  finally { clearInterval(_stkAITicker); _stkAITicker = null; }
   if(!res.ok) throw new Error(txt.slice(0,300));
   let j; try { j = JSON.parse(txt); } catch(e){ throw new Error('응답 파싱 실패'); }
   if(j.error) throw new Error(j.error);
@@ -14011,6 +14036,7 @@ async function handleStockFiles(files){
   const list = Array.from(files||[]);
   let _fi = 0;
   for(const f of list){
+    stkPF = { i:_fi, n:list.length };
     if(list.length>1) stkProg('파일 '+(++_fi)+' / '+list.length+' 처리 중...', Math.round((_fi-1)/list.length*100));
     const n = f.name.toLowerCase();
     try {
@@ -14020,6 +14046,7 @@ async function handleStockFiles(files){
       else alert('지원하지 않는 파일: '+f.name);
     } catch(e){ stkProg(''); alert(f.name+' 처리 실패: '+e.message); }
   }
+  stkPF = { i:0, n:1 };
   // 동일 스펙 중복 행 → 1행 + 수량 누적
   const _before = stkPreview.length;
   stkPreview = stkMergeDupRows(stkPreview);
@@ -14481,7 +14508,7 @@ async function parseStockImage(file){
 
   const SLICE = 1200, OVER = 170;
   if(H <= Math.round(SLICE * 1.35)){
-    stkProg('이미지 AI 분석 중... (10~30초 소요)');
+    stkProg('이미지 AI 분석 중... (10~30초 소요)', 10);
     stkPushItems(await stkCallAI({ mimeType:'image/jpeg', data: stkCanvasToJpeg(base, 0.82) }));
     stkProg('이미지 분석 완료 · 총 '+stkPreview.length+'대'+(stkDropped?' · 불량 '+stkDropped+'건 제외':''));
     return;
